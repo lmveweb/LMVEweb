@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMVE - Liga Metropolitana Voleibol Escolar</title>
+    <style>
+        /* Responsive Treatment y Estilos Base */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2b5b84; /* Fondo azul clásico */
+            color: #333;
+        }
+        .wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #fff;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        /* Header */
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #fff;
+        }
+        .header-logo {
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+        }
+        .header-image {
+            flex: 2;
+            min-width: 300px;
+            text-align: right;
+            padding-left: 20px;
+        }
+        .header-image div {
+            width: 100%;
+            height: 220px;
+            background: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 5px solid #fff;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+            border-radius: 4px;
+            color: #666;
+        }
+        /* Navegación */
+        .navbar {
+            background-color: #f07b1a; /* Naranja de la referencia */
+            padding: 10px 0;
+        }
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .navbar ul li {
+            padding: 5px 15px;
+        }
+        .navbar ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .navbar ul li a:hover {
+            text-decoration: underline;
+        }
+        /* Contenido Principal */
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 30px;
+        }
+        .content-left {
+            flex: 3;
+            min-width: 300px;
+            padding-right: 30px;
+        }
+        .sidebar-right {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        /* Ajustes para móviles */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .header-image {
+                padding-left: 0;
+                margin-top: 15px;
+            }
+            .main-content {
+                flex-direction: column;
+            }
+            .content-left {
+                padding-right: 0;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Cabecera -->
+        <header class="header">
+            <div class="header-logo">
+                <h1 style="color: #0b3486; font-size: 42px; margin-bottom: 5px; font-weight: 900;">LMVE</h1>
+                <p style="color: #0b3486; font-size: 13px; font-weight: bold;">LIGA METROPOLITANA<br>VOLEIBOL ESCOLAR</p>
+            </div>
+            <div class="header-image">
+                <!-- Contenedor simulando la foto grupal -->
+                <div>[ Espacio para Fotografía Grupal ]</div>
+            </div>
+        </header>
+
+        <!-- Menú de Navegación -->
+        <nav class="navbar">
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Nuestra Liga</a></li>
+                <li><a href="#">División Damas</a></li>
+                <li><a href="#">División Varones</a></li>
+                <li><a href="#">Noticias</a></li>
+                <li><a href="#">Galería</a></li>
+                <li><a href="#">Videos</a></li>
+                <li><a href="#">Prens   a</a></li>
+                <li><a href="#">Programación</a></li>
+                <li><a href="#">Contacto</a></li>
+            </ul>
+        </nav>
+
+        <!-- Contenido Dinámico (Aquí se inyectará home.html) -->
+        <main class="main-content">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+</body>
+</html>
