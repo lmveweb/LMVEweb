@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LMVE - Liga Metropolitana Vóleibol Escolar</title>
+    <title>Sponsoring - Liga Metropolitana Voleibol Escolar</title>
     <style>
         /* Responsive Treatment y Estilos Base */
         * {
@@ -12,144 +12,208 @@
             padding: 0;
         }
         body {
-            font-family: Arial, sans-serif;
-            background-color: #2b5b84; /* Fondo azul clásico */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e8eef2; /* Fondo sutilmente más moderno */
             color: #333;
+            /* Suavidad en el renderizado de las letras */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         .wrapper {
-            max-width: 1000px;
-            margin: 0 auto;
+            max-width: 1200px;
+            margin: 40px auto; /* Separado de los bordes de la pantalla */
             background-color: #fff;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            border-radius: 16px; /* Adiós cortes duros tipo XP */
+            overflow: hidden; /* Obliga a que la cabecera y el footer respeten las curvas */
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12); /* Sombra moderna y difuminada */
         }
-        /* Header */
+        
+        /* Header Minimalista */
         .header {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
-            background-color: #fff;
+            padding: 25px 40px;
+            background: linear-gradient(135deg, #0b3486 0%, #1a4da1 100%); /* Degradado suave */
+            color: white;
         }
-        .header-logo {
-            flex: 1;
-            min-width: 250px;
-            text-align: center;
+        .header-logo h1 {
+            font-size: 42px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: #fff;
+            /* Aquí está el borde negro y la suavidad de las letras */
+            -webkit-text-stroke: 1.5px #000;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
         }
-        .header-image {
-            flex: 2;
-            min-width: 300px;
-            text-align: right;
-            padding-left: 20px;
+        .header-logo p {
+            font-size: 13px;
+            color: #f07b1a;
+            font-weight: bold;
+            letter-spacing: 2px;
+            -webkit-text-stroke: 0.5px #000;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
-        .header-image div {
-            width: 100%;
-            height: 220px;
-            background: #ccc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 5px solid #fff;
-            box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
-            border-radius: 4px;
-            color: #666;
-        }
-        /* Navegación */
+        
+        /* Navegación para Patrocinadores */
         .navbar {
-            background-color: #f07b1a; /* Naranja de la referencia */
-            padding: 10px 0;
+            background-color: #f07b1a;
+            padding: 15px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
         }
         .navbar ul {
             list-style: none;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-        }
-        .navbar ul li {
-            padding: 5px 15px;
+            gap: 30px;
         }
         .navbar ul li a {
             color: #fff;
             text-decoration: none;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 15px;
+            text-transform: uppercase;
+            transition: all 0.3s ease; /* Transición suave al pasar el mouse */
+            -webkit-text-stroke: 0.5px rgba(0,0,0,0.5);
         }
         .navbar ul li a:hover {
-            text-decoration: underline;
+            color: #0b3486;
+            text-shadow: 0px 0px 8px rgba(255,255,255,0.6);
         }
+        
         /* Contenido Principal */
         .main-content {
+            padding: 50px 40px;
+            min-height: 50vh; /* Asegura que el footer siempre quede abajo */
+        }
+
+        /* ========================================= */
+        /* ESTILOS DEL NUEVO FOOTER PURIFICADO       */
+        /* ========================================= */
+        .footer {
+            background: linear-gradient(135deg, #0b3486 0%, #061c47 100%);
+            color: #fff;
+            padding: 40px;
             display: flex;
             flex-wrap: wrap;
-            padding: 30px;
+            justify-content: space-between;
+            gap: 30px;
         }
-        .content-left {
-            flex: 3;
-            min-width: 300px;
-            padding-right: 30px;
-        }
-        .sidebar-right {
+        .footer-col {
             flex: 1;
-            min-width: 200px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+            min-width: 250px;
         }
+        .footer-col h3 {
+            color: #f07b1a;
+            margin-bottom: 15px;
+            font-size: 18px;
+            -webkit-text-stroke: 0.5px #000;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+        }
+        .footer-col p, .footer-col a {
+            color: #d1dce5;
+            font-size: 14px;
+            line-height: 1.8;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .footer-col a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+        .footer-bottom {
+            width: 100%;
+            text-align: center;
+            padding-top: 20px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 12px;
+            color: #8da4b8;
+        }
+
         /* Ajustes para móviles */
         @media (max-width: 768px) {
+            .wrapper {
+                margin: 15px;
+                border-radius: 12px;
+            }
             .header {
                 flex-direction: column;
                 text-align: center;
+                padding: 20px;
             }
-            .header-image {
-                padding-left: 0;
-                margin-top: 15px;
+            .navbar ul {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
             }
             .main-content {
-                flex-direction: column;
+                padding: 30px 20px;
             }
-            .content-left {
-                padding-right: 0;
-                margin-bottom: 20px;
+            .footer {
+                padding: 30px 20px;
+                text-align: center; /* Centrar el texto del footer en móviles */
             }
         }
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <!-- Cabecera -->
         <header class="header">
             <div class="header-logo">
-                <h1 style="color: #0b3486; font-size: 42px; margin-bottom: 5px; font-weight: 900;">LMVE</h1>
-                <p style="color: #0b3486; font-size: 13px; font-weight: bold;">LIGA METROPOLITANA<br>VÓLEIBOL ESCOLAR</p>
+                <h1>LMVE</h1>
+                <p>LIGA METROPOLITANA VOLEIBOL ESCOLAR</p>
             </div>
-            <div class="header-image">
-                <!-- Contenedor simulando la foto grupal -->
-                <div>[ Espacio para Fotografía Grupal ]</div>
+            <div class="header-contact">
+                <p style="font-size: 15px; font-weight: bold; -webkit-text-stroke: 0.5px #000; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Sé parte de nuestro proyecto</p>
             </div>
         </header>
 
-        <!-- Menú de Navegación -->
         <nav class="navbar">
             <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Nuestra Liga</a></li>
-                <li><a href="#">División Damas</a></li>
-                <li><a href="#">División Varones</a></li>
-                <li><a href="#">Noticias</a></li>
-                <li><a href="#">Galería</a></li>
-                <li><a href="#">Videos</a></li>
-                <li><a href="#">Prensa</a></li>
-                <li><a href="#">Programación</a></li>
-                <li><a href="#">Contacto</a></li>
+                <li><a href="#">El Proyecto</a></li>
+                <li><a href="#">Impacto y Audiencia</a></li>
+                <li><a href="#">Redes Sociales</a></li>
+                <li><a href="#">Contacto Comercial</a></li>
             </ul>
         </nav>
 
-        <!-- Contenido Dinámico (Aquí se inyectará home.html) -->
         <main class="main-content">
+            <!-- Aquí se inyecta el contenido de home.html -->
             {% block content %}
             {% endblock %}
         </main>
+
+        <!-- ========================================= -->
+        <!-- ESTRUCTURA DEL NUEVO FOOTER               -->
+        <!-- ========================================= -->
+        <footer class="footer">
+            <div class="footer-col">
+                <h3 style="font-size: 28px; font-weight: 900; -webkit-text-stroke: 1px #000; margin-bottom: 5px;">LMVE</h3>
+                <p style="font-weight: bold; color: #f07b1a; margin-bottom: 10px;">LIGA METROPOLITANA<br>VOLEIBOL ESCOLAR</p>
+                <p>Fomentando el talento joven, la vida sana y el trabajo en equipo desde la cancha hasta el futuro.</p>
+            </div>
+            
+            <div class="footer-col">
+                <h3>Contacto Comercial</h3>
+                <p>📍 Santiago, Chile</p>
+                <p>📧 comercial@lmve.cl</p>
+                <p>📞 +56 9 1234 5678</p>
+            </div>
+            
+            <div class="footer-col">
+                <h3>Enlaces de Interés</h3>
+                <p><a href="#">▶ Descargar Dossier (PDF)</a></p>
+                <p><a href="#">▶ Beneficios Tributarios (Ley de Donaciones)</a></p>
+                <p><a href="#">▶ Ver Cronograma del Torneo</a></p>
+            </div>
+            
+            <div class="footer-bottom">
+                &copy; 2026 Liga Metropolitana de Voleibol Escolar. Todos los derechos reservados.
+            </div>
+        </footer>
     </div>
 </body>
 </html>
