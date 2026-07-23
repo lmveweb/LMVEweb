@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sponsoring - Liga Metropolitana Voleibol Escolar</title>
+    <title>Sponsoring - LMVE (Tech Edition)</title>
     <style>
-        /* Responsive Treatment y Estilos Base */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -13,186 +12,283 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e8eef2; /* Fondo sutilmente más moderno */
-            color: #333;
-            /* Suavidad en el renderizado de las letras */
+            background-color: #050b14;
+            background-image: 
+                linear-gradient(to bottom, rgba(5, 11, 20, 0.85), rgba(5, 11, 20, 0.98)), 
+                url('https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            color: #e2e8f0;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
         }
-        .wrapper {
+        
+        .header-tech {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(5, 11, 20, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(240, 123, 26, 0.15);
+            z-index: 1000;
+        }
+        .header-container {
             max-width: 1200px;
-            margin: 40px auto; /* Separado de los bordes de la pantalla */
-            background-color: #fff;
-            border-radius: 16px; /* Adiós cortes duros tipo XP */
-            overflow: hidden; /* Obliga a que la cabecera y el footer respeten las curvas */
-            box-shadow: 0 10px 40px rgba(0,0,0,0.12); /* Sombra moderna y difuminada */
-        }
-        
-        /* Header Minimalista */
-        .header {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
+            margin: 0 auto;
+            padding: 10px 20px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
             align-items: center;
-            padding: 25px 40px;
-            background: linear-gradient(135deg, #0b3486 0%, #1a4da1 100%); /* Degradado suave */
-            color: white;
-        }
-        .header-logo h1 {
-            font-size: 42px;
-            font-weight: 900;
-            letter-spacing: 1px;
-            color: #fff;
-            /* Aquí está el borde negro y la suavidad de las letras */
-            -webkit-text-stroke: 1.5px #000;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
-        }
-        .header-logo p {
-            font-size: 13px;
-            color: #f07b1a;
-            font-weight: bold;
-            letter-spacing: 2px;
-            -webkit-text-stroke: 0.5px #000;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
         
-        /* Navegación para Patrocinadores */
-        .navbar {
-            background-color: #f07b1a;
-            padding: 15px 0;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        .navbar-tech {
+            justify-self: start;
         }
-        .navbar ul {
+        .navbar-tech ul {
             list-style: none;
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
             gap: 30px;
         }
-        .navbar ul li a {
-            color: #fff;
+        .navbar-tech a {
+            color: #94a3b8;
             text-decoration: none;
-            font-weight: bold;
-            font-size: 15px;
+            font-size: 12px;
+            font-weight: 800;
             text-transform: uppercase;
-            transition: all 0.3s ease; /* Transición suave al pasar el mouse */
-            -webkit-text-stroke: 0.5px rgba(0,0,0,0.5);
+            letter-spacing: 1.5px;
+            transition: color 0.3s ease;
         }
-        .navbar ul li a:hover {
-            color: #0b3486;
-            text-shadow: 0px 0px 8px rgba(255,255,255,0.6);
+        .navbar-tech a:hover {
+            color: #f07b1a;
         }
         
-        /* Contenido Principal */
-        .main-content {
-            padding: 50px 40px;
-            min-height: 50vh; /* Asegura que el footer siempre quede abajo */
+        .header-logo {
+            justify-self: center;
+            text-decoration: none;
+            display: block;
+        }
+        .logo-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 140px;
+            height: 60px;
+        }
+        .logo-text {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 2; 
+        }
+        .orbit-mover {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 24px;
+            height: 24px;
+            margin-top: -12px;
+            margin-left: -12px;
+            animation: horizontal-orbit 4s linear infinite;
+        }
+        .header-volley-icon {
+            width: 100%;
+            height: 100%;
+            animation: spin-ball 3s linear infinite;
+            filter: drop-shadow(0 0 5px rgba(240, 123, 26, 0.8));
         }
 
-        /* ========================================= */
-        /* ESTILOS DEL NUEVO FOOTER PURIFICADO       */
-        /* ========================================= */
+        @keyframes horizontal-orbit {
+            0%   { transform: rotateY(0deg) translateX(65px) rotateY(0deg) scale(1); z-index: 1; }
+            25%  { transform: rotateY(90deg) translateX(65px) rotateY(-90deg) scale(0.8); z-index: 1; }
+            49.9%{ z-index: 1; }
+            50%  { transform: rotateY(180deg) translateX(65px) rotateY(-180deg) scale(1); z-index: 3; }
+            75%  { transform: rotateY(270deg) translateX(65px) rotateY(-270deg) scale(1.2); z-index: 3; }
+            99.9%{ z-index: 3; }
+            100% { transform: rotateY(360deg) translateX(65px) rotateY(-360deg) scale(1); z-index: 1; }
+        }
+        @keyframes spin-ball {
+            100% { transform: rotate(360deg); }
+        }
+        
+        .header-actions {
+            justify-self: end;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .btn-header {
+            background: transparent;
+            color: #f07b1a;
+            border: 1px solid #f07b1a;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 900;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .btn-header:hover {
+            background: #f07b1a;
+            color: #050b14;
+            box-shadow: 0 0 15px rgba(240, 123, 26, 0.4);
+        }
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            color: #f07b1a;
+            font-size: 26px;
+            cursor: pointer;
+        }
+        
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 140px 20px 80px 20px;
+            min-height: 80vh;
+        }
+        
         .footer {
-            background: linear-gradient(135deg, #0b3486 0%, #061c47 100%);
-            color: #fff;
-            padding: 40px;
+            background: rgba(2, 6, 13, 0.85);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #1a2744;
+            padding: 70px 20px 30px 20px;
+        }
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-            gap: 30px;
+            gap: 40px;
         }
         .footer-col {
             flex: 1;
-            min-width: 250px;
+            min-width: 220px;
         }
         .footer-col h3 {
-            color: #f07b1a;
-            margin-bottom: 15px;
-            font-size: 18px;
-            -webkit-text-stroke: 0.5px #000;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+            color: #fff;
+            margin-bottom: 25px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
         .footer-col p, .footer-col a {
-            color: #d1dce5;
+            color: #64748b;
             font-size: 14px;
             line-height: 1.8;
             text-decoration: none;
             transition: color 0.3s ease;
+            display: block;
+            margin-bottom: 12px;
         }
         .footer-col a:hover {
+            color: #f07b1a;
+        }
+        .footer-logo {
+            font-size: 28px;
+            font-weight: 900;
             color: #fff;
-            text-decoration: underline;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .footer-sub {
+            font-weight: 900;
+            color: #f07b1a;
+            font-size: 13px;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
         }
         .footer-bottom {
-            width: 100%;
+            max-width: 1200px;
+            margin: 50px auto 0 auto;
             text-align: center;
-            padding-top: 20px;
-            margin-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            font-size: 12px;
-            color: #8da4b8;
+            padding-top: 25px;
+            border-top: 1px solid #1a2744;
+            font-size: 13px;
+            color: #334155;
         }
 
-        /* Ajustes para móviles */
-        @media (max-width: 768px) {
-            .wrapper {
-                margin: 15px;
-                border-radius: 12px;
+        @media (max-width: 900px) {
+            .header-container {
+                display: flex;
+                justify-content: space-between;
             }
-            .header {
-                flex-direction: column;
-                text-align: center;
-                padding: 20px;
+            .navbar-tech {
+                display: none;
             }
-            .navbar ul {
+            .btn-header {
+                display: none;
+            }
+            .hamburger {
+                display: block;
+            }
+            .footer-container {
                 flex-direction: column;
-                align-items: center;
-                gap: 15px;
+                gap: 40px;
             }
             .main-content {
-                padding: 30px 20px;
-            }
-            .footer {
-                padding: 30px 20px;
-                text-align: center; /* Centrar el texto del footer en móviles */
+                padding: 110px 20px 60px 20px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <header class="header">
-            <div class="header-logo">
-                <h1>LMVE</h1>
-                <p>LIGA METROPOLITANA VOLEIBOL ESCOLAR</p>
+    
+    <header class="header-tech">
+        <div class="header-container">
+            <nav class="navbar-tech">
+                <ul>
+                    <li><a href="{% url 'proyecto' %}">El Proyecto</a></li>
+                    <li><a href="{% url 'impacto' %}">Impacto</a></li>
+                    <li><a href="{% url 'redes' %}">Redes</a></li>
+                </ul>
+            </nav>
+            
+            <a href="{% url 'home' %}" class="header-logo">
+                <div class="logo-wrapper">
+                    <div class="logo-text">LMVE</div>
+                    <div class="orbit-mover">
+                        <svg class="header-volley-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="#f07b1a" stroke-width="6"/>
+                            <path d="M 50 5 C 75 25 75 75 50 95" fill="none" stroke="#f07b1a" stroke-width="5"/>
+                            <path d="M 5 50 C 25 75 75 75 95 50" fill="none" stroke="#f07b1a" stroke-width="5"/>
+                            <path d="M 18 18 C 45 40 60 75 82 82" fill="none" stroke="#f07b1a" stroke-width="5"/>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+            
+            <div class="header-actions">
+                <a href="{% url 'contacto' %}" class="btn-header">Contacto Comercial</a>
+                <button class="hamburger">☰</button>
             </div>
-            <div class="header-contact">
-                <p style="font-size: 15px; font-weight: bold; -webkit-text-stroke: 0.5px #000; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Sé parte de nuestro proyecto</p>
-            </div>
-        </header>
+        </div>
+    </header>
 
-        <nav class="navbar">
-            <ul>
-                <li><a href="#">El Proyecto</a></li>
-                <li><a href="#">Impacto y Audiencia</a></li>
-                <li><a href="#">Redes Sociales</a></li>
-                <li><a href="#">Contacto Comercial</a></li>
-            </ul>
-        </nav>
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
 
-        <main class="main-content">
-            <!-- Aquí se inyecta el contenido de home.html -->
-            {% block content %}
-            {% endblock %}
-        </main>
-
-        <!-- ========================================= -->
-        <!-- ESTRUCTURA DEL NUEVO FOOTER               -->
-        <!-- ========================================= -->
-        <footer class="footer">
+    <footer class="footer">
+        <div class="footer-container">
             <div class="footer-col">
-                <h3 style="font-size: 28px; font-weight: 900; -webkit-text-stroke: 1px #000; margin-bottom: 5px;">LMVE</h3>
-                <p style="font-weight: bold; color: #f07b1a; margin-bottom: 10px;">LIGA METROPOLITANA<br>VOLEIBOL ESCOLAR</p>
+                <span class="footer-logo">LMVE</span>
+                <div class="footer-sub">LIGA METROPOLITANA DE VOLEIBOL</div>
                 <p>Fomentando el talento joven, la vida sana y el trabajo en equipo desde la cancha hasta el futuro.</p>
             </div>
             
@@ -205,15 +301,16 @@
             
             <div class="footer-col">
                 <h3>Enlaces de Interés</h3>
-                <p><a href="#">▶ Descargar Dossier (PDF)</a></p>
-                <p><a href="#">▶ Beneficios Tributarios (Ley de Donaciones)</a></p>
-                <p><a href="#">▶ Ver Cronograma del Torneo</a></p>
+                <a href="#">▶ Descargar Dossier (PDF)</a>
+                <a href="#">▶ Beneficios Tributarios</a>
+                <a href="#">▶ Ver Cronograma del Torneo</a>
             </div>
-            
-            <div class="footer-bottom">
-                &copy; 2026 Liga Metropolitana de Voleibol Escolar. Todos los derechos reservados.
-            </div>
-        </footer>
-    </div>
+        </div>
+        
+        <div class="footer-bottom">
+            &copy; 2026 Liga Metropolitana de Voleibol Escolar. Todos los derechos reservados.
+        </div>
+    </footer>
+
 </body>
 </html>
