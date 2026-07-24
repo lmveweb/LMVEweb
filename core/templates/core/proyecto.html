@@ -1,0 +1,287 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<style>
+    .proyecto-hero {
+        text-align: center;
+        margin-bottom: 70px;
+    }
+    .proyecto-hero h2 {
+        font-size: 56px;
+        font-weight: 900;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 15px;
+    }
+    .proyecto-hero h2 span {
+        color: #f07b1a;
+        text-shadow: 0 0 20px rgba(240, 123, 26, 0.4);
+    }
+    .proyecto-hero p {
+        font-size: 18px;
+        color: #94a3b8;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.7;
+    }
+
+    .specs-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        margin-bottom: 90px;
+    }
+    .spec-card {
+        background: rgba(10, 17, 34, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid #1a2744;
+        border-radius: 16px;
+        padding: 40px 30px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .spec-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: #f07b1a;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .spec-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(240, 123, 26, 0.4);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .spec-card:hover::before {
+        opacity: 1;
+    }
+    .spec-icon {
+        font-size: 32px;
+        color: #f07b1a;
+        margin-bottom: 20px;
+        display: block;
+    }
+    .spec-card h3 {
+        font-size: 20px;
+        color: #fff;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .spec-card p {
+        color: #94a3b8;
+        font-size: 15px;
+        line-height: 1.7;
+    }
+    .spec-tag {
+        display: inline-block;
+        background: #1a2744;
+        color: #e2e8f0;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 15px;
+        margin-right: 8px;
+        text-transform: uppercase;
+    }
+
+    .timeline-section {
+        background: rgba(2, 6, 13, 0.7);
+        border: 1px solid #1a2744;
+        border-radius: 20px;
+        padding: 60px;
+    }
+    .timeline-title {
+        text-align: center;
+        color: #fff;
+        font-size: 32px;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 50px;
+        letter-spacing: 1px;
+    }
+    .timeline-container {
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .timeline-container::after {
+        content: '';
+        position: absolute;
+        width: 2px;
+        background: #1a2744;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        margin-left: -1px;
+    }
+    .timeline-item {
+        padding: 10px 40px;
+        position: relative;
+        background: inherit;
+        width: 50%;
+        margin-bottom: 30px;
+    }
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+    .timeline-item.left {
+        left: 0;
+        text-align: right;
+    }
+    .timeline-item.right {
+        left: 50%;
+    }
+    .timeline-dot {
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        background-color: #050b14;
+        border: 3px solid #f07b1a;
+        border-radius: 50%;
+        top: 15px;
+        z-index: 1;
+        box-shadow: 0 0 10px #f07b1a;
+    }
+    .timeline-item.left .timeline-dot {
+        right: -8px;
+    }
+    .timeline-item.right .timeline-dot {
+        left: -8px;
+    }
+    .timeline-content {
+        background: #0a1122;
+        padding: 25px;
+        border-radius: 12px;
+        border: 1px solid #1a2744;
+        transition: border-color 0.3s ease;
+    }
+    .timeline-content:hover {
+        border-color: #f07b1a;
+    }
+    .timeline-date {
+        color: #f07b1a;
+        font-weight: 900;
+        font-size: 14px;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    .timeline-content h4 {
+        color: #fff;
+        font-size: 18px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+    .timeline-content p {
+        color: #94a3b8;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 900px) {
+        .specs-grid {
+            grid-template-columns: 1fr;
+        }
+        .proyecto-hero h2 {
+            font-size: 42px;
+        }
+        .timeline-container::after {
+            left: 31px;
+        }
+        .timeline-item {
+            width: 100%;
+            padding-left: 70px;
+            padding-right: 25px;
+            text-align: left;
+        }
+        .timeline-item.left, .timeline-item.right {
+            left: 0;
+        }
+        .timeline-item.left .timeline-dot, .timeline-item.right .timeline-dot {
+            left: 23px;
+            right: auto;
+        }
+        .timeline-section {
+            padding: 40px 20px;
+        }
+    }
+</style>
+
+<div class="proyecto-hero">
+    <h2>Sistema de <span>Competición</span></h2>
+    <p>La Liga Metropolitana de Voleibol Escolar está diseñada bajo estándares de alto rendimiento, asegurando un entorno profesional para el desarrollo del talento joven.</p>
+</div>
+
+<div class="specs-grid">
+    <div class="spec-card">
+        <span class="spec-icon">⚡</span>
+        <h3>División de Categorías</h3>
+        <p>Estructura competitiva segmentada para garantizar un desarrollo progresivo y justo, respetando las etapas de crecimiento de los atletas escolares.</p>
+        <span class="spec-tag">Juvenil (U18)</span>
+        <span class="spec-tag">Infantil (U16)</span>
+    </div>
+    
+    <div class="spec-card">
+        <span class="spec-icon">🛡️</span>
+        <h3>Formato Oficial</h3>
+        <p>Sistema de temporada regular seguido de rondas eliminatorias de alta tensión. Maximiza la exposición y el nivel competitivo en cada encuentro.</p>
+        <span class="spec-tag">Fase de Grupos</span>
+        <span class="spec-tag">Playoffs</span>
+    </div>
+    
+    <div class="spec-card">
+        <span class="spec-icon">🏟️</span>
+        <h3>Infraestructura</h3>
+        <p>Los encuentros se desarrollan en recintos deportivos de primera categoría, con arbitraje oficial y protocolos de seguridad médica en pista.</p>
+        <span class="spec-tag">Arbitraje Certificado</span>
+        <span class="spec-tag">Sedes Elite</span>
+    </div>
+</div>
+
+<div class="timeline-section">
+    <h3 class="timeline-title">Ruta del Torneo</h3>
+    <div class="timeline-container">
+        <div class="timeline-item left">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-date">Fase 01 // Apertura</div>
+                <h4>Draft e Inscripción</h4>
+                <p>Convocatoria oficial a los colegios de la Región Metropolitana. Presentación de planillas, validación de jugadores y sorteo de grupos transmitido en vivo.</p>
+            </div>
+        </div>
+        <div class="timeline-item right">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-date">Fase 02 // Regular</div>
+                <h4>Temporada de Grupos</h4>
+                <p>Partidos semanales de alta intensidad. Las marcas patrocinadoras tienen máxima visibilidad durante esta etapa de acumulación de puntos y estadísticas.</p>
+            </div>
+        </div>
+        <div class="timeline-item left">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-date">Fase 03 // Playoffs</div>
+                <h4>Fase Eliminatoria</h4>
+                <p>Clasifican los mejores de cada grupo. Cuartos de final y semifinales disputadas en formato de eliminación directa. Máximo engagement de la audiencia.</p>
+            </div>
+        </div>
+        <div class="timeline-item right">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-date">Fase 04 // Finales</div>
+                <h4>Championship Match</h4>
+                <p>El evento cúlmine del año escolar. Entrega de copas, premios a jugadores destacados (MVP) y ceremonias de clausura con presencia exclusiva de sponsors.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
