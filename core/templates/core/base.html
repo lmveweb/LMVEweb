@@ -3,217 +3,404 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sponsoring - Liga Metropolitana Voleibol Escolar</title>
+    <title>LMVE | Liga Metropolitana de Voleibol Escolar</title>
+    
+    <!-- Cargamos Three.js desde CDN para el motor 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
     <style>
-        /* Responsive Treatment y Estilos Base */
+        /* =========================================================
+           RESET & TIPOGRAFÍA (Estilo Awwwards Light Mode)
+           ========================================================= */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e8eef2; /* Fondo sutilmente más moderno */
-            color: #333;
-            /* Suavidad en el renderizado de las letras */
+        body, html {
+            width: 100%;
+            height: 100%;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f8fafc; /* Blanco perla premium */
+            color: #0f172a; /* Gris muy oscuro, casi negro */
+            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
-        .wrapper {
-            max-width: 1200px;
-            margin: 40px auto; /* Separado de los bordes de la pantalla */
-            background-color: #fff;
-            border-radius: 16px; /* Adiós cortes duros tipo XP */
-            overflow: hidden; /* Obliga a que la cabecera y el footer respeten las curvas */
-            box-shadow: 0 10px 40px rgba(0,0,0,0.12); /* Sombra moderna y difuminada */
-        }
-        
-        /* Header Minimalista */
-        .header {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            padding: 25px 40px;
-            background: linear-gradient(135deg, #0b3486 0%, #1a4da1 100%); /* Degradado suave */
-            color: white;
-        }
-        .header-logo h1 {
-            font-size: 42px;
-            font-weight: 900;
-            letter-spacing: 1px;
-            color: #fff;
-            /* Aquí está el borde negro y la suavidad de las letras */
-            -webkit-text-stroke: 1.5px #000;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
-        }
-        .header-logo p {
-            font-size: 13px;
-            color: #f07b1a;
-            font-weight: bold;
-            letter-spacing: 2px;
-            -webkit-text-stroke: 0.5px #000;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-        
-        /* Navegación para Patrocinadores */
-        .navbar {
-            background-color: #f07b1a;
-            padding: 15px 0;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        }
-        .navbar ul {
-            list-style: none;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-        }
-        .navbar ul li a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 15px;
-            text-transform: uppercase;
-            transition: all 0.3s ease; /* Transición suave al pasar el mouse */
-            -webkit-text-stroke: 0.5px rgba(0,0,0,0.5);
-        }
-        .navbar ul li a:hover {
-            color: #0b3486;
-            text-shadow: 0px 0px 8px rgba(255,255,255,0.6);
-        }
-        
-        /* Contenido Principal */
-        .main-content {
-            padding: 50px 40px;
-            min-height: 50vh; /* Asegura que el footer siempre quede abajo */
+
+        /* =========================================================
+           CANVAS 3D BACKGROUND
+           ========================================================= */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0; 
+            pointer-events: none; 
         }
 
-        /* ========================================= */
-        /* ESTILOS DEL NUEVO FOOTER PURIFICADO       */
-        /* ========================================= */
-        .footer {
-            background: linear-gradient(135deg, #0b3486 0%, #061c47 100%);
-            color: #fff;
-            padding: 40px;
+        .front-layer {
+            position: relative;
+            z-index: 10;
             display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 30px;
+            flex-direction: column;
+            min-height: 100vh;
+            background: transparent;
         }
-        .footer-col {
-            flex: 1;
-            min-width: 250px;
+
+        /* =========================================================
+           HEADER ULTRA MINIMALISTA (Logo Centrado)
+           ========================================================= */
+        .header-minimal {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 30px 50px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            z-index: 100;
         }
-        .footer-col h3 {
+        
+        .nav-minimal {
+            justify-self: start;
+        }
+        .nav-minimal ul {
+            list-style: none;
+            display: flex;
+            gap: 40px;
+        }
+        .nav-minimal a {
+            color: #475569;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: lowercase;
+            letter-spacing: 1px;
+            transition: color 0.3s ease;
+        }
+        .nav-minimal a:hover {
             color: #f07b1a;
-            margin-bottom: 15px;
-            font-size: 18px;
-            -webkit-text-stroke: 0.5px #000;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
         }
-        .footer-col p, .footer-col a {
-            color: #d1dce5;
-            font-size: 14px;
-            line-height: 1.8;
+
+        /* Logo al centro con pelota clásica rotando detrás */
+        .logo-center-wrapper {
+            justify-self: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 120px;
+            height: 60px;
+            text-decoration: none;
+        }
+        .logo-text {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: #0f172a;
+            z-index: 2;
+        }
+        .logo-text span {
+            color: #f07b1a;
+        }
+        .logo-bg-ball {
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            z-index: 1;
+            animation: slow-spin 10s linear infinite;
+            opacity: 0.15; 
+        }
+        @keyframes slow-spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        .header-right {
+            justify-self: end;
+        }
+        .btn-minimal {
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            background: transparent;
+        }
+        .btn-minimal:hover {
+            background: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
+        }
+
+        /* =========================================================
+           MAIN CONTENT AREA
+           ========================================================= */
+        .main-content {
+            flex: 1;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 150px 50px 100px 50px;
+        }
+
+        /* =========================================================
+           FOOTER INVISIBLE
+           ========================================================= */
+        .footer-minimal {
+            padding: 40px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e2e8f0;
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .footer-minimal a {
+            color: #94a3b8;
             text-decoration: none;
             transition: color 0.3s ease;
         }
-        .footer-col a:hover {
-            color: #fff;
-            text-decoration: underline;
-        }
-        .footer-bottom {
-            width: 100%;
-            text-align: center;
-            padding-top: 20px;
-            margin-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            font-size: 12px;
-            color: #8da4b8;
+        .footer-minimal a:hover {
+            color: #f07b1a;
         }
 
-        /* Ajustes para móviles */
-        @media (max-width: 768px) {
-            .wrapper {
-                margin: 15px;
-                border-radius: 12px;
+        /* =========================================================
+           RESPONSIVE TREATMENT
+           ========================================================= */
+        @media (max-width: 900px) {
+            .header-minimal { 
+                display: flex; 
+                justify-content: space-between; 
+                padding: 20px; 
             }
-            .header {
-                flex-direction: column;
-                text-align: center;
-                padding: 20px;
-            }
-            .navbar ul {
-                flex-direction: column;
-                align-items: center;
-                gap: 15px;
-            }
-            .main-content {
-                padding: 30px 20px;
-            }
-            .footer {
-                padding: 30px 20px;
-                text-align: center; /* Centrar el texto del footer en móviles */
-            }
+            .nav-minimal { display: none; }
+            .header-right { display: none; }
+            .logo-center-wrapper { margin: 0 auto; }
+            .main-content { padding: 120px 20px 60px 20px; }
+            .footer-minimal { flex-direction: column; gap: 20px; text-align: center; padding: 30px 20px; }
         }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <header class="header">
-            <div class="header-logo">
-                <h1>LMVE</h1>
-                <p>LIGA METROPOLITANA VOLEIBOL ESCOLAR</p>
-            </div>
-            <div class="header-contact">
-                <p style="font-size: 15px; font-weight: bold; -webkit-text-stroke: 0.5px #000; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Sé parte de nuestro proyecto</p>
+
+    <!-- CONTENEDOR DEL MOTOR 3D -->
+    <div id="webgl-canvas"></div>
+
+    <!-- CAPA FRONTAL CON CONTENIDO -->
+    <div class="front-layer">
+        
+        <header class="header-minimal">
+            <nav class="nav-minimal">
+                <ul>
+                    <li><a href="{% url 'proyecto' %}">el proyecto</a></li>
+                    <li><a href="{% url 'impacto' %}">impacto</a></li>
+                    <li><a href="{% url 'redes' %}">redes</a></li>
+                </ul>
+            </nav>
+            
+            <a href="{% url 'home' %}" class="logo-center-wrapper">
+                <!-- SVG Pelota de Voleibol Clásica -->
+                <svg class="logo-bg-ball" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#f07b1a" stroke-width="4"/>
+                    <!-- Panel Central Vertical -->
+                    <path d="M 35 7 C 45 35 45 65 35 93" fill="none" stroke="#f07b1a" stroke-width="3"/>
+                    <path d="M 65 7 C 55 35 55 65 65 93" fill="none" stroke="#f07b1a" stroke-width="3"/>
+                    <!-- Panel Central Horizontal -->
+                    <path d="M 7 35 C 35 45 65 45 93 35" fill="none" stroke="#f07b1a" stroke-width="3"/>
+                    <path d="M 7 65 C 35 55 65 55 93 65" fill="none" stroke="#f07b1a" stroke-width="3"/>
+                </svg>
+                <!-- Texto encima -->
+                <span class="logo-text">LMVE<span>.</span></span>
+            </a>
+            
+            <div class="header-right">
+                <a href="{% url 'contacto' %}" class="btn-minimal">Contacto</a>
             </div>
         </header>
 
-        <nav class="navbar">
-            <ul>
-                <li><a href="#">El Proyecto</a></li>
-                <li><a href="#">Impacto y Audiencia</a></li>
-                <li><a href="#">Redes Sociales</a></li>
-                <li><a href="#">Contacto Comercial</a></li>
-            </ul>
-        </nav>
-
         <main class="main-content">
-            <!-- Aquí se inyecta el contenido de home.html -->
             {% block content %}
             {% endblock %}
         </main>
 
-        <!-- ========================================= -->
-        <!-- ESTRUCTURA DEL NUEVO FOOTER               -->
-        <!-- ========================================= -->
-        <footer class="footer">
-            <div class="footer-col">
-                <h3 style="font-size: 28px; font-weight: 900; -webkit-text-stroke: 1px #000; margin-bottom: 5px;">LMVE</h3>
-                <p style="font-weight: bold; color: #f07b1a; margin-bottom: 10px;">LIGA METROPOLITANA<br>VOLEIBOL ESCOLAR</p>
-                <p>Fomentando el talento joven, la vida sana y el trabajo en equipo desde la cancha hasta el futuro.</p>
-            </div>
-            
-            <div class="footer-col">
-                <h3>Contacto Comercial</h3>
-                <p>📍 Santiago, Chile</p>
-                <p>📧 comercial@lmve.cl</p>
-                <p>📞 +56 9 1234 5678</p>
-            </div>
-            
-            <div class="footer-col">
-                <h3>Enlaces de Interés</h3>
-                <p><a href="#">▶ Descargar Dossier (PDF)</a></p>
-                <p><a href="#">▶ Beneficios Tributarios (Ley de Donaciones)</a></p>
-                <p><a href="#">▶ Ver Cronograma del Torneo</a></p>
-            </div>
-            
-            <div class="footer-bottom">
-                &copy; 2026 Liga Metropolitana de Voleibol Escolar. Todos los derechos reservados.
+        <footer class="footer-minimal">
+            <div>&copy; 2026 LMVE. Todos los derechos reservados.</div>
+            <div>
+                <a href="#">Instagram</a> &nbsp;&nbsp;//&nbsp;&nbsp;
+                <a href="#">TikTok</a>
             </div>
         </footer>
+
     </div>
+
+    <!-- SCRIPT DEL MOTOR 3D (THREE.JS) - VOLEIBOL REALISTA -->
+    <script>
+        const canvasContainer = document.getElementById('webgl-canvas');
+        const scene = new THREE.Scene();
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 35;
+
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        canvasContainer.appendChild(renderer.domElement);
+
+        const ballGroup = new THREE.Group();
+
+        // 1. Núcleo Sólido Blanco Perla
+        const coreGeo = new THREE.SphereGeometry(14, 64, 64);
+        const coreMat = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            roughness: 0.1,
+            metalness: 0.1,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.2
+        });
+        ballGroup.add(new THREE.Mesh(coreGeo, coreMat));
+
+        // 2. Algoritmo de Costuras Matemáticas (18 Paneles de Voleibol)
+        // Dibuja tubos que se adhieren perfectamente a la curvatura de la esfera
+        class ArcCurve extends THREE.Curve {
+            constructor(axisSweep, valA, valB, axisA, axisB) {
+                super();
+                this.axisSweep = axisSweep;
+                this.valA = valA;
+                this.valB = valB;
+                this.axisA = axisA;
+                this.axisB = axisB;
+            }
+            getPoint(t, optionalTarget = new THREE.Vector3()) {
+                const sweep = (t * 2) - 1; // Mapea de 0..1 a -1..1
+                optionalTarget.set(0, 0, 0);
+                optionalTarget[this.axisSweep] = sweep;
+                optionalTarget[this.axisA] = this.valA;
+                optionalTarget[this.axisB] = this.valB;
+                // Radio 14.1 para que sobresalga ligeramente del núcleo (14.0)
+                optionalTarget.normalize().multiplyScalar(14.1);
+                return optionalTarget;
+            }
+        }
+
+        const seamMat = new THREE.MeshBasicMaterial({ color: 0xf07b1a });
+
+        // Función constructora de costuras
+        function createSeam(axisSweep, valA, valB, axisA, axisB) {
+            const curve = new ArcCurve(axisSweep, valA, valB, axisA, axisB);
+            // TubeGeometry para darle grosor y estética premium a la línea
+            const geo = new THREE.TubeGeometry(curve, 32, 0.15, 8, false);
+            return new THREE.Mesh(geo, seamMat);
+        }
+
+        // ==========================================
+        // DIBUJANDO LOS 18 PANELES DEL VOLEIBOL
+        // ==========================================
+        
+        // Bordes Exteriores (El esqueleto principal)
+        // Barrido en X
+        ballGroup.add(createSeam('x', 1, 1, 'y', 'z'));
+        ballGroup.add(createSeam('x', -1, 1, 'y', 'z'));
+        ballGroup.add(createSeam('x', 1, -1, 'y', 'z'));
+        ballGroup.add(createSeam('x', -1, -1, 'y', 'z'));
+        // Barrido en Y
+        ballGroup.add(createSeam('y', 1, 1, 'x', 'z'));
+        ballGroup.add(createSeam('y', -1, 1, 'x', 'z'));
+        ballGroup.add(createSeam('y', 1, -1, 'x', 'z'));
+        ballGroup.add(createSeam('y', -1, -1, 'x', 'z'));
+        // Barrido en Z
+        ballGroup.add(createSeam('z', 1, 1, 'x', 'y'));
+        ballGroup.add(createSeam('z', -1, 1, 'x', 'y'));
+        ballGroup.add(createSeam('z', 1, -1, 'x', 'y'));
+        ballGroup.add(createSeam('z', -1, -1, 'x', 'y'));
+
+        // Costuras Internas (División en 3 franjas por cara)
+        const d = 0.35; // Separación de las franjas
+        
+        // Costuras Verticales (Eje Z)
+        ballGroup.add(createSeam('y', d, 1, 'x', 'z'));
+        ballGroup.add(createSeam('y', -d, 1, 'x', 'z'));
+        ballGroup.add(createSeam('y', d, -1, 'x', 'z'));
+        ballGroup.add(createSeam('y', -d, -1, 'x', 'z'));
+        
+        // Costuras Horizontales (Eje X)
+        ballGroup.add(createSeam('z', d, 1, 'y', 'x'));
+        ballGroup.add(createSeam('z', -d, 1, 'y', 'x'));
+        ballGroup.add(createSeam('z', d, -1, 'y', 'x'));
+        ballGroup.add(createSeam('z', -d, -1, 'y', 'x'));
+        
+        // Costuras de Profundidad (Eje Y)
+        ballGroup.add(createSeam('x', d, 1, 'z', 'y'));
+        ballGroup.add(createSeam('x', -d, 1, 'z', 'y'));
+        ballGroup.add(createSeam('x', d, -1, 'z', 'y'));
+        ballGroup.add(createSeam('x', -d, -1, 'z', 'y'));
+
+        scene.add(ballGroup);
+
+        // 3. Iluminación para resaltar el volumen
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        dirLight.position.set(20, 20, 20);
+        scene.add(dirLight);
+
+        const fillLight = new THREE.DirectionalLight(0xcbd5e1, 0.5); 
+        fillLight.position.set(-20, -20, -20);
+        scene.add(fillLight);
+
+        // 4. Interactividad Suave (Lerp)
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX - windowHalfX) * 0.001;
+            mouseY = (event.clientY - windowHalfY) * 0.001;
+        });
+
+        // 5. Motor de Animación
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Rotación base diagonal
+            ballGroup.rotation.y += 0.003;
+            ballGroup.rotation.x += 0.002;
+            ballGroup.rotation.z += 0.001;
+
+            // Seguimiento del cursor con fricción (Lerping)
+            targetX = mouseX * 2;
+            targetY = mouseY * 2;
+            ballGroup.position.x += (targetX - ballGroup.position.x) * 0.03;
+            ballGroup.position.y += (-targetY - ballGroup.position.y) * 0.03;
+            
+            // Inclinación 3D
+            ballGroup.rotation.x += (mouseY - ballGroup.rotation.x) * 0.05;
+            ballGroup.rotation.y += (mouseX - ballGroup.rotation.y) * 0.05;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // 6. Adaptabilidad a pantallas
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
