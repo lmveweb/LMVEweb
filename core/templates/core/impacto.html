@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load static %}
 
 {% block content %}
 <style>
@@ -203,6 +204,56 @@
     }
 
     /* =========================================================
+       EVIDENCIA REAL (fotos de la liga)
+       ========================================================= */
+    .evidencia-section {
+        margin-top: 100px;
+    }
+    .evidencia-section h3 {
+        font-size: 14px;
+        color: #5d873d; /* Verde — organiza información */
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        margin-bottom: 40px;
+        border-bottom: 1px solid rgba(32, 58, 105, 0.1);
+        padding-bottom: 20px;
+    }
+    .evidencia-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+    }
+    .evidencia-card {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        height: 340px;
+        box-shadow: 0 10px 30px rgba(32, 58, 105, 0.08);
+    }
+    .evidencia-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .evidencia-card:hover img {
+        transform: scale(1.05);
+    }
+    .evidencia-card figcaption {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 24px 22px;
+        background: linear-gradient(0deg, rgba(15, 23, 42, 0.75) 0%, rgba(15, 23, 42, 0) 100%);
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.5;
+    }
+
+    /* =========================================================
        RESPONSIVE
        ========================================================= */
     @media (max-width: 900px) {
@@ -211,6 +262,8 @@
         .glass-card.span-2 { grid-column: span 1; }
         .audiencia-grid { grid-template-columns: 1fr; gap: 30px; }
         .roi-grid { grid-template-columns: 1fr; }
+        .evidencia-grid { grid-template-columns: 1fr; }
+        .evidencia-card { height: 260px; }
     }
 </style>
 
@@ -289,6 +342,21 @@
             <h4>Ecosistema Digital</h4>
             <p>Menciones cruzadas, presencia en resultados y contenido patrocinado en los canales digitales oficiales de la liga.</p>
         </div>
+    </div>
+</div>
+
+<!-- EVIDENCIA REAL -->
+<div class="evidencia-section">
+    <h3>// Esto Ya Está Pasando</h3>
+    <div class="evidencia-grid">
+        <figure class="evidencia-card">
+            <img src="{% static 'core/img/fotos/impacto-banner-sponsor.jpg' %}" alt="Banner de sponsor oficial en el gimnasio durante un partido de la LMVE">
+            <figcaption>Presencia de marca en recintos deportivos durante los encuentros oficiales.</figcaption>
+        </figure>
+        <figure class="evidencia-card">
+            <img src="{% static 'core/img/fotos/impacto-reconocimiento.jpg' %}" alt="Ceremonia de reconocimiento junto a colaboradores de la LMVE">
+            <figcaption>Ceremonias de reconocimiento junto a nuestros colaboradores.</figcaption>
+        </figure>
     </div>
 </div>
 
