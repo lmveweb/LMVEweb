@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -85,37 +86,31 @@
             color: #f07b1a;
         }
 
-        /* Logo al centro con pelota clásica rotando detrás */
+        /* Logo oficial LMVE al centro del header */
         .logo-center-wrapper {
             justify-self: center;
-            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 120px;
             height: 60px;
             text-decoration: none;
+            animation: logo-breathe 6s ease-in-out infinite;
+            transform-origin: center;
         }
-        .logo-text {
-            font-size: 28px;
-            font-weight: 900;
-            letter-spacing: -1px;
-            color: #0f172a;
-            z-index: 2;
+        .logo-mark-img {
+            height: 52px;
+            width: auto;
+            display: block;
+            filter: drop-shadow(0 2px 8px rgba(15, 23, 42, 0.15));
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
         }
-        .logo-text span {
-            color: #f07b1a;
+        .logo-center-wrapper:hover .logo-mark-img {
+            transform: scale(1.08) rotate(-2deg);
+            filter: drop-shadow(0 10px 20px rgba(240, 123, 26, 0.4));
         }
-        .logo-bg-ball {
-            position: absolute;
-            width: 55px;
-            height: 55px;
-            z-index: 1;
-            animation: slow-spin 10s linear infinite;
-            opacity: 0.15; 
-        }
-        @keyframes slow-spin {
-            100% { transform: rotate(360deg); }
+        @keyframes logo-breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.035); }
         }
 
         .header-right {
@@ -210,18 +205,7 @@
             </nav>
             
             <a href="{% url 'home' %}" class="logo-center-wrapper">
-                <!-- SVG Pelota de Voleibol Clásica -->
-                <svg class="logo-bg-ball" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="#f07b1a" stroke-width="4"/>
-                    <!-- Panel Central Vertical -->
-                    <path d="M 35 7 C 45 35 45 65 35 93" fill="none" stroke="#f07b1a" stroke-width="3"/>
-                    <path d="M 65 7 C 55 35 55 65 65 93" fill="none" stroke="#f07b1a" stroke-width="3"/>
-                    <!-- Panel Central Horizontal -->
-                    <path d="M 7 35 C 35 45 65 45 93 35" fill="none" stroke="#f07b1a" stroke-width="3"/>
-                    <path d="M 7 65 C 35 55 65 55 93 65" fill="none" stroke="#f07b1a" stroke-width="3"/>
-                </svg>
-                <!-- Texto encima -->
-                <span class="logo-text">LMVE<span>.</span></span>
+                <img src="{% static 'core/img/logo-mark.png' %}" alt="LMVE - Liga Metropolitana de Voleibol Escolar" class="logo-mark-img">
             </a>
             
             <div class="header-right">
@@ -344,6 +328,23 @@
         ballGroup.add(createSeam('x', -d, 1, 'z', 'y'));
         ballGroup.add(createSeam('x', d, -1, 'z', 'y'));
         ballGroup.add(createSeam('x', -d, -1, 'z', 'y'));
+
+        // 2.5 Parche con el logo oficial LMVE (como un sticker de auspicio sobre la pelota)
+        const textureLoader = new THREE.TextureLoader();
+        const logoTexture = textureLoader.load('{% static "core/img/logo-mark.png" %}');
+        const logoAspect = 961 / 794; // proporción real del recorte del logo
+        const logoHeight = 4.6;
+        const logoWidth = logoHeight * logoAspect;
+        const logoDecalGeo = new THREE.PlaneGeometry(logoWidth, logoHeight);
+        const logoDecalMat = new THREE.MeshBasicMaterial({
+            map: logoTexture,
+            transparent: true,
+            depthWrite: false,
+            side: THREE.FrontSide
+        });
+        const logoDecal = new THREE.Mesh(logoDecalGeo, logoDecalMat);
+        logoDecal.position.set(0, 0, 14.4);
+        ballGroup.add(logoDecal);
 
         scene.add(ballGroup);
 
