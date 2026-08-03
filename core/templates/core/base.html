@@ -511,13 +511,22 @@
         ballGroup.add(createSeam('x', d, -1, 'z', 'y'));
         ballGroup.add(createSeam('x', -d, -1, 'z', 'y'));
 
-        // 2.5 Parche con el logo oficial LMVE (como un sticker de auspicio sobre la pelota)
+        // 2.5 Parche con el logo oficial LMVE, curvado sobre la propia esfera
+        // (un recorte de SphereGeometry, no un plano) para que siga la
+        // curvatura de la pelota y no se vea "flotando" al mirarla de lado.
         const textureLoader = new THREE.TextureLoader();
         const logoTexture = textureLoader.load('{% static "core/img/logo-mark.png" %}');
         const logoAspect = 961 / 794; // proporción real del recorte del logo
+        const patchRadius = 14.3; // apenas por fuera de las costuras (radio 14.1)
         const logoHeight = 4.6;
         const logoWidth = logoHeight * logoAspect;
-        const logoDecalGeo = new THREE.PlaneGeometry(logoWidth, logoHeight);
+        const thetaExtent = logoHeight / patchRadius;
+        const phiExtent = logoWidth / patchRadius;
+        const logoDecalGeo = new THREE.SphereGeometry(
+            patchRadius, 32, 32,
+            Math.PI / 2 - phiExtent / 2, phiExtent,
+            Math.PI / 2 - thetaExtent / 2, thetaExtent
+        );
         const logoDecalMat = new THREE.MeshBasicMaterial({
             map: logoTexture,
             transparent: true,
@@ -525,7 +534,6 @@
             side: THREE.FrontSide
         });
         const logoDecal = new THREE.Mesh(logoDecalGeo, logoDecalMat);
-        logoDecal.position.set(0, 0, 14.4);
         ballGroup.add(logoDecal);
 
         scene.add(ballGroup);
