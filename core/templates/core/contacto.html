@@ -172,6 +172,24 @@
         box-shadow: 0 10px 25px rgba(93, 135, 61, 0.3);
         transform: none;
     }
+    /* Estado "error": el servidor rechazó el envío (ej. falta un campo). */
+    .submit-btn.is-error,
+    .submit-btn.is-error:hover {
+        background: #cd2e26;
+        box-shadow: 0 10px 25px rgba(205, 46, 38, 0.3);
+        transform: none;
+    }
+    .form-error-msg {
+        display: none;
+        color: #cd2e26;
+        font-size: 13px;
+        font-weight: 700;
+        margin-top: 12px;
+        text-align: center;
+    }
+    .form-error-msg.is-visible {
+        display: block;
+    }
 
     /* =========================================================
        PANEL DE CONTACTO
@@ -264,7 +282,7 @@
 <div class="contact-grid">
     <!-- FORMULARIO -->
     <div class="glass-form-container">
-        <form action="#" method="POST" id="contactForm">
+        <form action="{% url 'contacto' %}" method="POST" id="contactForm">
             {% csrf_token %}
             <div class="form-group">
                 <label class="field-label">Empresa o Marca <span class="required-mark">*</span></label>
@@ -301,6 +319,7 @@
                 <span class="submit-btn-label" id="contactSubmitLabel">Enviar Propuesta</span>
                 <span class="submit-btn-spinner"></span>
             </button>
+            <p class="form-error-msg" id="contactErrorMsg"></p>
         </form>
     </div>
 
@@ -333,29 +352,65 @@
 </div>
 
 <script>
-    // Confirmación visual de envío: bloquea el botón para evitar doble
-    // envío y le muestra al usuario que su propuesta quedó registrada.
-    // Nota: esto es solo la capa visual — el guardado/envío real del
-    // mensaje se conecta cuando quede lista la base de datos.
+    // Envía el formulario a la vista de Django por fetch() (sin recargar
+    // la página) y solo muestra "¡Propuesta Enviada!" cuando el servidor
+    // confirmó que guardó el mensaje. Si algo falla (falta un campo, error
+    // de red), se muestra el motivo en vez de fingir un éxito.
     (function () {
         var form = document.getElementById('contactForm');
         var btn = document.getElementById('contactSubmitBtn');
         var label = document.getElementById('contactSubmitLabel');
-        if (!form || !btn || !label) return;
+        var errorMsg = document.getElementById('contactErrorMsg');
+        if (!form || !btn || !label || !errorMsg) return;
 
         form.addEventListener('submit', function (e) {
             e.preventDefault();
             if (btn.disabled) return;
 
             btn.disabled = true;
+            btn.classList.remove('is-done', 'is-error');
             btn.classList.add('is-loading');
             label.textContent = 'Enviando...';
+            errorMsg.classList.remove('is-visible');
 
-            setTimeout(function () {
-                btn.classList.remove('is-loading');
-                btn.classList.add('is-done');
-                label.textContent = '¡Propuesta Enviada!';
-            }, 1100);
+            // Se espera un mínimo de tiempo visible en "Enviando..." para
+            // que el feedback se perciba (en localhost la respuesta real
+            // puede tardar unos pocos milisegundos, casi imperceptible).
+            var tiempoMinimo = new Promise(function (resolve) { setTimeout(resolve, 500); });
+            var envio = fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+            }).then(function (response) {
+                return response.json().then(function (data) {
+                    return { ok: response.ok, data: data };
+                });
+            });
+
+            Promise.all([envio, tiempoMinimo])
+                .then(function (values) {
+                    var result = values[0];
+                    btn.classList.remove('is-loading');
+                    if (result.ok && result.data.ok) {
+                        btn.classList.add('is-done');
+                        label.textContent = '¡Propuesta Enviada!';
+                        form.reset();
+                    } else {
+                        btn.classList.add('is-error');
+                        btn.disabled = false;
+                        label.textContent = 'Revisa los datos';
+                        var mensajes = (result.data && result.data.errores) || ['No se pudo enviar la propuesta. Intenta de nuevo.'];
+                        errorMsg.textContent = mensajes.join(' ');
+                        errorMsg.classList.add('is-visible');
+                    }
+                })
+                .catch(function () {
+                    btn.classList.remove('is-loading');
+                    btn.classList.add('is-error');
+                    btn.disabled = false;
+                    label.textContent = 'Revisa los datos';
+                    errorMsg.textContent = 'No se pudo conectar con el servidor. Intenta de nuevo.';
+                    errorMsg.classList.add('is-visible');
+                });
         });
     })();
 </script>
