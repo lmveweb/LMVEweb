@@ -1,0 +1,340 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<style>
+    /* =========================================================
+       HERO DE PÁGINA (mismo lenguaje visual que Home)
+       ========================================================= */
+    .page-hero {
+        margin-bottom: 80px;
+        max-width: 800px;
+    }
+    .page-badge {
+        display: inline-block;
+        border: 1px solid rgba(15, 23, 42, 0.2);
+        color: #0f172a;
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 30px;
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(5px);
+    }
+    .page-badge span {
+        color: #f07b1a;
+        margin-right: 8px;
+    }
+    .page-hero h1 {
+        font-size: 5.5vw;
+        font-weight: 900;
+        line-height: 0.95;
+        text-transform: uppercase;
+        letter-spacing: -2px;
+        margin-bottom: 30px;
+        color: #0f172a;
+    }
+    .page-hero h1 span {
+        color: #f07b1a;
+    }
+    .page-hero p {
+        font-size: 19px;
+        color: #475569;
+        line-height: 1.7;
+        font-weight: 500;
+    }
+
+    /* =========================================================
+       BLOQUE "QUIÉNES SOMOS" (estilo purpose-brutal)
+       ========================================================= */
+    .quienes-somos {
+        margin-bottom: 120px;
+    }
+    .quienes-somos h3 {
+        font-size: 14px;
+        color: #f07b1a;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        margin-bottom: 40px;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+        padding-bottom: 20px;
+    }
+    .quienes-somos-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 80px;
+    }
+    .quienes-somos p {
+        font-size: 18px;
+        color: #475569;
+        line-height: 1.8;
+        font-weight: 500;
+        margin-bottom: 20px;
+    }
+    .valores-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 10px;
+    }
+    .valor-tag {
+        background: rgba(240, 123, 26, 0.08);
+        color: #f07b1a;
+        border: 1px solid rgba(240, 123, 26, 0.3);
+        padding: 8px 18px;
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* =========================================================
+       TIMELINE (tema claro / glassmorphism)
+       ========================================================= */
+    .timeline-section {
+        margin-bottom: 120px;
+    }
+    .timeline-section h3 {
+        font-size: 14px;
+        color: #f07b1a;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        margin-bottom: 50px;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+        padding-bottom: 20px;
+    }
+    .timeline-container {
+        position: relative;
+        max-width: 850px;
+        margin: 0 auto;
+    }
+    .timeline-container::after {
+        content: '';
+        position: absolute;
+        width: 2px;
+        background: rgba(15, 23, 42, 0.1);
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        margin-left: -1px;
+    }
+    .timeline-item {
+        padding: 10px 40px;
+        position: relative;
+        width: 50%;
+        margin-bottom: 30px;
+    }
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+    .timeline-item.left {
+        left: 0;
+        text-align: right;
+    }
+    .timeline-item.right {
+        left: 50%;
+    }
+    .timeline-dot {
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        background: #f8fafc;
+        border: 3px solid #f07b1a;
+        border-radius: 50%;
+        top: 15px;
+        z-index: 1;
+    }
+    .timeline-item.left .timeline-dot {
+        right: -8px;
+    }
+    .timeline-item.right .timeline-dot {
+        left: -8px;
+    }
+    .timeline-content {
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .timeline-content:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
+        border-color: rgba(240, 123, 26, 0.3);
+    }
+    .timeline-date {
+        color: #f07b1a;
+        font-weight: 900;
+        font-size: 13px;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    .timeline-content h4 {
+        color: #0f172a;
+        font-size: 18px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: -0.5px;
+    }
+    .timeline-content p {
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.7;
+        font-weight: 500;
+    }
+
+    /* =========================================================
+       MIRANDO HACIA EL FUTURO
+       ========================================================= */
+    .futuro-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    .futuro-card {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03);
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .futuro-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+        border-color: rgba(240, 123, 26, 0.3);
+    }
+    .futuro-card h4 {
+        font-size: 12px;
+        font-weight: 800;
+        color: #f07b1a;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 16px;
+    }
+    .futuro-card h5 {
+        font-size: 26px;
+        font-weight: 900;
+        color: #0f172a;
+        margin-bottom: 14px;
+        text-transform: uppercase;
+        letter-spacing: -1px;
+    }
+    .futuro-card p {
+        color: #475569;
+        font-size: 15px;
+        line-height: 1.7;
+        font-weight: 500;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+    @media (max-width: 900px) {
+        .page-hero h1 { font-size: 12vw; }
+        .quienes-somos-grid { grid-template-columns: 1fr; gap: 40px; }
+        .timeline-container::after { left: 31px; }
+        .timeline-item { width: 100%; padding-left: 70px; padding-right: 20px; text-align: left; }
+        .timeline-item.left, .timeline-item.right { left: 0; }
+        .timeline-item.left .timeline-dot, .timeline-item.right .timeline-dot { left: 23px; right: auto; }
+        .futuro-section { grid-template-columns: 1fr; }
+    }
+</style>
+
+<!-- HERO -->
+<div class="page-hero">
+    <div class="page-badge"><span>●</span> Fundada en 1987</div>
+    <h1>Nuestra <span>Historia</span></h1>
+    <p>Fundada en 1987 por un grupo de profesores de Educación Física —inicialmente como Liga Teresiana de Voleibol Escolar—, la Liga Metropolitana de Voleibol Escolar (LMVE) es una institución deportiva sin fines de lucro enfocada en el desarrollo integral de niños y jóvenes.</p>
+</div>
+
+<!-- QUIÉNES SOMOS -->
+<div class="quienes-somos">
+    <h3>// Propósito y Valores</h3>
+    <div class="quienes-somos-grid">
+        <div>
+            <p>Bajo el lema <strong>"Educar a Través del Deporte"</strong>, aspiramos a ser un referente nacional del deporte escolar, promoviendo el desarrollo integral de niños y jóvenes en un ambiente de apoyo constante.</p>
+        </div>
+        <div>
+            <p>Nuestros valores fundacionales guían cada torneo, cada colegio y cada equipo que forma parte de la liga:</p>
+            <div class="valores-list">
+                <span class="valor-tag">Justicia</span>
+                <span class="valor-tag">Perseverancia</span>
+                <span class="valor-tag">Responsabilidad</span>
+                <span class="valor-tag">Excelencia</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="timeline-section">
+    <h3>// Evolución y Crecimiento</h3>
+    <div class="timeline-container">
+        <div class="timeline-item left">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-date">1987 — 1989 // Inicios</div>
+                <h4>Los Primeros Pasos</h4>
+                <p>La Liga comenzó con cerca de 16 colegios compitiendo en divisiones de Damas y Varones a través de los torneos Apertura u Oficial, disputados los sábados por la mañana.</p>
+            </div>
+        </div>
+        <div class="timeline-item right">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-date">Década de 1990 // Consolidación</div>
+                <h4>Cobertura y Crecimiento</h4>
+                <p>La participación creció a 25 colegios. Se incorporó el Mini Voleibol (4° a 6° Básico) y se logró difusión en medios, destacando el patrocinio del diario La Nación con la "Copa Diario La Nación".</p>
+            </div>
+        </div>
+        <div class="timeline-item left">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-date">Década de 2000 // Estructura y Alianzas</div>
+                <h4>Profesionalización</h4>
+                <p>Se consolidó la estructura directiva y administrativa (personalidad jurídica, sitio web y marca institucional), junto a alianzas estratégicas con Barlosport (Molten), Arte Bismarck y Productora Kraneo, con cobertura en El Mercurio y La Tercera.</p>
+            </div>
+        </div>
+        <div class="timeline-item right">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-date">2022 a la Fecha // Retorno Post-Pandemia</div>
+                <h4>Nueva Expansión</h4>
+                <p>Tras la pausa por la pandemia, la LMVE reinició sus actividades en 2022, expandiendo su alcance a Colina (Chicureo), Puente Alto, Calera de Tango, Pirque, La Pintana, Talagante, Maipú, Las Condes y Lo Barnechea.</p>
+            </div>
+        </div>
+        <div class="timeline-item left">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-date">2025 — Presente</div>
+                <h4>Fundación para el Desarrollo del Deporte Escolar</h4>
+                <p>La organización se constituye como fundación, manteniendo a la LMVE como su pilar central para seguir promoviendo el deporte escolar a nivel nacional.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MIRANDO HACIA EL FUTURO -->
+<div class="futuro-section">
+    <div class="futuro-card">
+        <h4>Proyecto de Auspicio 2026</h4>
+        <h5>Alianzas Corporativas</h5>
+        <p>Enfocado en gestionar alianzas corporativas y beneficios directos para potenciar la experiencia deportiva de nuestros jóvenes atletas.</p>
+    </div>
+    <div class="futuro-card">
+        <h4>Rumbo a los 40 Años</h4>
+        <h5>Celebración 2027</h5>
+        <p>Nos preparamos para celebrar cuatro décadas promoviendo la actividad física, la formación humana y la excelencia deportiva en Chile.</p>
+    </div>
+</div>
+
+{% endblock %}

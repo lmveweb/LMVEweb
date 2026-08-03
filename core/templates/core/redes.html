@@ -1,0 +1,242 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<style>
+    /* =========================================================
+       HERO DE PÁGINA
+       ========================================================= */
+    .page-hero {
+        margin-bottom: 60px;
+        max-width: 800px;
+    }
+    .page-badge {
+        display: inline-block;
+        border: 1px solid rgba(15, 23, 42, 0.2);
+        color: #0f172a;
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 30px;
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(5px);
+    }
+    .page-badge span {
+        color: #f07b1a;
+        margin-right: 8px;
+    }
+    .page-hero h1 {
+        font-size: 5.5vw;
+        font-weight: 900;
+        line-height: 0.95;
+        text-transform: uppercase;
+        letter-spacing: -2px;
+        margin-bottom: 30px;
+        color: #0f172a;
+    }
+    .page-hero h1 span {
+        color: #f07b1a;
+    }
+    .page-hero p {
+        font-size: 19px;
+        color: #475569;
+        line-height: 1.7;
+        font-weight: 500;
+    }
+
+    /* =========================================================
+       CINTA DE HASHTAGS
+       ========================================================= */
+    .hash-tape {
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        background: #f07b1a;
+        transform: rotate(-1deg);
+        padding: 12px 0;
+        margin-bottom: 100px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(240, 123, 26, 0.25);
+    }
+    .hash-track {
+        display: flex;
+        white-space: nowrap;
+        animation: scroll-hash 20s linear infinite;
+    }
+    .hash-item {
+        color: #0f172a;
+        font-weight: 900;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        padding: 0 20px;
+    }
+    @keyframes scroll-hash {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+
+    /* =========================================================
+       COMUNIDAD SOCIAL (Instagram embed) — mismo patrón que Home
+       ========================================================= */
+    .social-minimal-section {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-shadow: 0 10px 40px rgba(15, 23, 42, 0.05);
+        border-radius: 30px;
+        padding: 80px 60px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 60px;
+        align-items: center;
+        margin-bottom: 100px;
+    }
+    .social-text {
+        flex: 1;
+        min-width: 300px;
+    }
+    .social-text h2 {
+        font-size: 50px;
+        font-weight: 900;
+        color: #0f172a;
+        line-height: 1;
+        margin-bottom: 20px;
+        letter-spacing: -2px;
+    }
+    .social-text p {
+        font-size: 18px;
+        color: #475569;
+        line-height: 1.6;
+        font-weight: 500;
+    }
+    .ig-glass-wrapper {
+        width: 100%;
+        max-width: 450px;
+        margin: 0 auto;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+        background: #ffffff;
+    }
+
+    /* =========================================================
+       GRID DE PLATAFORMAS
+       ========================================================= */
+    .platforms-section h3 {
+        font-size: 14px;
+        color: #f07b1a;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        margin-bottom: 40px;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+        padding-bottom: 20px;
+    }
+    .platforms-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    .platform-card {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 20px;
+        padding: 40px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: block;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .platform-card:hover {
+        background: #f07b1a;
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(240, 123, 26, 0.3);
+        border-color: #f07b1a;
+    }
+    .platform-card h4 {
+        color: #0f172a;
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    .platform-card:hover h4 {
+        color: #ffffff;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+    @media (max-width: 900px) {
+        .page-hero h1 { font-size: 12vw; }
+        .social-minimal-section { padding: 40px 20px; flex-direction: column; text-align: center; }
+        .social-text h2 { font-size: 36px; }
+        .platforms-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<!-- HERO -->
+<div class="page-hero">
+    <div class="page-badge"><span>●</span> Comunidad Digital</div>
+    <h1>Nexo <span>Digital</span></h1>
+    <p>La conversación de la LMVE no termina en la cancha. Así es como conectamos con atletas, familias y colegios en nuestros canales digitales.</p>
+</div>
+
+<!-- CINTA DE HASHTAGS -->
+<div class="hash-tape">
+    <div class="hash-track">
+        <div class="hash-item">#LMVE2026</div>
+        <div class="hash-item">//</div>
+        <div class="hash-item">#VOLEIBOLESCOLAR</div>
+        <div class="hash-item">//</div>
+        <div class="hash-item">#SOMOSLMVE</div>
+        <div class="hash-item">//</div>
+        <div class="hash-item">#LMVE2026</div>
+        <div class="hash-item">//</div>
+        <div class="hash-item">#VOLEIBOLESCOLAR</div>
+        <div class="hash-item">//</div>
+        <div class="hash-item">#SOMOSLMVE</div>
+        <div class="hash-item">//</div>
+    </div>
+</div>
+
+<!-- COMUNIDAD SOCIAL -->
+<div class="social-minimal-section">
+    <div class="social-text">
+        <h2>PULSO<br>DIGITAL</h2>
+        <p>Revisa la interacción diaria con nuestros atletas, coberturas de partidos y momentos destacados compartidos directamente desde nuestro Instagram oficial.</p>
+    </div>
+
+    <div class="ig-glass-wrapper">
+        <!-- ========================================== -->
+        <!-- PEGA TU CÓDIGO DE INSTAGRAM AQUÍ -->
+        <!-- ========================================== -->
+    </div>
+</div>
+
+<!-- PLATAFORMAS -->
+<div class="platforms-section">
+    <h3>// Encuéntranos en</h3>
+    <div class="platforms-grid">
+        <a href="#" class="platform-card">
+            <h4>Instagram</h4>
+        </a>
+        <a href="#" class="platform-card">
+            <h4>TikTok</h4>
+        </a>
+        <a href="#" class="platform-card">
+            <h4>YouTube / Twitch</h4>
+        </a>
+    </div>
+</div>
+
+<script async src="//www.instagram.com/embed.js"></script>
+{% endblock %}
