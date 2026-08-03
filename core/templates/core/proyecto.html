@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load static %}
 
 {% block content %}
 <style>
@@ -50,7 +51,7 @@
         left: 0;
         width: 4px;
         height: 100%;
-        background: #d9622c;
+        background: #de9936; /* Amarillo Anaranjado — elegancia */
         opacity: 0;
         transition: opacity 0.3s ease;
     }
@@ -163,17 +164,27 @@
         border-radius: 12px;
         border: 1px solid #1a2744;
         transition: border-color 0.3s ease;
+        overflow: hidden;
     }
     .timeline-content:hover {
         border-color: #d9622c;
     }
     .timeline-date {
-        color: #d9622c;
+        color: #5d873d; /* Verde — organiza información */
         font-weight: 900;
         font-size: 14px;
         margin-bottom: 8px;
         letter-spacing: 1px;
         text-transform: uppercase;
+    }
+    .timeline-photo {
+        display: block;
+        width: calc(100% + 50px);
+        margin: -25px -25px 16px -25px;
+        height: 170px;
+        object-fit: cover;
+        filter: grayscale(20%) brightness(0.85);
+        border-radius: 12px 12px 0 0;
     }
     .timeline-content h4 {
         color: #fff;
@@ -217,69 +228,80 @@
 </style>
 
 <div class="proyecto-hero">
-    <h2>Sistema de <span>Competición</span></h2>
-    <p>La Liga Metropolitana de Voleibol Escolar está diseñada bajo estándares de alto rendimiento, asegurando un entorno profesional para el desarrollo del talento joven.</p>
+    <h2>Nuestra <span>Historia</span></h2>
+    <p>Fundada en 1987 por un grupo de profesores de Educación Física —inicialmente como Liga Teresiana de Voleibol Escolar—, la LMVE es una institución deportiva sin fines de lucro enfocada en el desarrollo integral de niños y jóvenes.</p>
 </div>
 
 <div class="specs-grid">
     <div class="spec-card">
-        <span class="spec-icon">⚡</span>
-        <h3>División de Categorías</h3>
-        <p>Estructura competitiva segmentada para garantizar un desarrollo progresivo y justo, respetando las etapas de crecimiento de los atletas escolares.</p>
-        <span class="spec-tag">Juvenil (U18)</span>
-        <span class="spec-tag">Infantil (U16)</span>
+        <span class="spec-icon">🏆</span>
+        <h3>Fundada en 1987</h3>
+        <p>Casi cuatro décadas promoviendo el deporte escolar en la Región Metropolitana, desde nuestros inicios como Liga Teresiana de Voleibol Escolar.</p>
+        <span class="spec-tag">Sin Fines de Lucro</span>
+        <span class="spec-tag">Rumbo a los 40 Años</span>
     </div>
-    
+
     <div class="spec-card">
-        <span class="spec-icon">🛡️</span>
-        <h3>Formato Oficial</h3>
-        <p>Sistema de temporada regular seguido de rondas eliminatorias de alta tensión. Maximiza la exposición y el nivel competitivo en cada encuentro.</p>
-        <span class="spec-tag">Fase de Grupos</span>
-        <span class="spec-tag">Playoffs</span>
+        <span class="spec-icon">🎯</span>
+        <h3>Nuestra Misión</h3>
+        <p>Bajo el lema "Educar a Través del Deporte", aspiramos a ser un referente nacional del deporte escolar, en un ambiente de apoyo constante.</p>
+        <span class="spec-tag">Educar a Través del Deporte</span>
     </div>
-    
+
     <div class="spec-card">
-        <span class="spec-icon">🏟️</span>
-        <h3>Infraestructura</h3>
-        <p>Los encuentros se desarrollan en recintos deportivos de primera categoría, con arbitraje oficial y protocolos de seguridad médica en pista.</p>
-        <span class="spec-tag">Arbitraje Certificado</span>
-        <span class="spec-tag">Sedes Elite</span>
+        <span class="spec-icon">⭐</span>
+        <h3>Nuestros Valores</h3>
+        <p>Los pilares que guían cada torneo, cada colegio y cada equipo que forma parte de la liga.</p>
+        <span class="spec-tag">Justicia</span>
+        <span class="spec-tag">Perseverancia</span>
+        <span class="spec-tag">Responsabilidad</span>
+        <span class="spec-tag">Excelencia</span>
     </div>
 </div>
 
 <div class="timeline-section">
-    <h3 class="timeline-title">Ruta del Torneo</h3>
+    <h3 class="timeline-title">Evolución y Crecimiento</h3>
     <div class="timeline-container">
         <div class="timeline-item left">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
-                <div class="timeline-date">Fase 01 // Apertura</div>
-                <h4>Draft e Inscripción</h4>
-                <p>Convocatoria oficial a los colegios de la Región Metropolitana. Presentación de planillas, validación de jugadores y sorteo de grupos transmitido en vivo.</p>
+                <img class="timeline-photo" src="{% static 'core/img/fotos/historia-1987.jpg' %}" alt="Equipo LMVE a fines de los años 80">
+                <div class="timeline-date">1987 — 1989 // Inicios</div>
+                <h4>Los Primeros Pasos</h4>
+                <p>La Liga comenzó con cerca de 16 colegios compitiendo en divisiones de Damas y Varones a través de los torneos Apertura u Oficial, disputados los sábados por la mañana.</p>
             </div>
         </div>
         <div class="timeline-item right">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
-                <div class="timeline-date">Fase 02 // Regular</div>
-                <h4>Temporada de Grupos</h4>
-                <p>Partidos semanales de alta intensidad. Las marcas patrocinadoras tienen máxima visibilidad durante esta etapa de acumulación de puntos y estadísticas.</p>
+                <img class="timeline-photo" src="{% static 'core/img/fotos/historia-1996.jpg' %}" alt="Selección LMVE, 1996">
+                <div class="timeline-date">Década de 1990 // Consolidación</div>
+                <h4>Cobertura y Crecimiento</h4>
+                <p>La participación creció a 25 colegios. Se incorporó el Mini Voleibol (4° a 6° Básico) y se logró difusión en medios, destacando el patrocinio del diario La Nación con la "Copa Diario La Nación".</p>
             </div>
         </div>
         <div class="timeline-item left">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
-                <div class="timeline-date">Fase 03 // Playoffs</div>
-                <h4>Fase Eliminatoria</h4>
-                <p>Clasifican los mejores de cada grupo. Cuartos de final y semifinales disputadas en formato de eliminación directa. Máximo engagement de la audiencia.</p>
+                <div class="timeline-date">Década de 2000 // Estructura y Alianzas</div>
+                <h4>Profesionalización</h4>
+                <p>Se consolidó la estructura directiva y administrativa (personalidad jurídica, sitio web y marca institucional), junto a alianzas con Barlosport (Molten), Arte Bismarck y Productora Kraneo, con cobertura en El Mercurio y La Tercera.</p>
             </div>
         </div>
         <div class="timeline-item right">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
-                <div class="timeline-date">Fase 04 // Finales</div>
-                <h4>Championship Match</h4>
-                <p>El evento cúlmine del año escolar. Entrega de copas, premios a jugadores destacados (MVP) y ceremonias de clausura con presencia exclusiva de sponsors.</p>
+                <div class="timeline-date">2022 a la Fecha // Retorno Post-Pandemia</div>
+                <h4>Nueva Expansión</h4>
+                <p>Tras la pausa por la pandemia, la LMVE reinició sus actividades en 2022, expandiendo su alcance a Colina (Chicureo), Puente Alto, Calera de Tango, Pirque, La Pintana, Talagante, Maipú, Las Condes y Lo Barnechea.</p>
+            </div>
+        </div>
+        <div class="timeline-item left">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <div class="timeline-date">2025 — Presente</div>
+                <h4>Fundación para el Desarrollo del Deporte Escolar</h4>
+                <p>La organización se constituye como fundación, manteniendo a la LMVE como su pilar central para seguir promoviendo el deporte escolar a nivel nacional.</p>
             </div>
         </div>
     </div>
