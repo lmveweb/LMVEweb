@@ -110,6 +110,9 @@
         letter-spacing: 1.5px;
         margin-bottom: 10px;
     }
+    .required-mark {
+        color: #cd2e26; /* Rojo — reservado para momentos a destacar */
+    }
     .cyber-input, .cyber-select, .cyber-textarea {
         width: 100%;
         background: rgba(2, 6, 13, 0.8);
@@ -288,25 +291,26 @@
             </div>
         </div>
 
-        <form action="#" method="POST">
+        <form action="#" method="POST" id="contactForm">
+            {% csrf_token %}
             <div class="form-group">
-                <label class="cyber-label">Nombre de la Empresa o Marca</label>
-                <input type="text" class="cyber-input" placeholder="Ej. Sponsor Oficial" required>
+                <label class="cyber-label">Nombre de la Empresa o Marca <span class="required-mark">*</span></label>
+                <input type="text" name="empresa" class="cyber-input" placeholder="Ej. Sponsor Oficial" required>
             </div>
-            
+
             <div class="form-group">
-                <label class="cyber-label">Persona de Contacto</label>
-                <input type="text" class="cyber-input" placeholder="Tu nombre y cargo" required>
+                <label class="cyber-label">Persona de Contacto <span class="required-mark">*</span></label>
+                <input type="text" name="contacto" class="cyber-input" placeholder="Tu nombre y cargo" required>
             </div>
-            
+
             <div class="form-group">
-                <label class="cyber-label">Correo Electrónico Corporativo</label>
-                <input type="email" class="cyber-input" placeholder="correo@empresa.com" required>
+                <label class="cyber-label">Correo Electrónico Corporativo <span class="required-mark">*</span></label>
+                <input type="email" name="email" class="cyber-input" placeholder="correo@empresa.com" required>
             </div>
-            
+
             <div class="form-group">
-                <label class="cyber-label">Nivel de Interés Estratégico</label>
-                <select class="cyber-select" required>
+                <label class="cyber-label">Nivel de Interés Estratégico <span class="required-mark">*</span></label>
+                <select name="interes" class="cyber-select" required>
                     <option value="" disabled selected>Selecciona una opción de patrocinio...</option>
                     <option value="naming">Main Sponsor (Naming Rights)</option>
                     <option value="apparel">Indumentaria y Equipamiento</option>
@@ -314,13 +318,15 @@
                     <option value="other">Activaciones y BTL en recinto</option>
                 </select>
             </div>
-            
+
             <div class="form-group">
                 <label class="cyber-label">Mensaje Adicional</label>
-                <textarea class="cyber-textarea" placeholder="Cuéntanos sobre tus objetivos comerciales..."></textarea>
+                <textarea name="mensaje" class="cyber-textarea" placeholder="Cuéntanos sobre tus objetivos comerciales..."></textarea>
             </div>
-            
-            <button type="submit" class="cyber-submit">ENVIAR PROPUESTA</button>
+
+            <button type="submit" class="cyber-submit" id="contactSubmitBtn">
+                <span id="contactSubmitLabel">ENVIAR PROPUESTA</span>
+            </button>
         </form>
     </div>
 
