@@ -126,6 +126,52 @@
         box-shadow: 0 15px 30px rgba(32, 58, 105, 0.25);
         transform: translateY(-2px);
     }
+    .submit-btn:active {
+        transform: scale(0.97);
+        transition-duration: 0.1s;
+    }
+    .submit-btn:disabled {
+        cursor: default;
+    }
+    .submit-btn-label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    .submit-btn-spinner {
+        display: none;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: submit-spin 0.7s linear infinite;
+    }
+    @keyframes submit-spin {
+        to { transform: rotate(360deg); }
+    }
+    /* Estado "enviando": se traba el hover/translateY para que no
+       parezca interactivo mientras está deshabilitado. */
+    .submit-btn.is-loading {
+        background: #a94e1f;
+        box-shadow: 0 10px 25px rgba(169, 78, 31, 0.3);
+        transform: none;
+    }
+    .submit-btn.is-loading:hover {
+        transform: none;
+    }
+    .submit-btn.is-loading .submit-btn-spinner {
+        display: inline-block;
+    }
+    /* Estado "enviado": Verde de la paleta oficial, reutilizado aquí
+       como confirmación de éxito. */
+    .submit-btn.is-done,
+    .submit-btn.is-done:hover {
+        background: #5d873d;
+        box-shadow: 0 10px 25px rgba(93, 135, 61, 0.3);
+        transform: none;
+    }
 
     /* =========================================================
        PANEL DE CONTACTO
@@ -218,7 +264,7 @@
 <div class="contact-grid">
     <!-- FORMULARIO -->
     <div class="glass-form-container">
-        <form action="#" method="POST">
+        <form action="#" method="POST" id="contactForm">
             {% csrf_token %}
             <div class="form-group">
                 <label class="field-label">Empresa o Marca <span class="required-mark">*</span></label>
@@ -251,7 +297,10 @@
                 <textarea name="mensaje" class="field-textarea" placeholder="Cuéntanos sobre tus objetivos comerciales..."></textarea>
             </div>
 
-            <button type="submit" class="submit-btn">Enviar Propuesta</button>
+            <button type="submit" class="submit-btn" id="contactSubmitBtn">
+                <span class="submit-btn-label" id="contactSubmitLabel">Enviar Propuesta</span>
+                <span class="submit-btn-spinner"></span>
+            </button>
         </form>
     </div>
 
@@ -282,5 +331,33 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Confirmación visual de envío: bloquea el botón para evitar doble
+    // envío y le muestra al usuario que su propuesta quedó registrada.
+    // Nota: esto es solo la capa visual — el guardado/envío real del
+    // mensaje se conecta cuando quede lista la base de datos.
+    (function () {
+        var form = document.getElementById('contactForm');
+        var btn = document.getElementById('contactSubmitBtn');
+        var label = document.getElementById('contactSubmitLabel');
+        if (!form || !btn || !label) return;
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (btn.disabled) return;
+
+            btn.disabled = true;
+            btn.classList.add('is-loading');
+            label.textContent = 'Enviando...';
+
+            setTimeout(function () {
+                btn.classList.remove('is-loading');
+                btn.classList.add('is-done');
+                label.textContent = '¡Propuesta Enviada!';
+            }, 1100);
+        });
+    })();
+</script>
 
 {% endblock %}

@@ -99,7 +99,7 @@
             border-bottom: 1px solid rgba(32, 58, 105, 0.06);
             box-shadow: 0 10px 30px rgba(32, 58, 105, 0.05);
         }
-
+        
         .nav-minimal {
             grid-column: 1;
             justify-self: start;
@@ -110,16 +110,21 @@
             gap: 40px;
         }
         .nav-minimal a {
+            display: inline-block;
             color: #111820;
             text-decoration: none;
             font-size: 13px;
             font-weight: 600;
             text-transform: lowercase;
             letter-spacing: 1px;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, transform 0.15s ease;
         }
         .nav-minimal a:hover {
             color: #d9622c;
+        }
+        .nav-minimal a:active {
+            color: #d9622c;
+            transform: scale(0.92);
         }
 
         /* Logo oficial LMVE al centro del header */
@@ -144,6 +149,10 @@
         .logo-center-wrapper:hover .logo-mark-img {
             transform: scale(1.08) rotate(-2deg);
             filter: drop-shadow(0 10px 20px rgba(217, 98, 44, 0.4));
+        }
+        .logo-center-wrapper:active .logo-mark-img {
+            transform: scale(0.9);
+            transition-duration: 0.1s;
         }
         @keyframes logo-breathe {
             0%, 100% { transform: scale(1); }
@@ -175,6 +184,10 @@
             color: #ffffff;
             border-color: #203a69;
         }
+        .btn-minimal:active {
+            transform: scale(0.94);
+            transition-duration: 0.1s;
+        }
 
         /* =========================================================
            MENÚ MÓVIL (botón hamburguesa + panel de navegación)
@@ -194,6 +207,13 @@
             padding: 0;
             flex-shrink: 0;
             z-index: 210;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+        .menu-toggle:active {
+            transform: scale(0.88);
+        }
+        .menu-toggle:disabled {
+            opacity: 0.6;
         }
         .menu-toggle span {
             display: block;
@@ -236,6 +256,7 @@
             transform: translateY(0);
         }
         .mobile-nav-overlay a {
+            display: inline-block;
             color: #203a69;
             text-decoration: none;
             font-size: 12vw;
@@ -243,11 +264,14 @@
             text-transform: uppercase;
             letter-spacing: -1px;
             line-height: 1.15;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, transform 0.15s ease;
         }
-        .mobile-nav-overlay a:hover,
+        .mobile-nav-overlay a:hover {
+            color: #d9622c;
+        }
         .mobile-nav-overlay a:active {
             color: #d9622c;
+            transform: scale(0.94);
         }
         .mobile-nav-overlay a.mobile-nav-cta {
             margin-top: 20px;
@@ -259,6 +283,10 @@
             padding: 14px 36px;
             border-radius: 50px;
             text-transform: none;
+        }
+        .mobile-nav-overlay a.mobile-nav-cta:active {
+            transform: scale(0.92);
+            background: #b9531f;
         }
 
         /* =========================================================
@@ -288,12 +316,17 @@
             letter-spacing: 1px;
         }
         .footer-minimal a {
+            display: inline-block;
             color: #93a0ac;
             text-decoration: none;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, transform 0.15s ease;
         }
         .footer-minimal a:hover {
             color: #d9622c;
+        }
+        .footer-minimal a:active {
+            color: #d9622c;
+            transform: scale(0.92);
         }
 
         /* =========================================================
@@ -394,7 +427,11 @@
         }
 
         menuToggle.addEventListener('click', () => {
+            // Bloqueo breve para que un tap repetido no interrumpa la
+            // animación a medio camino y se vea entrecortada.
+            menuToggle.disabled = true;
             setMobileMenu(!mobileNav.classList.contains('is-open'));
+            setTimeout(() => { menuToggle.disabled = false; }, 350);
         });
 
         mobileNav.querySelectorAll('a').forEach((link) => {
