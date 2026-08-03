@@ -56,16 +56,21 @@
             gap: 30px;
         }
         .navbar-tech a {
+            display: inline-block;
             color: #94a3b8;
             text-decoration: none;
             font-size: 12px;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, transform 0.15s ease;
         }
         .navbar-tech a:hover {
             color: #d9622c;
+        }
+        .navbar-tech a:active {
+            color: #d9622c;
+            transform: scale(0.92);
         }
         
         .header-logo {
@@ -92,6 +97,10 @@
             transform: scale(1.08);
             filter: drop-shadow(0 0 18px rgba(217, 98, 44, 0.6));
         }
+        .header-logo:active .logo-mark-img {
+            transform: scale(0.92);
+            transition-duration: 0.1s;
+        }
         
         .header-actions {
             justify-self: end;
@@ -116,6 +125,10 @@
             background: #d9622c;
             color: #050b14;
             box-shadow: 0 0 15px rgba(217, 98, 44, 0.4);
+        }
+        .btn-header:active {
+            transform: scale(0.94);
+            transition-duration: 0.1s;
         }
         .hamburger {
             display: none;
@@ -249,12 +262,16 @@
             font-size: 14px;
             line-height: 1.8;
             text-decoration: none;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, transform 0.15s ease;
             display: block;
             margin-bottom: 12px;
         }
         .footer-col a:hover {
             color: #d9622c;
+        }
+        .footer-col a:active {
+            color: #d9622c;
+            transform: scale(0.96);
         }
         .footer-logo {
             font-size: 28px;
