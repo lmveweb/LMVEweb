@@ -3,14 +3,6 @@
 
 {% block title %}LMVE | Liga Metropolitana de Voleibol Escolar{% endblock %}
 
-{# Home es la única vista que carga el motor 3D. #}
-{% block head_extra %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-{% endblock %}
-
-{# Sin marca de agua en Home: aquí el protagonismo lo tiene la pelota. #}
-{% block body_class %}{% endblock %}
-
 {% block content %}
 <style>
     /* =========================================================
@@ -31,7 +23,9 @@
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 2.5px;
-        color: var(--color-organize);
+        /* Ámbar y no verde: el verde de la paleta sobre el azul oscuro
+           queda en 2,6:1 y no es legible en texto pequeño. */
+        color: var(--c-amber);
         margin-bottom: 26px;
     }
     .hero h1 {
@@ -73,15 +67,18 @@
     .btn-ghost:hover { border-color: var(--color-ink); }
     .btn-ghost:active { transform: scale(0.96); }
 
-    /* Contenedor acotado de la pelota: ya no es un fondo a pantalla
-       completa detrás del contenido, sino un objeto dentro del hero. */
-    .hero-ball {
-        width: 100%;
-        max-width: 400px;
-        aspect-ratio: 1;
-        margin-left: auto;
+    /* Fotografía real en el hero: es lo que conecta con una familia
+       que entra a ver dónde juega su hijo o hija. */
+    .hero-photo {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--c-line);
     }
-    .hero-ball canvas { display: block; }
+    .hero-photo img {
+        width: 100%;
+        height: 440px;
+        object-fit: cover;
+    }
 
     /* =========================================================
        CIFRAS
@@ -229,10 +226,10 @@
         margin-bottom: 24px;
     }
     .ig-frame {
-        border: 1px solid var(--color-border-soft);
+        border: 1px solid var(--c-line);
         border-radius: 8px;
         overflow: hidden;
-        background: #fff;
+        background: var(--c-surface);
     }
     /* Ranura para el embed de Instagram: mantiene la altura del bloque
        para que la maqueta no se desarme mientras no haya publicación. */
@@ -278,8 +275,8 @@
        PATROCINADORES Y COLEGIOS
        ========================================================= */
     .partners {
-        border-top: 1px solid var(--color-border-soft);
-        background: #ffffff;
+        border-top: 1px solid var(--c-line);
+        background: var(--c-surface);
     }
     .partners-inner {
         max-width: var(--page-max);
@@ -387,7 +384,10 @@
         </div>
     </div>
 
-    <div class="hero-ball" id="heroBall"></div>
+    <figure class="hero-photo">
+        <img src="{% static 'core/img/fotos/galeria-1.jpg' %}"
+             alt="Jugadoras de la Liga durante un partido oficial">
+    </figure>
 </section>
 
 <!-- CIFRAS -->
@@ -548,126 +548,4 @@
 
 {% block scripts %}
 <script async src="//www.instagram.com/embed.js"></script>
-
-<!-- PELOTA 3D — versión discreta, contenida y sin seguimiento del cursor -->
-<script>
-(function () {
-    var mount = document.getElementById('heroBall');
-    if (!mount || typeof THREE === 'undefined') return;
-
-    // Si el visitante pidió reducir movimiento, la pelota se dibuja una
-    // sola vez y se queda completamente quieta.
-    var sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    var size = mount.clientWidth;
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-    camera.position.z = 62;
-
-    var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(size, size);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    mount.appendChild(renderer.domElement);
-
-    var ball = new THREE.Group();
-
-    // Núcleo. Material mate (menos brillo especular que la versión
-    // anterior) para que no destelle mientras gira.
-    var core = new THREE.Mesh(
-        new THREE.SphereGeometry(14, 64, 64),
-        new THREE.MeshPhysicalMaterial({
-            color: 0xffffff,
-            roughness: 0.55,
-            metalness: 0.0,
-            clearcoat: 0.35,
-            clearcoatRoughness: 0.6
-        })
-    );
-    ball.add(core);
-
-    // Costuras que siguen la curvatura real de la esfera.
-    class ArcCurve extends THREE.Curve {
-        constructor(axisSweep, valA, valB, axisA, axisB) {
-            super();
-            this.axisSweep = axisSweep;
-            this.valA = valA; this.valB = valB;
-            this.axisA = axisA; this.axisB = axisB;
-        }
-        getPoint(t, target = new THREE.Vector3()) {
-            target.set(0, 0, 0);
-            target[this.axisSweep] = (t * 2) - 1;
-            target[this.axisA] = this.valA;
-            target[this.axisB] = this.valB;
-            return target.normalize().multiplyScalar(14.1);
-        }
-    }
-
-    var seamMat = new THREE.MeshBasicMaterial({ color: 0x203a69 });
-    function seam(axisSweep, valA, valB, axisA, axisB) {
-        var curve = new ArcCurve(axisSweep, valA, valB, axisA, axisB);
-        ball.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 32, 0.14, 8, false), seamMat));
-    }
-
-    // Esqueleto de 18 paneles
-    seam('x', 1, 1, 'y', 'z');   seam('x', -1, 1, 'y', 'z');
-    seam('x', 1, -1, 'y', 'z');  seam('x', -1, -1, 'y', 'z');
-    seam('y', 1, 1, 'x', 'z');   seam('y', -1, 1, 'x', 'z');
-    seam('y', 1, -1, 'x', 'z');  seam('y', -1, -1, 'x', 'z');
-    seam('z', 1, 1, 'x', 'y');   seam('z', -1, 1, 'x', 'y');
-    seam('z', 1, -1, 'x', 'y');  seam('z', -1, -1, 'x', 'y');
-
-    var d = 0.35;
-    seam('y', d, 1, 'x', 'z');   seam('y', -d, 1, 'x', 'z');
-    seam('y', d, -1, 'x', 'z');  seam('y', -d, -1, 'x', 'z');
-    seam('z', d, 1, 'y', 'x');   seam('z', -d, 1, 'y', 'x');
-    seam('z', d, -1, 'y', 'x');  seam('z', -d, -1, 'y', 'x');
-    seam('x', d, 1, 'z', 'y');   seam('x', -d, 1, 'z', 'y');
-    seam('x', d, -1, 'z', 'y');  seam('x', -d, -1, 'z', 'y');
-
-    // Parche con el logo, curvado sobre la propia esfera.
-    var logoTex = new THREE.TextureLoader().load('{% static "core/img/logo-mark.png" %}');
-    var aspect = 961 / 794;
-    var R = 14.3, h = 5.2, w = h * aspect;
-    var tEx = h / R, pEx = w / R;
-    ball.add(new THREE.Mesh(
-        new THREE.SphereGeometry(R, 32, 32,
-            Math.PI / 2 - pEx / 2, pEx,
-            Math.PI / 2 - tEx / 2, tEx),
-        new THREE.MeshBasicMaterial({ map: logoTex, transparent: true, depthWrite: false })
-    ));
-
-    // Inclinación fija para que el logo se lea de frente.
-    ball.rotation.x = -0.18;
-    scene.add(ball);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-    var key = new THREE.DirectionalLight(0xffffff, 0.5);
-    key.position.set(18, 22, 24);
-    scene.add(key);
-    var fill = new THREE.DirectionalLight(0xc7d5e0, 0.35);
-    fill.position.set(-20, -12, -18);
-    scene.add(fill);
-
-    function resize() {
-        var s = mount.clientWidth;
-        renderer.setSize(s, s);
-        camera.updateProjectionMatrix();
-    }
-    window.addEventListener('resize', resize);
-
-    if (sinMovimiento) {
-        renderer.render(scene, camera);
-        return;
-    }
-
-    // Giro lento sobre un solo eje. Sin seguimiento del cursor y sin
-    // acople al scroll: son los dos gatillantes principales de vértigo.
-    function animate() {
-        requestAnimationFrame(animate);
-        ball.rotation.y += 0.0016;
-        renderer.render(scene, camera);
-    }
-    animate();
-})();
-</script>
 {% endblock %}

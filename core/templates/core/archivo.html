@@ -3,13 +3,33 @@
 
 {% block title %}Archivo | LMVE{% endblock %}
 
+{# Archivo es la única vista que carga el motor 3D. #}
+{% block head_extra %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+{% endblock %}
+
+{# Sin marca de agua aquí: el protagonismo lo tiene la pelota. #}
+{% block body_class %}{% endblock %}
+
 {% block content %}
 <style>
     .archivo-hero {
         max-width: var(--page-max);
         margin: 0 auto;
         padding: 72px var(--page-pad) 48px var(--page-pad);
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 56px;
+        align-items: center;
     }
+    /* Pelota contenida en el encabezado, no como fondo de la página. */
+    .archivo-ball {
+        width: 100%;
+        max-width: 380px;
+        aspect-ratio: 1;
+        margin-left: auto;
+    }
+    .archivo-ball canvas { display: block; }
     .archivo-hero h1 {
         font-size: clamp(34px, 4.4vw, 54px);
         font-weight: 800;
@@ -67,8 +87,8 @@
         margin: 0;
         border-radius: 6px;
         overflow: hidden;
-        background: #fff;
-        border: 1px solid var(--color-border-soft);
+        background: var(--c-surface);
+        border: 1px solid var(--c-line);
     }
     .era-photos img {
         width: 100%;
@@ -99,6 +119,12 @@
     }
 
     @media (max-width: 900px) {
+        .archivo-hero {
+            grid-template-columns: 1fr;
+            gap: 36px;
+            padding: 48px var(--page-pad) 40px var(--page-pad);
+        }
+        .archivo-ball { max-width: 260px; margin: 0 auto; }
         .era-photos, .era-photos.wide { grid-template-columns: 1fr; }
         .era-photos img { height: 220px; }
         .era-head { flex-direction: column; gap: 4px; }
@@ -106,14 +132,18 @@
 </style>
 
 <section class="archivo-hero">
-    <div class="section-label">// Archivo Histórico</div>
-    <h1>Casi cuatro décadas<br>de voleibol escolar</h1>
-    <p>
-        Desde 1987, cada temporada deja una huella: equipos, generaciones y
-        momentos que forman parte de la memoria de la Liga. Este archivo reúne
-        ese registro y seguirá creciendo con el material que aporten los colegios
-        y las familias.
-    </p>
+    <div>
+        <div class="section-label">// Archivo Histórico</div>
+        <h1>Casi cuatro décadas<br>de voleibol escolar</h1>
+        <p>
+            Desde 1987, cada temporada deja una huella: equipos, generaciones y
+            momentos que forman parte de la memoria de la Liga. Este archivo reúne
+            ese registro y seguirá creciendo con el material que aporten los
+            colegios y las familias.
+        </p>
+    </div>
+
+    <div class="archivo-ball" id="archivoBall"></div>
 </section>
 
 <section class="era">
@@ -200,4 +230,126 @@
         </p>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<!-- PELOTA 3D — discreta, contenida y sin seguimiento del cursor -->
+<script>
+(function () {
+    var mount = document.getElementById('archivoBall');
+    if (!mount || typeof THREE === 'undefined') return;
+
+    // Si el visitante pidió reducir movimiento, la pelota se dibuja una
+    // sola vez y se queda completamente quieta.
+    var sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var size = mount.clientWidth;
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+    camera.position.z = 62;
+
+    var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(size, size);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    mount.appendChild(renderer.domElement);
+
+    var ball = new THREE.Group();
+
+    // Ámbar con costuras azules: se mantiene dentro de la paleta y a la
+    // vez recuerda al balón Molten amarillo y azul que usa la Liga.
+    ball.add(new THREE.Mesh(
+        new THREE.SphereGeometry(14, 64, 64),
+        new THREE.MeshPhysicalMaterial({
+            color: 0xf2a413,
+            roughness: 0.5,
+            metalness: 0.0,
+            clearcoat: 0.35,
+            clearcoatRoughness: 0.6
+        })
+    ));
+
+    // Costuras que siguen la curvatura real de la esfera.
+    class ArcCurve extends THREE.Curve {
+        constructor(axisSweep, valA, valB, axisA, axisB) {
+            super();
+            this.axisSweep = axisSweep;
+            this.valA = valA; this.valB = valB;
+            this.axisA = axisA; this.axisB = axisB;
+        }
+        getPoint(t, target = new THREE.Vector3()) {
+            target.set(0, 0, 0);
+            target[this.axisSweep] = (t * 2) - 1;
+            target[this.axisA] = this.valA;
+            target[this.axisB] = this.valB;
+            return target.normalize().multiplyScalar(14.1);
+        }
+    }
+
+    var seamMat = new THREE.MeshBasicMaterial({ color: 0x163e73 });
+    function seam(axisSweep, valA, valB, axisA, axisB) {
+        var curve = new ArcCurve(axisSweep, valA, valB, axisA, axisB);
+        ball.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 32, 0.16, 8, false), seamMat));
+    }
+
+    // Esqueleto de 18 paneles
+    seam('x', 1, 1, 'y', 'z');   seam('x', -1, 1, 'y', 'z');
+    seam('x', 1, -1, 'y', 'z');  seam('x', -1, -1, 'y', 'z');
+    seam('y', 1, 1, 'x', 'z');   seam('y', -1, 1, 'x', 'z');
+    seam('y', 1, -1, 'x', 'z');  seam('y', -1, -1, 'x', 'z');
+    seam('z', 1, 1, 'x', 'y');   seam('z', -1, 1, 'x', 'y');
+    seam('z', 1, -1, 'x', 'y');  seam('z', -1, -1, 'x', 'y');
+
+    var d = 0.35;
+    seam('y', d, 1, 'x', 'z');   seam('y', -d, 1, 'x', 'z');
+    seam('y', d, -1, 'x', 'z');  seam('y', -d, -1, 'x', 'z');
+    seam('z', d, 1, 'y', 'x');   seam('z', -d, 1, 'y', 'x');
+    seam('z', d, -1, 'y', 'x');  seam('z', -d, -1, 'y', 'x');
+    seam('x', d, 1, 'z', 'y');   seam('x', -d, 1, 'z', 'y');
+    seam('x', d, -1, 'z', 'y');  seam('x', -d, -1, 'z', 'y');
+
+    // Parche con el logo, curvado sobre la propia esfera.
+    var logoTex = new THREE.TextureLoader().load('{% static "core/img/logo-mark.png" %}');
+    var aspect = 961 / 794;
+    var R = 14.3, h = 5.2, w = h * aspect;
+    var tEx = h / R, pEx = w / R;
+    ball.add(new THREE.Mesh(
+        new THREE.SphereGeometry(R, 32, 32,
+            Math.PI / 2 - pEx / 2, pEx,
+            Math.PI / 2 - tEx / 2, tEx),
+        new THREE.MeshBasicMaterial({ map: logoTex, transparent: true, depthWrite: false })
+    ));
+
+    // Inclinación fija para que el logo se lea de frente.
+    ball.rotation.x = -0.18;
+    scene.add(ball);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.95));
+    var key = new THREE.DirectionalLight(0xffffff, 0.55);
+    key.position.set(18, 22, 24);
+    scene.add(key);
+    var fill = new THREE.DirectionalLight(0x0511f2, 0.3);
+    fill.position.set(-20, -12, -18);
+    scene.add(fill);
+
+    window.addEventListener('resize', function () {
+        var s = mount.clientWidth;
+        renderer.setSize(s, s);
+        camera.updateProjectionMatrix();
+    });
+
+    if (sinMovimiento) {
+        renderer.render(scene, camera);
+        return;
+    }
+
+    // Giro lento sobre un solo eje. Sin seguimiento del cursor y sin
+    // acople al scroll: son los dos gatillantes principales de vértigo.
+    function animate() {
+        requestAnimationFrame(animate);
+        ball.rotation.y += 0.0016;
+        renderer.render(scene, camera);
+    }
+    animate();
+})();
+</script>
 {% endblock %}
