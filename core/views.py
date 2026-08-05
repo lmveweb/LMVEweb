@@ -15,6 +15,10 @@ def proyecto(request):
 def impacto(request):
     return render(request, 'core/impacto.html')
 
+def archivo(request):
+    return render(request, 'core/archivo.html')
+
+
 def redes(request):
     return render(request, 'core/redes.html')
 

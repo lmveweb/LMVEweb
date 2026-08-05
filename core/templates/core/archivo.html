@@ -1,0 +1,203 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Archivo | LMVE{% endblock %}
+
+{% block content %}
+<style>
+    .archivo-hero {
+        max-width: var(--page-max);
+        margin: 0 auto;
+        padding: 72px var(--page-pad) 48px var(--page-pad);
+    }
+    .archivo-hero h1 {
+        font-size: clamp(34px, 4.4vw, 54px);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -1px;
+        color: var(--color-ink);
+        margin-bottom: 22px;
+    }
+    .archivo-hero p {
+        font-size: 18px;
+        line-height: 1.7;
+        color: var(--color-ink-soft);
+        max-width: 640px;
+    }
+
+    .era {
+        max-width: var(--page-max);
+        margin: 0 auto;
+        padding: 0 var(--page-pad) 72px var(--page-pad);
+    }
+    .era-head {
+        display: flex;
+        align-items: baseline;
+        gap: 18px;
+        padding-bottom: 16px;
+        margin-bottom: 26px;
+        border-bottom: 2px solid var(--color-ink);
+    }
+    .era-year {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--color-ink);
+        letter-spacing: -0.5px;
+    }
+    .era-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--color-ink-muted);
+    }
+    .era p.era-text {
+        font-size: 16px;
+        line-height: 1.75;
+        color: var(--color-ink-muted);
+        max-width: 700px;
+        margin-bottom: 26px;
+    }
+
+    .era-photos {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    .era-photos.wide { grid-template-columns: repeat(2, 1fr); }
+    .era-photos figure {
+        margin: 0;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid var(--color-border-soft);
+    }
+    .era-photos img {
+        width: 100%;
+        height: 260px;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .era-photos figure:hover img { transform: scale(1.04); }
+    .era-photos figcaption {
+        font-size: 13px;
+        color: var(--color-ink-muted);
+        padding: 12px 14px;
+        line-height: 1.5;
+    }
+
+    .archivo-cta .band-inner { text-align: center; }
+    .archivo-cta h2 {
+        font-size: clamp(24px, 2.8vw, 32px);
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 14px;
+    }
+    .archivo-cta p {
+        font-size: 17px;
+        color: rgba(255, 255, 255, 0.85);
+        max-width: 620px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 900px) {
+        .era-photos, .era-photos.wide { grid-template-columns: 1fr; }
+        .era-photos img { height: 220px; }
+        .era-head { flex-direction: column; gap: 4px; }
+    }
+</style>
+
+<section class="archivo-hero">
+    <div class="section-label">// Archivo Histórico</div>
+    <h1>Casi cuatro décadas<br>de voleibol escolar</h1>
+    <p>
+        Desde 1987, cada temporada deja una huella: equipos, generaciones y
+        momentos que forman parte de la memoria de la Liga. Este archivo reúne
+        ese registro y seguirá creciendo con el material que aporten los colegios
+        y las familias.
+    </p>
+</section>
+
+<section class="era">
+    <div class="era-head">
+        <span class="era-year">1987 — 1989</span>
+        <span class="era-title">Los primeros pasos</span>
+    </div>
+    <p class="era-text">
+        La Liga nació como Liga Teresiana de Voleibol Escolar, impulsada por un
+        grupo de profesores de Educación Física. Comenzó con cerca de 16 colegios
+        compitiendo en divisiones de Damas y Varones, los sábados por la mañana.
+    </p>
+    <div class="era-photos wide">
+        <figure>
+            <img src="{% static 'core/img/fotos/historia-1987.jpg' %}" alt="Equipo de la Liga a fines de los años 80">
+            <figcaption>Equipo participante en los primeros años de la Liga.</figcaption>
+        </figure>
+    </div>
+</section>
+
+<section class="era">
+    <div class="era-head">
+        <span class="era-year">Década de 1990</span>
+        <span class="era-title">Consolidación y crecimiento</span>
+    </div>
+    <p class="era-text">
+        La participación creció hasta cerca de 25 colegios. Se incorporó el Mini
+        Voleibol para las categorías más pequeñas y la Liga alcanzó difusión en
+        medios, destacando el patrocinio del diario La Nación con la
+        "Copa Diario La Nación".
+    </p>
+    <div class="era-photos wide">
+        <figure>
+            <img src="{% static 'core/img/fotos/historia-1996.jpg' %}" alt="Selección de la Liga en los años 90">
+            <figcaption>Selección de la Liga, década de 1990.</figcaption>
+        </figure>
+    </div>
+</section>
+
+<section class="era">
+    <div class="era-head">
+        <span class="era-year">Hoy</span>
+        <span class="era-title">La Liga en cancha</span>
+    </div>
+    <p class="era-text">
+        Más de 2.500 deportistas y 60 equipos compiten cada temporada en las
+        categorías Sub-14, Sub-16 y Sub-18, en recintos de toda la Región
+        Metropolitana.
+    </p>
+    <div class="era-photos">
+        <figure>
+            <img src="{% static 'core/img/fotos/galeria-1.jpg' %}" alt="Armadora en plena jugada">
+            <figcaption>Armado en zona de red durante un partido oficial.</figcaption>
+        </figure>
+        <figure>
+            <img src="{% static 'core/img/fotos/galeria-2.jpg' %}" alt="Bloqueo en la red">
+            <figcaption>Bloqueo en la red en categoría escolar.</figcaption>
+        </figure>
+        <figure>
+            <img src="{% static 'core/img/fotos/galeria-3.jpg' %}" alt="Saque de salto">
+            <figcaption>Saque de salto en un encuentro de la Liga.</figcaption>
+        </figure>
+        <figure>
+            <img src="{% static 'core/img/fotos/galeria-4.jpg' %}" alt="Remate en la red">
+            <figcaption>Remate durante una jornada de competencia.</figcaption>
+        </figure>
+        <figure>
+            <img src="{% static 'core/img/fotos/impacto-banner-sponsor.jpg' %}" alt="Equipos en un recinto de la Liga">
+            <figcaption>Equipos reunidos antes de una jornada oficial.</figcaption>
+        </figure>
+        <figure>
+            <img src="{% static 'core/img/fotos/impacto-reconocimiento.jpg' %}" alt="Ceremonia de reconocimiento">
+            <figcaption>Ceremonia de reconocimiento a colaboradores.</figcaption>
+        </figure>
+    </div>
+</section>
+
+<section class="band-blue archivo-cta">
+    <div class="band-inner">
+        <h2>¿Tienes fotos de tu colegio en la Liga?</h2>
+        <p>
+            Este archivo se construye entre todos. Si guardas fotografías,
+            programas o recortes de alguna temporada, nos encantaría sumarlos.
+        </p>
+    </div>
+</section>
+{% endblock %}
