@@ -8,14 +8,67 @@
     /* =========================================================
        HERO
        ========================================================= */
+    /* =========================================================
+       HERO CON VIDEO DE FONDO
+       El video ocupa todo el ancho, cubierto por un lavado azul y una
+       retícula de paneles translúcidos que aparecen y desaparecen.
+       Los paneles los genera el script del final del archivo.
+       ========================================================= */
     .hero {
+        position: relative;
+        width: 100vw;
+        left: 50%;
+        margin-left: -50vw;
+        min-height: 78vh;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        background: var(--c-navy);
+    }
+    .hero-video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        /* Se atenúa el material original, que es muy dorado, para que
+           el azul de la Liga sea el que manda. */
+        filter: saturate(0.7) contrast(1.05);
+    }
+    /* Lavado de color: da identidad y asegura que el texto se lea.
+       Cierra a la izquierda, donde va el texto, y se abre a la derecha
+       para que el video se alcance a ver. */
+    .hero-lavado {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(100deg, rgba(var(--c-navy-rgb), 0.93) 0%, rgba(var(--c-navy-rgb), 0.72) 44%, rgba(var(--c-navy-rgb), 0.38) 100%),
+            linear-gradient(rgba(var(--c-blue-rgb), 0.20), rgba(var(--c-blue-rgb), 0.20));
+    }
+    /* Retícula de paneles. */
+    .hero-paneles {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        pointer-events: none;
+    }
+    .hero-paneles span {
+        background: currentColor;
+        color: rgba(255, 255, 255, 0.07);
+        animation: panel-latir 9s ease-in-out infinite;
+    }
+    @keyframes panel-latir {
+        0%, 100% { opacity: 0; }
+        50%      { opacity: 1; }
+    }
+
+    .hero-contenido {
+        position: relative;
+        z-index: 2;
+        width: 100%;
         max-width: var(--page-max);
         margin: 0 auto;
-        padding: 80px var(--page-pad) 72px var(--page-pad);
-        display: grid;
-        grid-template-columns: 1.15fr 0.85fr;
-        gap: 56px;
-        align-items: center;
+        padding: 110px var(--page-pad) 130px var(--page-pad);
     }
     .hero-eyebrow {
         display: inline-block;
@@ -26,27 +79,29 @@
         /* Ámbar y no verde: el verde de la paleta sobre el azul oscuro
            queda en 2,6:1 y no es legible en texto pequeño. */
         color: var(--c-amber);
-        margin-bottom: 26px;
+        margin-bottom: 24px;
     }
     .hero h1 {
-        font-size: clamp(38px, 5vw, 64px);
-        line-height: 1.08;
+        font-size: clamp(40px, 6vw, 78px);
+        line-height: 1.02;
         font-weight: 800;
-        letter-spacing: -1.2px;
-        color: var(--color-ink);
-        margin-bottom: 26px;
+        letter-spacing: -1.8px;
+        color: var(--c-text);
+        margin-bottom: 24px;
+        text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
     }
     .hero h1 em {
         font-style: italic;
         font-weight: 700;
-        color: var(--color-accent);
+        color: var(--c-amber);
     }
     .hero p {
         font-size: 19px;
         line-height: 1.65;
-        color: var(--color-ink-soft);
+        color: rgba(255, 255, 255, 0.92);
         max-width: 540px;
         margin-bottom: 34px;
+        text-shadow: 0 1px 12px rgba(0, 0, 0, 0.4);
     }
     .hero-actions {
         display: flex;
@@ -55,77 +110,48 @@
     }
     .btn-ghost {
         display: inline-block;
-        border: 1px solid var(--color-border);
-        color: var(--color-ink);
+        border: 1px solid rgba(255, 255, 255, 0.55);
+        color: var(--c-text);
         padding: 13px 26px;
         border-radius: 4px;
         font-size: 14px;
         font-weight: 700;
         text-decoration: none;
+        backdrop-filter: blur(4px);
         transition: border-color 0.25s ease, color 0.25s ease, transform 0.12s ease;
     }
-    .btn-ghost:hover { border-color: var(--color-ink); }
+    .btn-ghost:hover { border-color: var(--c-amber); color: var(--c-amber); }
     .btn-ghost:active { transform: scale(0.96); }
 
-    /* Fotografía real en el hero: es lo que conecta con una familia
-       que entra a ver dónde juega su hijo o hija. */
-    /* =========================================================
-       MOSAICO DEL HERO
-       El video se reconstruye en bloques con los colores de la Liga,
-       como un tifo de gradería. Ver el script al final del archivo.
-       ========================================================= */
-    .hero-media {
-        position: relative;
-        margin: 0;
-        border-radius: 8px;
+    /* Cinta inferior, como en la referencia. */
+    .hero-cinta {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2;
+        padding: 14px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(var(--c-navy-rgb), 0.55);
         overflow: hidden;
-        border: 1px solid var(--c-line);
-        aspect-ratio: 16 / 10;
-        background: var(--c-navy);
     }
-    /* El video es solo la fuente de imagen: nunca se muestra. */
-    .hero-media video {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        opacity: 0;
-        pointer-events: none;
+    .hero-cinta-pista {
+        display: flex;
+        width: max-content;
+        animation: cinta 34s linear infinite;
     }
-    /* Imagen de respaldo si el video no puede reproducirse. */
-    .hero-media .respaldo {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+    .hero-cinta span {
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2.5px;
+        color: var(--c-amber);
+        padding: 0 22px;
+        white-space: nowrap;
     }
-    .hero-media.listo .respaldo { opacity: 0; }
-
-    .hero-mosaico {
-        position: relative;
-        display: block;
-        width: 100%;
-        height: 100%;
-        /* Lo esencial del efecto: el lienzo es diminuto y el navegador
-           lo amplía sin suavizar, así cada píxel queda como un bloque. */
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-        opacity: 0;
-        transition: opacity 0.8s ease;
-    }
-    .hero-media.listo .hero-mosaico { opacity: 1; }
-
-    /* Rejilla superpuesta: da la junta entre baldosas del mosaico sin
-       costo por fotograma. --baldosa la calcula el script. */
-    .hero-media::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background-image:
-            repeating-linear-gradient(90deg, rgba(var(--c-navy-rgb), 0.9) 0 1px, transparent 1px var(--baldosa, 14px)),
-            repeating-linear-gradient(0deg,  rgba(var(--c-navy-rgb), 0.9) 0 1px, transparent 1px var(--baldosa, 14px));
-        opacity: 0.32;
+    @keyframes cinta {
+        from { transform: translateX(0); }
+        to   { transform: translateX(-50%); }
     }
 
     /* =========================================================
@@ -452,8 +478,16 @@
 </style>
 
 <!-- HERO -->
-<section class="hero">
-    <div>
+<section class="hero" id="hero">
+    <video class="hero-video" id="heroVideo"
+           src="{% static 'core/video/hero.mp4' %}"
+           poster="{% static 'core/img/fotos/galeria-1.jpg' %}"
+           muted playsinline loop preload="auto" aria-hidden="true"></video>
+
+    <div class="hero-lavado"></div>
+    <div class="hero-paneles" id="heroPaneles" aria-hidden="true"></div>
+
+    <div class="hero-contenido">
         <span class="hero-eyebrow">Fundada en 1987 · Región Metropolitana</span>
         <h1>Educar a través<br>del <em>deporte</em></h1>
         <p>
@@ -467,15 +501,9 @@
         </div>
     </div>
 
-    <figure class="hero-media" id="heroMedia">
-        <img class="respaldo" src="{% static 'core/img/fotos/galeria-1.jpg' %}"
-             alt="Jugadoras de la Liga durante un partido oficial">
-        <video id="heroVideo" src="{% static 'core/video/hero.mp4' %}"
-               muted playsinline loop preload="auto" aria-hidden="true"></video>
-        <canvas class="hero-mosaico" id="heroMosaico"
-                role="img"
-                aria-label="Mosaico animado con imágenes de voleibol, en los colores de la Liga"></canvas>
-    </figure>
+    <div class="hero-cinta" aria-hidden="true">
+        <div class="hero-cinta-pista"><span>LMVE</span><span>*</span><span>VOLEIBOL ESCOLAR</span><span>*</span><span>DESDE 1987</span><span>*</span><span>REGIÓN METROPOLITANA</span><span>*</span><span>LMVE</span><span>*</span><span>VOLEIBOL ESCOLAR</span><span>*</span><span>DESDE 1987</span><span>*</span><span>REGIÓN METROPOLITANA</span><span>*</span></div>
+    </div>
 </section>
 
 <!-- CIFRAS -->
@@ -726,163 +754,82 @@
 {% block scripts %}
 <script async src="//www.instagram.com/embed.js"></script>
 
-<!-- MOSAICO DEL HERO -->
+<!-- PANELES Y VIDEO DEL HERO -->
 <script>
 (function () {
-    var caja   = document.getElementById('heroMedia');
-    var video  = document.getElementById('heroVideo');
-    var lienzo = document.getElementById('heroMosaico');
-    if (!caja || !video || !lienzo) return;
-
-    var ctx = lienzo.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return;
-
-    // Cuántas baldosas de ancho tiene el mosaico. El lienzo se dibuja a
-    // esta resolución y el navegador lo amplía sin suavizar.
-    var COLUMNAS = 46;
-
-    // Rampa de la Liga: cada baldosa se lleva al color de la paleta que
-    // corresponde a su luminosidad. Así el video, que es dorado y rojo,
-    // queda hablando el idioma cromático del sitio.
-    // El salto al naranja va temprano a propósito: con la mayoría de los
-    // pasos en azul, los medios tonos se apagaban y todo quedaba azul.
-    var RAMPA = [
-        [ 12,  32,  74],   // sombra profunda
-        [ 22,  62, 115],   // #163E73
-        [242,  98,  15],   // #F2620F
-        [242, 164,  19],   // #F2A413
-        [255, 244, 214]    // brillo
-    ];
+    var hero    = document.getElementById('hero');
+    var video   = document.getElementById('heroVideo');
+    var paneles = document.getElementById('heroPaneles');
+    if (!hero || !video || !paneles) return;
 
     var sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var filas = 1, activo = false;
 
-    function medir() {
-        // Las baldosas son cuadradas, así que las filas salen de la
-        // proporción de la caja, no de la del video.
-        filas = Math.max(1, Math.round(COLUMNAS * (caja.clientHeight / caja.clientWidth)));
-        lienzo.width = COLUMNAS;
-        lienzo.height = filas;
-        caja.style.setProperty('--baldosa', (caja.clientWidth / COLUMNAS).toFixed(2) + 'px');
-    }
+    // Retícula de paneles. Son celdas iguales con opacidades distintas:
+    // al encenderse varias contiguas se leen como rectángulos grandes,
+    // que es el efecto buscado.
+    var COLS = 14, FILAS = 7;
 
-    // Recorta el fotograma para que llene la caja sin deformarse.
-    function recorte() {
-        var vw = video.videoWidth, vh = video.videoHeight;
-        var destino = COLUMNAS / filas, origen = vw / vh;
-        if (origen > destino) {
-            var w = vh * destino;
-            return [(vw - w) / 2, 0, w, vh];
-        }
-        var h = vw / destino;
-        return [0, (vh - h) / 2, vw, h];
-    }
+    function construir() {
+        paneles.style.gridTemplateColumns = 'repeat(' + COLS + ', 1fr)';
+        paneles.style.gridTemplateRows = 'repeat(' + FILAS + ', 1fr)';
+        paneles.innerHTML = '';
 
-    // Niveles suavizados en el tiempo. El video alterna escenas muy
-    // oscuras y muy brillantes; con un rango fijo las oscuras quedaban
-    // como una mancha azul. Se recalculan por fotograma y se mueven de a
-    // poco para que el ajuste no parpadee.
-    var nivelBajo = 0.05, nivelAlto = 0.95;
-    var BINS = 48, histo = new Uint16Array(BINS);
-    var lums = null;
-
-    function pintar() {
-        var r = recorte();
-        ctx.drawImage(video, r[0], r[1], r[2], r[3], 0, 0, COLUMNAS, filas);
-
-        var datos = ctx.getImageData(0, 0, COLUMNAS, filas);
-        var p = datos.data;
-        var n = p.length / 4;
-        if (!lums || lums.length !== n) lums = new Float32Array(n);
-        histo.fill(0);
-
-        for (var i = 0, k = 0; i < p.length; i += 4, k++) {
-            var lum = (p[i] * 0.2126 + p[i + 1] * 0.7152 + p[i + 2] * 0.0722) / 255;
-            lums[k] = lum;
-            var bin = (lum * (BINS - 1)) | 0;
-            histo[bin < 0 ? 0 : (bin > BINS - 1 ? BINS - 1 : bin)]++;
+        // Secuencia determinista: el patrón se ve azaroso pero es el
+        // mismo en cada carga, así no cambia de una visita a otra.
+        var semilla = 7;
+        function azar() {
+            semilla = (semilla * 1103515245 + 12345) % 2147483648;
+            return semilla / 2147483648;
         }
 
-        // Percentiles 6% y 94%: se ignoran los extremos aislados para
-        // que un foco o una sombra suelta no aplasten todo lo demás.
-        var corte = n * 0.06, acum = 0, bajo = 0, alto = BINS - 1, j;
-        for (j = 0; j < BINS; j++) { acum += histo[j]; if (acum >= corte) { bajo = j; break; } }
-        acum = 0;
-        for (j = BINS - 1; j >= 0; j--) { acum += histo[j]; if (acum >= corte) { alto = j; break; } }
-
-        var objBajo = bajo / (BINS - 1), objAlto = alto / (BINS - 1);
-        if (objAlto - objBajo < 0.12) objAlto = objBajo + 0.12;
-        nivelBajo += (objBajo - nivelBajo) * 0.07;
-        nivelAlto += (objAlto - nivelAlto) * 0.07;
-
-        var rango = Math.max(0.08, nivelAlto - nivelBajo);
-        var ultimo = RAMPA.length - 1;
-
-        for (var q = 0, m = 0; q < p.length; q += 4, m++) {
-            var v = (lums[m] - nivelBajo) / rango;
-            v = v < 0 ? 0 : (v > 1 ? 1 : v);
-            var pos = v * ultimo;
-            var a = pos | 0, b = a + 1 > ultimo ? ultimo : a + 1, t = pos - a;
-            p[q]     = RAMPA[a][0] + (RAMPA[b][0] - RAMPA[a][0]) * t;
-            p[q + 1] = RAMPA[a][1] + (RAMPA[b][1] - RAMPA[a][1]) * t;
-            p[q + 2] = RAMPA[a][2] + (RAMPA[b][2] - RAMPA[a][2]) * t;
-        }
-        ctx.putImageData(datos, 0, 0);
-    }
-
-    function bucle() {
-        if (!activo) return;
-        pintar();
-        requestAnimationFrame(bucle);
-    }
-
-    function arrancar() {
-        medir();
-        caja.classList.add('listo');
-        if (sinMovimiento) {
-            // Con movimiento reducido queda un mosaico fijo: se dibuja un
-            // solo fotograma y el video no se reproduce.
-            video.pause();
-            pintar();
-            return;
-        }
-        activo = true;
-        bucle();
-    }
-
-    video.addEventListener('loadeddata', function () {
-        // Se parte pasado el inicio, que suele ser el fundido de entrada.
-        try { video.currentTime = Math.min(4, video.duration || 0); } catch (e) {}
-        if (sinMovimiento) {
-            video.addEventListener('seeked', arrancar, { once: true });
-        } else {
-            var promesa = video.play();
-            if (promesa && promesa.catch) {
-                // Si el navegador bloquea la reproducción, queda la foto.
-                promesa.catch(function () { medir(); pintar(); caja.classList.add('listo'); });
+        var fragmento = document.createDocumentFragment();
+        for (var i = 0; i < COLS * FILAS; i++) {
+            var celda = document.createElement('span');
+            var a = azar();
+            // Solo se enciende parte de la retícula: si se encendieran
+            // todas, el efecto se convierte en un velo uniforme.
+            if (a < 0.42) {
+                celda.style.color = 'rgba(255,255,255,' + (0.04 + azar() * 0.07).toFixed(3) + ')';
+                if (sinMovimiento) {
+                    celda.style.animation = 'none';
+                    celda.style.opacity = '1';
+                } else {
+                    celda.style.animationDuration = (7 + azar() * 9).toFixed(1) + 's';
+                    celda.style.animationDelay = (-azar() * 12).toFixed(1) + 's';
+                }
+            } else {
+                celda.style.animation = 'none';
+                celda.style.opacity = '0';
             }
-            arrancar();
+            fragmento.appendChild(celda);
         }
-    }, { once: true });
+        paneles.appendChild(fragmento);
+    }
 
-    // Se detiene mientras el hero no está a la vista: no tiene sentido
-    // gastar batería dibujando algo que nadie ve.
-    if ('IntersectionObserver' in window && !sinMovimiento) {
+    construir();
+
+    if (sinMovimiento) {
+        // Queda el póster fijo: el video no se reproduce.
+        video.removeAttribute('autoplay');
+        video.pause();
+        return;
+    }
+
+    var promesa = video.play();
+    if (promesa && promesa.catch) {
+        // Si el navegador bloquea la reproducción, queda el póster.
+        promesa.catch(function () {});
+    }
+
+    // No tiene sentido decodificar video cuando el hero no está a la vista.
+    if ('IntersectionObserver' in window) {
         new IntersectionObserver(function (entradas) {
             entradas.forEach(function (e) {
-                if (e.isIntersecting) {
-                    if (video.readyState >= 2 && !activo) { activo = true; video.play(); bucle(); }
-                } else if (activo) {
-                    activo = false; video.pause();
-                }
+                if (e.isIntersecting) { video.play().catch(function () {}); }
+                else { video.pause(); }
             });
-        }, { threshold: 0.05 }).observe(caja);
+        }, { threshold: 0.05 }).observe(hero);
     }
-
-    window.addEventListener('resize', function () {
-        medir();
-        if (video.readyState >= 2) pintar();
-    });
 })();
 </script>
 {% endblock %}
