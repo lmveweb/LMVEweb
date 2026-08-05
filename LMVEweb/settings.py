@@ -38,6 +38,21 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+# Enlace temporal para mostrarle el avance a alguien más (reenvío de
+# puertos de VS Code, ngrok o Cloudflare Tunnel). Se activa a propósito
+# con DJANGO_SHARE_TUNNEL=True y no afecta a producción.
+if os.environ.get('DJANGO_SHARE_TUNNEL', 'False') == 'True':
+    DOMINIOS_TUNEL = [
+        '.devtunnels.ms',
+        '.ngrok-free.app',
+        '.ngrok.io',
+        '.trycloudflare.com',
+    ]
+    ALLOWED_HOSTS += DOMINIOS_TUNEL
+    # Necesario para que el formulario de Contacto siga funcionando
+    # cuando se accede por https a través del túnel.
+    CSRF_TRUSTED_ORIGINS = ['https://*' + d for d in DOMINIOS_TUNEL]
+
 
 # Application definition
 
