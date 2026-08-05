@@ -166,6 +166,41 @@
             align-items: center;
             gap: 18px;
         }
+
+        /* Lema institucional entre el logo y el botón de Contacto */
+        .header-lema {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-lema-divider {
+            width: 1px;
+            height: 22px;
+            background: rgba(32, 58, 105, 0.18);
+            flex-shrink: 0;
+        }
+        .header-lema-text {
+            font-size: 13px;
+            font-style: italic;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+            background: linear-gradient(90deg, #203a69 0%, #d9622c 30%, #203a69 60%, #203a69 100%);
+            background-size: 250% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            animation: lema-shimmer 7s ease-in-out infinite;
+        }
+        @keyframes lema-shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        @media (max-width: 1180px) {
+            .header-lema { display: none; }
+        }
+
         .btn-minimal {
             border: 1px solid #c7d5e0;
             color: #203a69;
@@ -371,6 +406,10 @@
             </a>
             
             <div class="header-right">
+                <div class="header-lema" aria-hidden="true">
+                    <span class="header-lema-divider"></span>
+                    <span class="header-lema-text">"Educar a Través del Deporte"</span>
+                </div>
                 <a href="{% url 'contacto' %}" class="btn-minimal">Contacto</a>
                 <button class="menu-toggle" id="menuToggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav">
                     <span></span>
