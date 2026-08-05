@@ -321,11 +321,30 @@
         color: var(--color-ink);
         margin-bottom: 10px;
     }
+    .partner-copy {
+        flex: 1;
+        min-width: 260px;
+    }
     .partner-copy p {
         font-size: 15px;
         line-height: 1.7;
-        color: var(--color-ink-muted);
+        color: var(--c-text-muted);
         max-width: 520px;
+    }
+    /* Evidencia real: en esta foto se ve la presencia de marca en cancha. */
+    .partner-photo {
+        margin: 0;
+        width: 260px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--c-line);
+    }
+    .partner-photo img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        display: block;
     }
     .schools-grid {
         display: grid;
@@ -531,6 +550,11 @@
                     utilizado en competencias oficiales a nivel internacional.
                 </p>
             </div>
+
+            <figure class="partner-photo">
+                <img src="{% static 'core/img/fotos/impacto-banner-sponsor.jpg' %}"
+                     alt="Plantel de la Liga en un recinto con presencia de marca en cancha">
+            </figure>
         </div>
 
         <div class="section-label">// Colegios Representados</div>
