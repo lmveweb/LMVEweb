@@ -1,50 +1,32 @@
 {% extends "core/base.html" %}
 {% load static %}
 
+{% block title %}Comunidad | LMVE{% endblock %}
+
 {% block content %}
 <style>
     /* =========================================================
-       HERO DE PÁGINA
+       HERO
        ========================================================= */
     .page-hero {
-        margin-bottom: 60px;
-        max-width: 800px;
+        max-width: var(--page-max);
+        margin: 0 auto;
+        padding: 72px var(--page-pad) 48px var(--page-pad);
     }
-    .page-badge {
-        display: inline-block;
-        border: 1px solid rgba(32, 58, 105, 0.2);
-        color: #203a69;
-        padding: 8px 16px;
-        border-radius: 50px;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 30px;
-        background: rgba(255, 255, 255, 0.3);
-        backdrop-filter: blur(5px);
-    }
-    .page-badge span {
-        color: #de9936; /* Amarillo Anaranjado — elegancia */
-        margin-right: 8px;
-    }
+    .page-hero-inner { max-width: 760px; }
     .page-hero h1 {
-        font-size: 5.5vw;
-        font-weight: 900;
-        line-height: 0.95;
-        text-transform: uppercase;
-        letter-spacing: -2px;
-        margin-bottom: 30px;
-        color: #203a69;
+        font-size: clamp(36px, 4.6vw, 56px);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -1px;
+        color: var(--c-text);
+        margin-bottom: 24px;
     }
-    .page-hero h1 span {
-        color: #d9622c;
-    }
+    .page-hero h1 span { color: var(--c-amber); }
     .page-hero p {
-        font-size: 19px;
-        color: #111820;
+        font-size: 18px;
         line-height: 1.7;
-        font-weight: 500;
+        color: var(--c-text-soft);
     }
 
     /* =========================================================
@@ -54,28 +36,23 @@
         width: 100vw;
         position: relative;
         left: 50%;
-        right: 50%;
         margin-left: -50vw;
-        margin-right: -50vw;
-        background: #d9622c;
-        transform: rotate(-1deg);
-        padding: 12px 0;
-        margin-bottom: 100px;
+        background: var(--c-orange);
+        padding: 14px 0;
         overflow: hidden;
-        box-shadow: 0 10px 30px rgba(217, 98, 44, 0.25);
+        margin-bottom: 72px;
     }
     .hash-track {
         display: flex;
         white-space: nowrap;
-        animation: scroll-hash 20s linear infinite;
+        animation: scroll-hash 26s linear infinite;
     }
     .hash-item {
-        color: #203a69;
-        font-weight: 900;
-        font-size: 16px;
-        text-transform: uppercase;
+        color: var(--c-navy);
+        font-weight: 800;
+        font-size: 15px;
         letter-spacing: 2px;
-        padding: 0 20px;
+        padding: 0 22px;
     }
     @keyframes scroll-hash {
         0% { transform: translateX(0); }
@@ -83,80 +60,20 @@
     }
 
     /* =========================================================
-       COMUNIDAD SOCIAL (Instagram embed) — mismo patrón que Home
+       GALERÍA
        ========================================================= */
-    .social-minimal-section {
-        background: rgba(255, 255, 255, 0.4);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        box-shadow: 0 10px 40px rgba(32, 58, 105, 0.05);
-        border-radius: 30px;
-        padding: 80px 60px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 60px;
-        align-items: center;
-        margin-bottom: 100px;
-    }
-    .social-text {
-        flex: 1;
-        min-width: 300px;
-    }
-    .social-text h2 {
-        font-size: 50px;
-        font-weight: 900;
-        color: #203a69;
-        line-height: 1;
-        margin-bottom: 20px;
-        letter-spacing: -2px;
-    }
-    .social-text p {
-        font-size: 18px;
-        color: #111820;
-        line-height: 1.6;
-        font-weight: 500;
-    }
-    .ig-glass-wrapper {
-        width: 100%;
-        max-width: 450px;
-        margin: 0 auto;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 20px 50px rgba(32, 58, 105, 0.15);
-        background: #ffffff;
-    }
-
-    /* =========================================================
-       GALERÍA (fotos reales de la liga)
-       ========================================================= */
-    .gallery-section {
-        margin-bottom: 100px;
-    }
-    .gallery-section h3 {
-        font-size: 14px;
-        color: #5d873d; /* Verde — organiza información */
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        margin-bottom: 40px;
-        border-bottom: 1px solid rgba(32, 58, 105, 0.1);
-        padding-bottom: 20px;
-    }
     .gallery-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: repeat(2, 200px);
-        gap: 16px;
+        grid-auto-rows: 220px;
+        gap: 14px;
     }
     .gallery-item {
-        border-radius: 16px;
+        border-radius: 8px;
         overflow: hidden;
-        position: relative;
+        border: 1px solid var(--c-line);
     }
-    .gallery-item:nth-child(1) { grid-column: 1 / 3; grid-row: 1; }
-    .gallery-item:nth-child(2) { grid-column: 3; grid-row: 1 / 3; }
-    .gallery-item:nth-child(3) { grid-column: 4; grid-row: 1 / 3; }
-    .gallery-item:nth-child(4) { grid-column: 1 / 3; grid-row: 2; }
+    .gallery-item:nth-child(1) { grid-column: span 2; grid-row: span 2; }
     .gallery-item img {
         width: 100%;
         height: 100%;
@@ -164,85 +81,140 @@
         display: block;
         transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .gallery-item:hover img {
-        transform: scale(1.06);
-    }
+    .gallery-item:hover img { transform: scale(1.05); }
 
     /* =========================================================
-       GRID DE PLATAFORMAS
+       PULSO DIGITAL
        ========================================================= */
-    .platforms-section h3 {
-        font-size: 14px;
-        color: #5d873d; /* Verde — organiza información */
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        margin-bottom: 40px;
-        border-bottom: 1px solid rgba(32, 58, 105, 0.1);
-        padding-bottom: 20px;
+    .social-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 56px;
+        align-items: center;
     }
+    .social-text h2 {
+        font-size: clamp(30px, 3.4vw, 42px);
+        font-weight: 800;
+        color: var(--c-text);
+        line-height: 1.1;
+        letter-spacing: -1px;
+        margin-bottom: 18px;
+    }
+    .social-text p {
+        font-size: 17px;
+        line-height: 1.7;
+        color: var(--c-text-muted);
+        margin-bottom: 26px;
+    }
+    .btn-ghost {
+        display: inline-block;
+        border: 1px solid var(--c-line);
+        color: var(--c-text);
+        padding: 13px 26px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: border-color 0.25s ease, color 0.25s ease, transform 0.12s ease;
+    }
+    .btn-ghost:hover { border-color: var(--c-amber); color: var(--c-amber); }
+    .btn-ghost:active { transform: scale(0.96); }
+
+    /* Ranura para el embed de la última publicación. */
+    .ig-slot {
+        border: 1px dashed var(--c-line);
+        border-radius: 8px;
+        background: var(--c-surface);
+        min-height: 360px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 32px;
+    }
+    .ig-slot-icon {
+        font-size: 34px;
+        color: var(--c-amber);
+        line-height: 1;
+        margin-bottom: 16px;
+    }
+    .ig-slot-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--c-text);
+        margin-bottom: 8px;
+    }
+    .ig-slot-text {
+        font-size: 14px;
+        color: var(--c-text-muted);
+        max-width: 260px;
+        margin-bottom: 16px;
+    }
+    .ig-slot a {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--c-amber);
+        text-decoration: none;
+    }
+    .ig-slot a:hover { text-decoration: underline; }
+
+    /* =========================================================
+       PLATAFORMAS
+       ========================================================= */
     .platforms-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 20px;
     }
     .platform-card {
-        background: rgba(255, 255, 255, 0.4);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        border-radius: 20px;
-        padding: 40px 20px;
+        background: var(--c-surface);
+        border: 1px solid var(--c-line);
+        border-radius: 8px;
+        padding: 38px 20px;
         text-align: center;
         text-decoration: none;
         display: block;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: border-color 0.3s ease, background 0.3s ease, transform 0.12s ease;
     }
     .platform-card:hover {
-        background: #d9622c;
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(217, 98, 44, 0.3);
-        border-color: #d9622c;
+        border-color: var(--c-amber);
+        background: rgba(var(--c-amber-rgb), 0.1);
     }
-    .platform-card:active {
-        transform: translateY(-8px) scale(0.96);
-        transition-duration: 0.1s;
-    }
+    .platform-card:active { transform: scale(0.97); }
     .platform-card h4 {
-        color: #203a69;
-        font-size: 20px;
-        font-weight: 900;
-        letter-spacing: 1px;
-        text-transform: uppercase;
+        color: var(--c-text);
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
     }
-    .platform-card:hover h4 {
-        color: #ffffff;
-    }
+    .platform-card:hover h4 { color: var(--c-amber); }
 
     /* =========================================================
        RESPONSIVE
        ========================================================= */
     @media (max-width: 900px) {
-        .page-hero h1 { font-size: 12vw; }
-        .social-minimal-section { padding: 40px 20px; flex-direction: column; text-align: center; }
-        .social-text h2 { font-size: 36px; }
+        .social-grid { grid-template-columns: 1fr; gap: 32px; }
         .platforms-grid { grid-template-columns: 1fr; }
         .gallery-grid {
             grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(3, 160px);
+            grid-auto-rows: 150px;
         }
-        .gallery-item:nth-child(1) { grid-column: 1 / 3; grid-row: 1; }
-        .gallery-item:nth-child(2) { grid-column: 1; grid-row: 2 / 4; }
-        .gallery-item:nth-child(3) { grid-column: 2; grid-row: 2 / 4; }
-        .gallery-item:nth-child(4) { display: none; }
+        .hash-tape { margin-bottom: 48px; }
     }
 </style>
 
 <!-- HERO -->
-<div class="page-hero">
-    <div class="page-badge"><span>●</span> Comunidad Digital</div>
-    <h1>Nexo <span>Digital</span></h1>
-    <p>La conversación de la LMVE no termina en la cancha. Así es como conectamos con atletas, familias y colegios en nuestros canales digitales.</p>
-</div>
+<section class="page-hero">
+    <div class="page-hero-inner">
+        <div class="section-label">// Comunidad Digital</div>
+        <h1>La comunidad <span>de la Liga</span></h1>
+        <p>
+            La conversación no termina en la cancha. Así es como conectamos con
+            atletas, familias y colegios fuera del recinto.
+        </p>
+    </div>
+</section>
 
 <!-- CINTA DE HASHTAGS -->
 <div class="hash-tape">
@@ -263,45 +235,75 @@
 </div>
 
 <!-- GALERÍA -->
-<div class="gallery-section">
-    <h3>// Así se Vive la Liga</h3>
+<section class="page-wrap" style="padding-top: 0;">
+    <div class="section-label">// Así se vive la Liga</div>
     <div class="gallery-grid">
-        <div class="gallery-item"><img src="{% static 'core/img/fotos/galeria-1.jpg' %}" alt="Armadora en plena jugada durante un partido de la LMVE"></div>
-        <div class="gallery-item"><img src="{% static 'core/img/fotos/galeria-3.jpg' %}" alt="Saque de salto durante un partido de la LMVE"></div>
-        <div class="gallery-item"><img src="{% static 'core/img/fotos/galeria-2.jpg' %}" alt="Bloqueo en la red durante un partido de la LMVE"></div>
-        <div class="gallery-item"><img src="{% static 'core/img/fotos/galeria-4.jpg' %}" alt="Remate en la red durante un partido de la LMVE"></div>
+        <div class="gallery-item"><img src="{% static 'core/img/fotos/galeria-1.jpg' %}" alt="Armado en zona de red durante un partido de la Liga"></div>
+        <div class="gallery-item"><img src="{% static 'core/img/fotos/galeria-3.jpg' %}" alt="Saque de salto durante un partido de la Liga"></div>
+        <div class="gallery-item"><img src="{% static 'core/img/fotos/galeria-2.jpg' %}" alt="Bloqueo en la red durante un partido de la Liga"></div>
+        <div class="gallery-item"><img src="{% static 'core/img/fotos/galeria-4.jpg' %}" alt="Remate en la red durante un partido de la Liga"></div>
     </div>
-</div>
+</section>
 
-<!-- COMUNIDAD SOCIAL -->
-<div class="social-minimal-section">
-    <div class="social-text">
-        <h2>PULSO<br>DIGITAL</h2>
-        <p>Revisa la interacción diaria con nuestros atletas, coberturas de partidos y momentos destacados compartidos directamente desde nuestro Instagram oficial.</p>
-    </div>
+<!-- PULSO DIGITAL -->
+<section class="page-wrap" style="padding-top: 0;">
+    <div class="social-grid">
+        <div class="social-text">
+            <div class="section-label">// Pulso digital</div>
+            <h2>La Liga, día a día</h2>
+            <p>
+                Cobertura de partidos, jugadas destacadas y momentos que las
+                familias comparten cada temporada. Todo eso vive en nuestro
+                Instagram oficial.
+            </p>
+            <a href="https://www.instagram.com/ligametropolitanavoley/" target="_blank" rel="noopener" class="btn-ghost">
+                Seguir a @ligametropolitanavoley
+            </a>
+        </div>
 
-    <div class="ig-glass-wrapper">
-        <!-- ========================================== -->
-        <!-- PEGA TU CÓDIGO DE INSTAGRAM AQUÍ -->
-        <!-- ========================================== -->
+        {% comment %}
+        RANURA DE LA ÚLTIMA PUBLICACIÓN DE INSTAGRAM
+
+        El embed oficial de Instagram (gratuito) solo funciona con la URL
+        de UNA publicación concreta, no con la del perfil. Para actualizarlo:
+
+          1. Abrir la publicación en instagram.com/ligametropolitanavoley
+          2. Menú "..." -> "Insertar" -> "Copiar código de inserción"
+          3. Reemplazar TODO el bloque .ig-slot de abajo por ese código
+          4. Dejar el script de embed.js que ya está al final de este archivo
+
+        No requiere programar: es copiar y pegar.
+        {% endcomment %}
+        <div class="ig-slot">
+            <div class="ig-slot-icon">◎</div>
+            <p class="ig-slot-title">Última publicación</p>
+            <p class="ig-slot-text">
+                Aquí se muestra la publicación más reciente de la Liga.
+            </p>
+            <a href="https://www.instagram.com/ligametropolitanavoley/" target="_blank" rel="noopener">
+                @ligametropolitanavoley
+            </a>
+        </div>
     </div>
-</div>
+</section>
 
 <!-- PLATAFORMAS -->
-<div class="platforms-section">
-    <h3>// Encuéntranos en</h3>
+<section class="page-wrap" style="padding-top: 0;">
+    <div class="section-label">// Encuéntranos en</div>
     <div class="platforms-grid">
-        <a href="#" class="platform-card">
+        <a href="https://www.instagram.com/ligametropolitanavoley/" target="_blank" rel="noopener" class="platform-card">
             <h4>Instagram</h4>
         </a>
         <a href="#" class="platform-card">
             <h4>TikTok</h4>
         </a>
         <a href="#" class="platform-card">
-            <h4>YouTube / Twitch</h4>
+            <h4>YouTube</h4>
         </a>
     </div>
-</div>
+</section>
+{% endblock %}
 
+{% block scripts %}
 <script async src="//www.instagram.com/embed.js"></script>
 {% endblock %}

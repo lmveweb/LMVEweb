@@ -1,234 +1,156 @@
 {% extends "core/base.html" %}
 {% load static %}
 
+{% block title %}Impacto | LMVE{% endblock %}
+
 {% block content %}
 <style>
     /* =========================================================
-       HERO DE PÁGINA
+       HERO
        ========================================================= */
     .page-hero {
-        margin-bottom: 80px;
-        max-width: 800px;
+        max-width: var(--page-max);
+        margin: 0 auto;
+        padding: 72px var(--page-pad) 56px var(--page-pad);
     }
-    .page-badge {
-        display: inline-block;
-        border: 1px solid rgba(32, 58, 105, 0.2);
-        color: #203a69;
-        padding: 8px 16px;
-        border-radius: 50px;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 30px;
-        background: rgba(255, 255, 255, 0.3);
-        backdrop-filter: blur(5px);
-    }
-    .page-badge span {
-        color: #de9936; /* Amarillo Anaranjado — elegancia */
-        margin-right: 8px;
-    }
+    .page-hero-inner { max-width: 760px; }
     .page-hero h1 {
-        font-size: 5.5vw;
-        font-weight: 900;
-        line-height: 0.95;
-        text-transform: uppercase;
-        letter-spacing: -2px;
-        margin-bottom: 30px;
-        color: #203a69;
+        font-size: clamp(36px, 4.6vw, 56px);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -1px;
+        color: var(--c-text);
+        margin-bottom: 24px;
     }
-    .page-hero h1 span {
-        color: #d9622c;
-    }
+    .page-hero h1 span { color: var(--c-amber); }
     .page-hero p {
-        font-size: 19px;
-        color: #111820;
+        font-size: 18px;
         line-height: 1.7;
-        font-weight: 500;
+        color: var(--c-text-soft);
     }
 
     /* =========================================================
-       BENTO GRID DE CIFRAS (mismo lenguaje que Home)
+       CIFRAS
        ========================================================= */
-    .glass-grid {
+    .cifras-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 20px;
-        margin-bottom: 30px;
     }
-    .glass-card {
-        background: rgba(255, 255, 255, 0.4);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        border-radius: 20px;
-        padding: 40px;
-        box-shadow: 0 10px 30px rgba(32, 58, 105, 0.03);
-        transition: transform 0.4s ease, background 0.4s ease, box-shadow 0.4s ease;
+    .cifra-card {
+        background: var(--c-surface);
+        border: 1px solid var(--c-line);
+        border-top: 3px solid var(--c-amber);
+        border-radius: 0 0 8px 8px;
+        padding: 28px 26px;
     }
-    .glass-card:hover {
-        background: rgba(255, 255, 255, 0.8);
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(32, 58, 105, 0.08);
-        border-color: rgba(217, 98, 44, 0.3);
-    }
-    .glass-card.span-2 {
-        grid-column: span 2;
-    }
-    .glass-card h4 {
+    .cifra-card.span-2 { grid-column: span 2; }
+    .cifra-card h4 {
         font-size: 12px;
-        font-weight: 800;
-        color: #64717e;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 20px;
+        letter-spacing: 1.8px;
+        color: var(--c-text-muted);
+        margin-bottom: 14px;
     }
-    .glass-num {
-        font-size: 64px;
-        font-weight: 900;
+    .cifra-num {
+        font-size: 52px;
+        font-weight: 800;
         line-height: 1;
-        color: #203a69;
-        margin-bottom: 10px;
-        letter-spacing: -2px;
+        letter-spacing: -1.5px;
+        color: var(--c-text);
+        margin-bottom: 12px;
     }
-    .glass-num span {
-        color: #de9936; /* Amarillo Anaranjado — elegancia */
-    }
-    .glass-card p {
-        color: #111820;
-        font-size: 16px;
-        line-height: 1.6;
-        font-weight: 500;
+    .cifra-card p {
+        font-size: 15px;
+        line-height: 1.65;
+        color: var(--c-text-muted);
     }
     .plantel-note {
-        color: #64717e;
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 120px;
-        max-width: 700px;
+        margin-top: 22px;
+        font-size: 15px;
+        color: var(--c-text-muted);
+        line-height: 1.7;
     }
-    .plantel-note strong {
-        color: #203a69;
-    }
+    .plantel-note strong { color: var(--c-amber); }
 
     /* =========================================================
-       AUDIENCIA (texto cualitativo, sin cifras inventadas)
+       AUDIENCIA
        ========================================================= */
-    .audiencia-section {
-        margin-bottom: 120px;
-    }
-    .audiencia-section h3 {
-        font-size: 14px;
-        color: #5d873d; /* Verde — organiza información */
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        margin-bottom: 40px;
-        border-bottom: 1px solid rgba(32, 58, 105, 0.1);
-        padding-bottom: 20px;
-    }
     .audiencia-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: repeat(3, 1fr);
         gap: 40px;
     }
+    .audiencia-item {
+        border-top: 2px solid rgba(255, 255, 255, 0.35);
+        padding-top: 22px;
+    }
     .audiencia-item h4 {
-        font-size: 22px;
-        font-weight: 900;
-        color: #203a69;
+        font-size: 21px;
+        font-weight: 700;
+        color: var(--c-text);
         margin-bottom: 12px;
-        text-transform: uppercase;
-        letter-spacing: -0.5px;
     }
     .audiencia-item p {
-        color: #111820;
         font-size: 15px;
         line-height: 1.7;
-        font-weight: 500;
+        color: rgba(255, 255, 255, 0.86);
     }
 
     /* =========================================================
-       ZONAS DE INTEGRACIÓN DE MARCA (ROI)
+       ZONAS DE INTEGRACIÓN DE MARCA
        ========================================================= */
-    .roi-section h3 {
-        font-size: 14px;
-        color: #5d873d; /* Verde — organiza información */
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        margin-bottom: 40px;
-        border-bottom: 1px solid rgba(32, 58, 105, 0.1);
-        padding-bottom: 20px;
-    }
     .roi-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
+        gap: 24px;
     }
     .roi-card {
-        background: rgba(255, 255, 255, 0.4);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        border-radius: 20px;
-        padding: 36px 30px;
-        transition: transform 0.4s ease, box-shadow 0.4s ease;
+        background: var(--c-surface);
+        border: 1px solid var(--c-line);
+        border-radius: 8px;
+        padding: 30px 26px;
     }
-    .roi-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(32, 58, 105, 0.08);
-        border-color: rgba(217, 98, 44, 0.3);
-    }
-    .roi-icon-wrap {
-        width: 50px;
-        height: 50px;
-        background: rgba(217, 98, 44, 0.08);
-        border: 1px solid rgba(217, 98, 44, 0.3);
-        border-radius: 12px;
-        display: flex;
+    .roi-icon {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 20px;
+        width: 52px;
+        height: 52px;
+        border-radius: 8px;
+        background: rgba(var(--c-amber-rgb), 0.14);
+        border: 1px solid rgba(var(--c-amber-rgb), 0.4);
+        font-size: 22px;
+        margin-bottom: 18px;
     }
-    .roi-icon { font-size: 22px; }
     .roi-card h4 {
-        color: #203a69;
-        font-size: 17px;
-        margin-bottom: 12px;
-        text-transform: uppercase;
-        letter-spacing: -0.3px;
+        font-size: 19px;
+        font-weight: 700;
+        color: var(--c-text);
+        margin-bottom: 10px;
     }
     .roi-card p {
-        color: #111820;
-        font-size: 14px;
+        font-size: 15px;
         line-height: 1.7;
-        font-weight: 500;
+        color: var(--c-text-muted);
     }
 
     /* =========================================================
-       EVIDENCIA REAL (fotos de la liga)
+       EVIDENCIA
        ========================================================= */
-    .evidencia-section {
-        margin-top: 100px;
-    }
-    .evidencia-section h3 {
-        font-size: 14px;
-        color: #5d873d; /* Verde — organiza información */
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        margin-bottom: 40px;
-        border-bottom: 1px solid rgba(32, 58, 105, 0.1);
-        padding-bottom: 20px;
-    }
     .evidencia-grid {
         display: grid;
         grid-template-columns: 2fr 1fr;
-        gap: 20px;
+        gap: 18px;
     }
     .evidencia-card {
         position: relative;
-        border-radius: 20px;
+        border-radius: 8px;
         overflow: hidden;
         height: 340px;
-        box-shadow: 0 10px 30px rgba(32, 58, 105, 0.08);
+        margin: 0;
+        border: 1px solid var(--c-line);
     }
     .evidencia-card img {
         width: 100%;
@@ -237,30 +159,44 @@
         display: block;
         transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .evidencia-card:hover img {
-        transform: scale(1.05);
-    }
+    .evidencia-card:hover img { transform: scale(1.05); }
     .evidencia-card figcaption {
         position: absolute;
         left: 0;
         right: 0;
         bottom: 0;
         padding: 24px 22px;
-        background: linear-gradient(0deg, rgba(15, 23, 42, 0.75) 0%, rgba(15, 23, 42, 0) 100%);
-        color: #ffffff;
+        background: linear-gradient(0deg, rgba(var(--c-navy-rgb), 0.95) 0%, rgba(var(--c-navy-rgb), 0) 100%);
+        color: var(--c-text);
         font-size: 14px;
         font-weight: 600;
         line-height: 1.5;
     }
 
     /* =========================================================
+       CIERRE
+       ========================================================= */
+    .impacto-cta .band-inner { text-align: center; }
+    .impacto-cta h2 {
+        font-size: clamp(24px, 2.8vw, 34px);
+        font-weight: 700;
+        color: var(--c-text);
+        margin-bottom: 16px;
+    }
+    .impacto-cta p {
+        font-size: 17px;
+        color: rgba(255, 255, 255, 0.88);
+        max-width: 600px;
+        margin: 0 auto 28px auto;
+    }
+
+    /* =========================================================
        RESPONSIVE
        ========================================================= */
     @media (max-width: 900px) {
-        .page-hero h1 { font-size: 12vw; }
-        .glass-grid { grid-template-columns: 1fr; }
-        .glass-card.span-2 { grid-column: span 1; }
-        .audiencia-grid { grid-template-columns: 1fr; gap: 30px; }
+        .cifras-grid { grid-template-columns: 1fr; }
+        .cifra-card.span-2 { grid-column: span 1; }
+        .audiencia-grid { grid-template-columns: 1fr; gap: 28px; }
         .roi-grid { grid-template-columns: 1fr; }
         .evidencia-grid { grid-template-columns: 1fr; }
         .evidencia-card { height: 260px; }
@@ -268,96 +204,138 @@
 </style>
 
 <!-- HERO -->
-<div class="page-hero">
-    <div class="page-badge"><span>●</span> Temporada 2026</div>
-    <h1>LMVE en <span>Cifras</span></h1>
-    <p>Hoy la LMVE es una de las ligas escolares más competitivas y con mayor convocatoria a nivel nacional. Estos son los números que respaldan nuestra propuesta.</p>
-</div>
+<section class="page-hero">
+    <div class="page-hero-inner">
+        <div class="section-label">// Temporada 2026</div>
+        <h1>La Liga en <span>cifras</span></h1>
+        <p>
+            Hoy la Liga es una de las competencias escolares de voleibol con
+            mayor convocatoria de la Región Metropolitana. Estos son los números
+            de la temporada.
+        </p>
+    </div>
+</section>
 
-<!-- BENTO GRID DE CIFRAS -->
-<div class="glass-grid">
-    <div class="glass-card span-2">
-        <h4>Atletas Participantes</h4>
-        <div class="glass-num">+2.500<span>.</span></div>
-        <p>Estudiantes-deportistas activos en la liga, temporada 2026.</p>
+<!-- CIFRAS -->
+<section class="page-wrap" style="padding-top: 0;">
+    <div class="cifras-grid">
+        <div class="cifra-card span-2">
+            <h4>Atletas participantes</h4>
+            <div class="cifra-num">+2.500</div>
+            <p>Estudiantes-deportistas activos en la liga, temporada 2026.</p>
+        </div>
+        <div class="cifra-card">
+            <h4>Equipos en competencia</h4>
+            <div class="cifra-num">60</div>
+            <p>42 equipos femeninos y 18 masculinos y mixtos.</p>
+        </div>
+        <div class="cifra-card">
+            <h4>Categoría Sub-14</h4>
+            <div class="cifra-num">~850</div>
+            <p>Atletas compitiendo en esta categoría.</p>
+        </div>
+        <div class="cifra-card">
+            <h4>Categoría Sub-16</h4>
+            <div class="cifra-num">~900</div>
+            <p>Atletas compitiendo en esta categoría.</p>
+        </div>
+        <div class="cifra-card">
+            <h4>Categoría Sub-18</h4>
+            <div class="cifra-num">~750</div>
+            <p>Atletas compitiendo en esta categoría.</p>
+        </div>
     </div>
-    <div class="glass-card">
-        <h4>Equipos en Competencia</h4>
-        <div class="glass-num">60<span>.</span></div>
-        <p>42 equipos femeninos y 18 masculinos y mixtos.</p>
-    </div>
-    <div class="glass-card">
-        <h4>Categoría Sub-14</h4>
-        <div class="glass-num">~850<span>.</span></div>
-        <p>Atletas compitiendo en esta categoría.</p>
-    </div>
-    <div class="glass-card">
-        <h4>Categoría Sub-16</h4>
-        <div class="glass-num">~900<span>.</span></div>
-        <p>Atletas compitiendo en esta categoría.</p>
-    </div>
-    <div class="glass-card">
-        <h4>Categoría Sub-18</h4>
-        <div class="glass-num">~750<span>.</span></div>
-        <p>Atletas compitiendo en esta categoría.</p>
-    </div>
-</div>
-<p class="plantel-note">Cada equipo cuenta con planteles de <strong>15 a 18 jugadores</strong>, sumados a sus respectivos cuerpos técnicos.</p>
+    <p class="plantel-note">
+        Cada equipo cuenta con planteles de <strong>15 a 18 jugadores</strong>,
+        sumados a sus respectivos cuerpos técnicos.
+    </p>
+</section>
 
 <!-- AUDIENCIA -->
-<div class="audiencia-section">
-    <h3>// Nuestra Audiencia</h3>
-    <div class="audiencia-grid">
-        <div class="audiencia-item">
-            <h4>Atletas</h4>
-            <p>Jóvenes deportistas que viven la competencia semana a semana y son el corazón de la liga.</p>
-        </div>
-        <div class="audiencia-item">
-            <h4>Familias</h4>
-            <p>Apoderados y núcleos familiares que acompañan cada partido, con alta lealtad hacia sus equipos.</p>
-        </div>
-        <div class="audiencia-item">
-            <h4>Comunidad Educativa</h4>
-            <p>Colegios, profesores y entorno escolar que siguen de cerca el desempeño de sus representantes.</p>
+<section class="band-blue">
+    <div class="band-inner">
+        <div class="section-label">// Nuestra Audiencia</div>
+        <div class="audiencia-grid">
+            <div class="audiencia-item">
+                <h4>Atletas</h4>
+                <p>
+                    Jóvenes deportistas que viven la competencia semana a semana
+                    y son el corazón de la liga.
+                </p>
+            </div>
+            <div class="audiencia-item">
+                <h4>Familias</h4>
+                <p>
+                    Apoderados y núcleos familiares que acompañan cada partido,
+                    con alta lealtad hacia sus equipos.
+                </p>
+            </div>
+            <div class="audiencia-item">
+                <h4>Comunidad educativa</h4>
+                <p>
+                    Colegios, profesores y entorno escolar que siguen de cerca el
+                    desempeño de sus representantes.
+                </p>
+            </div>
         </div>
     </div>
-</div>
+</section>
 
 <!-- ZONAS DE INTEGRACIÓN DE MARCA -->
-<div class="roi-section">
-    <h3>// Zonas de Integración de Marca</h3>
+<section class="page-wrap">
+    <div class="section-label">// Zonas de integración de marca</div>
     <div class="roi-grid">
         <div class="roi-card">
-            <div class="roi-icon-wrap"><span class="roi-icon">👕</span></div>
-            <h4>Indumentaria Oficial</h4>
-            <p>Logotipo posicionado estratégicamente en las camisetas de los equipos, asegurando visibilidad en cada fotografía y partido.</p>
+            <span class="roi-icon">👕</span>
+            <h4>Indumentaria oficial</h4>
+            <p>
+                Logotipo posicionado estratégicamente en las camisetas de los
+                equipos, asegurando visibilidad en cada fotografía y partido.
+            </p>
         </div>
         <div class="roi-card">
-            <div class="roi-icon-wrap"><span class="roi-icon">🏟️</span></div>
-            <h4>Naming & Branding Físico</h4>
-            <p>Presencia en recintos deportivos: lienzos perimetrales, banners y módulos de activación de marca durante los encuentros.</p>
+            <span class="roi-icon">🏟️</span>
+            <h4>Presencia en recintos</h4>
+            <p>
+                Lienzos perimetrales, banners y módulos de activación de marca
+                durante los encuentros.
+            </p>
         </div>
         <div class="roi-card">
-            <div class="roi-icon-wrap"><span class="roi-icon">📱</span></div>
-            <h4>Ecosistema Digital</h4>
-            <p>Menciones cruzadas, presencia en resultados y contenido patrocinado en los canales digitales oficiales de la liga.</p>
+            <span class="roi-icon">📱</span>
+            <h4>Ecosistema digital</h4>
+            <p>
+                Menciones cruzadas, presencia en resultados y contenido
+                patrocinado en los canales digitales oficiales de la liga.
+            </p>
         </div>
     </div>
-</div>
+</section>
 
-<!-- EVIDENCIA REAL -->
-<div class="evidencia-section">
-    <h3>// Esto Ya Está Pasando</h3>
+<!-- EVIDENCIA -->
+<section class="page-wrap" style="padding-top: 0;">
+    <div class="section-label">// Esto ya está pasando</div>
     <div class="evidencia-grid">
         <figure class="evidencia-card">
-            <img src="{% static 'core/img/fotos/impacto-banner-sponsor.jpg' %}" alt="Banner de sponsor oficial en el gimnasio durante un partido de la LMVE">
+            <img src="{% static 'core/img/fotos/impacto-banner-sponsor.jpg' %}" alt="Presencia de marca en un recinto durante un partido de la Liga">
             <figcaption>Presencia de marca en recintos deportivos durante los encuentros oficiales.</figcaption>
         </figure>
         <figure class="evidencia-card">
-            <img src="{% static 'core/img/fotos/impacto-reconocimiento.jpg' %}" alt="Ceremonia de reconocimiento junto a colaboradores de la LMVE">
+            <img src="{% static 'core/img/fotos/impacto-reconocimiento.jpg' %}" alt="Ceremonia de reconocimiento junto a colaboradores de la Liga">
             <figcaption>Ceremonias de reconocimiento junto a nuestros colaboradores.</figcaption>
         </figure>
     </div>
-</div>
+</section>
 
+<!-- CIERRE -->
+<section class="band-blue impacto-cta">
+    <div class="band-inner">
+        <h2>¿Quieres que tu marca sea parte?</h2>
+        <p>
+            Conversemos sobre cómo integrar tu marca a la temporada y al camino
+            de la Liga rumbo a sus 40 años.
+        </p>
+        <a href="{% url 'contacto' %}" class="btn-cta">Auspiciar la Liga</a>
+    </div>
+</section>
 {% endblock %}
