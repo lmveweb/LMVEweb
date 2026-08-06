@@ -7,9 +7,9 @@
 <style>
     /* =========================================================
        HERO CON VIDEO DE FONDO
-       El video ocupa todo el ancho y se reconstruye como un tifo de
-       gradería: cartulinas con los colores de la Liga. Lo dibuja el
-       script del final del archivo.
+       El video ocupa todo el ancho, proyectado sobre una bandera que
+       ondea, como un lienzo de la afición. La dibuja el script del
+       final del archivo.
        ========================================================= */
     .hero {
         position: relative;
@@ -33,8 +33,8 @@
         filter: saturate(0.7) contrast(1.05);
     }
     /* Lavado para que el texto se lea. Cierra a la izquierda, donde va
-       el texto, y se abre casi del todo a la derecha: el tifo ya viene
-       en los colores de la Liga, así que no necesita teñirse más. */
+       el texto, y se abre casi del todo a la derecha para que la
+       bandera se luzca. */
     .hero-lavado {
         position: absolute;
         inset: 0;
@@ -44,39 +44,21 @@
             rgba(var(--c-navy-rgb), 0.42) 62%,
             rgba(var(--c-navy-rgb), 0.06) 100%);
     }
-    /* Tifo: el video reconstruido en baldosas con los colores de la
-       Liga, como una gradería levantando cartulinas. Lo dibuja el
-       script del final del archivo. */
-    .hero-tifo {
+    /* Bandera: el video se dibuja deformado sobre una tela que ondea,
+       como un lienzo de la afición. Lo dibuja el script del final. */
+    .hero-bandera {
         position: absolute;
         inset: 0;
         width: 100%;
         height: 100%;
-        /* El lienzo es diminuto y el navegador lo amplía sin suavizar:
-           así cada píxel queda convertido en una cartulina. */
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
         opacity: 0;
-        transition: opacity 1.2s ease;
+        transition: opacity 1s ease;
         pointer-events: none;
     }
-    .hero.tifo-listo .hero-tifo { opacity: 1; }
-    /* Mientras el tifo no está armado se ve el video tal cual, así que
+    .hero.bandera-lista .hero-bandera { opacity: 1; }
+    /* Mientras la tela no está lista se ve el video tal cual, así que
        no hay un salto en blanco al cargar. */
-
-    /* Junta entre cartulinas. Es una rejilla CSS encima: no cuesta
-       nada por fotograma. --baldosa la calcula el script. */
-    .hero-junta {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        opacity: 0;
-        transition: opacity 1.2s ease;
-        background-image:
-            repeating-linear-gradient(90deg, rgba(var(--c-navy-rgb), 0.85) 0 1px, transparent 1px var(--baldosa, 28px)),
-            repeating-linear-gradient(0deg,  rgba(var(--c-navy-rgb), 0.85) 0 1px, transparent 1px var(--baldosa, 28px));
-    }
-    .hero.tifo-listo .hero-junta { opacity: 0.35; }
+    .hero.bandera-lista .hero-video { opacity: 0; }
 
     .hero-contenido {
         position: relative;
@@ -500,8 +482,7 @@
            poster="{% static 'core/img/fotos/galeria-1.jpg' %}"
            muted playsinline loop preload="auto" aria-hidden="true"></video>
 
-    <canvas class="hero-tifo" id="heroTifo" aria-hidden="true"></canvas>
-    <div class="hero-junta" id="heroJunta" aria-hidden="true"></div>
+    <canvas class="hero-bandera" id="heroBandera" aria-hidden="true"></canvas>
     <div class="hero-lavado"></div>
 
     <div class="hero-contenido">
@@ -771,62 +752,57 @@
 {% block scripts %}
 <script async src="//www.instagram.com/embed.js"></script>
 
-<!-- TIFO DEL HERO -->
+<!-- BANDERA DEL HERO -->
 <script>
 (function () {
     var hero   = document.getElementById('hero');
     var video  = document.getElementById('heroVideo');
-    var lienzo = document.getElementById('heroTifo');
-    var junta  = document.getElementById('heroJunta');
-    if (!hero || !video || !lienzo || !junta) return;
+    var lienzo = document.getElementById('heroBandera');
+    if (!hero || !video || !lienzo) return;
 
-    var ctx = lienzo.getContext('2d', { willReadFrequently: true });
+    var ctx = lienzo.getContext('2d');
     if (!ctx) return;
 
     var sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Cartulinas de unos 30px: lo bastante grandes para leerse como
-    // tifo y lo bastante pocas para que no aparezca el hormigueo de
-    // detalle fino, que es justo lo que marea.
-    var LADO_BALDOSA = 30;
+    // La tela se arma con franjas verticales: cada una se dibuja
+    // desplazada hacia arriba o abajo según una onda que viaja. Cuantas
+    // menos franjas, más barato; a 6px la curva ya se ve continua.
+    // ANCHO_FRANJA y ONDAS se ajustan al ancho en medir(): con los
+    // mismos valores en una pantalla angosta la onda cambia demasiado
+    // rápido de una franja a la otra y la tela se ve escalonada.
+    var ANCHO_FRANJA = 6;
+    var ONDAS = 2.1;          // pliegues a lo ancho
+    var AMPLITUD = 0.075;     // alto del pliegue, en proporción del alto
+    var VELOCIDAD = 0.00028;  // lenta a propósito
+    var SOMBRA = 0.30;        // cuánto marca el volumen de la tela
 
-    // Rampa de la Liga: cada cartulina toma el color de la paleta que
-    // corresponde a la luminosidad de esa zona del video.
-    var RAMPA = [
-        [ 12,  32,  74],
-        [ 22,  62, 115],   // #163E73
-        [242,  98,  15],   // #F2620F
-        [242, 164,  19],   // #F2A413
-        [255, 244, 214]
-    ];
-
-    var cols = 1, filas = 1;
-    var actual = null;       // color mostrado (se acerca al objetivo de a poco)
-    var nivelBajo = 0.05, nivelAlto = 0.95;
-    var BINS = 48, histo = new Uint16Array(BINS), lums = null;
+    var W = 0, H = 0, escala = 1;
     var activo = false, ultimo = 0;
-
-    // Se dibuja a ~20 cuadros por segundo en vez de 60: el tifo cambia
-    // con calma y de paso se gasta bastante menos batería.
-    var MS_ENTRE_CUADROS = 50;
-    // Cada cartulina avanza solo una fracción hacia su nuevo color, así
-    // el cambio es un desvanecido y nunca un parpadeo.
-    var SUAVIDAD = 0.12;
+    var MS_ENTRE_CUADROS = 33;   // ~30 cuadros por segundo
 
     function medir() {
-        cols  = Math.max(8, Math.round(hero.clientWidth  / LADO_BALDOSA));
-        filas = Math.max(6, Math.round(hero.clientHeight / LADO_BALDOSA));
-        lienzo.width = cols;
-        lienzo.height = filas;
-        actual = null;
-        hero.style.setProperty('--baldosa', (hero.clientWidth / cols).toFixed(2) + 'px');
+        // Se dibuja a media resolución: es un fondo tras un velo, así
+        // que no se nota y cuesta la mitad.
+        escala = Math.min(1, 900 / Math.max(1, hero.clientWidth));
+        W = Math.max(320, Math.round(hero.clientWidth * escala));
+        H = Math.max(240, Math.round(hero.clientHeight * escala));
+        lienzo.width = W;
+        lienzo.height = H;
+
+        // Menos pliegues y franjas más finas cuando hay poco ancho: así
+        // el desnivel entre franjas vecinas se mantiene suave y la tela
+        // no se ve escalonada.
+        ONDAS = Math.max(1.1, Math.min(2.2, W / 700));
+        ANCHO_FRANJA = W < 560 ? 3 : 6;
+        AMPLITUD = W < 560 ? 0.05 : 0.075;
     }
 
-    // Recorta el fotograma para llenar el hero sin deformar el video.
-    function recorte() {
+    // Recorte del video para llenar el lienzo sin deformarlo.
+    function recorte(alto) {
         var vw = video.videoWidth, vh = video.videoHeight;
         if (!vw || !vh) return null;
-        var destino = cols / filas, origen = vw / vh;
+        var destino = W / alto, origen = vw / vh;
         if (origen > destino) {
             var w = vh * destino;
             return [(vw - w) / 2, 0, w, vh];
@@ -835,56 +811,61 @@
         return [0, (vh - h) / 2, vw, h];
     }
 
-    function pintar(instantaneo) {
-        var r = recorte();
+    function pintar(tiempo) {
+        var amp = H * AMPLITUD;
+        // Se dibuja la tela más alta que el lienzo para que al
+        // desplazar las franjas no asome el fondo por los bordes.
+        var altoTela = H + amp * 3;
+        var r = recorte(altoTela);
         if (!r) return false;
-        ctx.drawImage(video, r[0], r[1], r[2], r[3], 0, 0, cols, filas);
 
-        var datos = ctx.getImageData(0, 0, cols, filas);
-        var p = datos.data, n = p.length / 4;
-        if (!lums || lums.length !== n) lums = new Float32Array(n);
-        histo.fill(0);
+        ctx.clearRect(0, 0, W, H);
 
-        for (var i = 0, k = 0; i < p.length; i += 4, k++) {
-            var lum = (p[i] * 0.2126 + p[i + 1] * 0.7152 + p[i + 2] * 0.0722) / 255;
-            lums[k] = lum;
-            var bin = (lum * (BINS - 1)) | 0;
-            histo[bin < 0 ? 0 : (bin > BINS - 1 ? BINS - 1 : bin)]++;
-        }
+        var t = tiempo * VELOCIDAD;
+        var franjas = Math.ceil(W / ANCHO_FRANJA);
+        var TAU = Math.PI * 2;
 
-        // Percentiles 6% y 94%: el video alterna escenas claras y
-        // oscuras, y sin esto las oscuras quedaban como una mancha azul.
-        var corte = n * 0.06, acum = 0, bajo = 0, alto = BINS - 1, j;
-        for (j = 0; j < BINS; j++) { acum += histo[j]; if (acum >= corte) { bajo = j; break; } }
-        acum = 0;
-        for (j = BINS - 1; j >= 0; j--) { acum += histo[j]; if (acum >= corte) { alto = j; break; } }
+        for (var i = 0; i < franjas; i++) {
+            var x = i * ANCHO_FRANJA;
+            var u = x / W;
 
-        var objBajo = bajo / (BINS - 1), objAlto = alto / (BINS - 1);
-        if (objAlto - objBajo < 0.12) objAlto = objBajo + 0.12;
-        if (instantaneo) { nivelBajo = objBajo; nivelAlto = objAlto; }
-        else {
-            nivelBajo += (objBajo - nivelBajo) * 0.05;
-            nivelAlto += (objAlto - nivelAlto) * 0.05;
-        }
+            // El borde izquierdo hace de amarre, como si la bandera
+            // estuviera sujeta ahí: casi no se mueve y suelta hacia
+            // la derecha.
+            var amarre = Math.pow(u, 0.75);
 
-        var rango = Math.max(0.08, nivelAlto - nivelBajo);
-        var tope = RAMPA.length - 1;
-        if (!actual || actual.length !== n * 3) { actual = new Float32Array(n * 3); instantaneo = true; }
-        var mezcla = instantaneo ? 1 : SUAVIDAD;
+            var fase = u * ONDAS * TAU - t;
+            // Dos frecuencias en vez de una: el ondeo deja de parecer
+            // una onda de reloj y se ve como tela.
+            var onda = Math.sin(fase) + 0.45 * Math.sin(fase * 0.5 + t * 0.6);
+            var dy = amp * amarre * onda;
 
-        for (var q = 0, m = 0; q < p.length; q += 4, m++) {
-            var v = (lums[m] - nivelBajo) / rango;
-            v = v < 0 ? 0 : (v > 1 ? 1 : v);
-            var pos = v * tope;
-            var a = pos | 0, b = a + 1 > tope ? tope : a + 1, t = pos - a;
-            var d = m * 3;
-            for (var c = 0; c < 3; c++) {
-                var objetivo = RAMPA[a][c] + (RAMPA[b][c] - RAMPA[a][c]) * t;
-                actual[d + c] += (objetivo - actual[d + c]) * mezcla;
-                p[q + c] = actual[d + c];
+            // La pendiente de la onda indica hacia dónde mira la tela:
+            // con eso se ilumina o se sombrea. Esto es lo que hace que
+            // se lea como género y no como agua.
+            var pendiente = Math.cos(fase) * amarre;
+
+            var sx = r[0] + (x / W) * r[2];
+            var sw = Math.max(1, (ANCHO_FRANJA / W) * r[2]);
+
+            // Todas las franjas conservan el mismo alto: al estirarlas
+            // de a poco, las vecinas se desalineaban y aparecía un
+            // corte vertical que parecía un desgarro de la tela.
+            ctx.drawImage(
+                video,
+                sx, r[1], sw, r[3],
+                x, dy - amp, ANCHO_FRANJA + 1, altoTela
+            );
+
+            // Volumen de la tela.
+            var luz = pendiente * SOMBRA;
+            if (luz > 0) {
+                ctx.fillStyle = 'rgba(255,255,255,' + (luz * 0.5).toFixed(3) + ')';
+            } else {
+                ctx.fillStyle = 'rgba(8,20,45,' + (-luz).toFixed(3) + ')';
             }
+            ctx.fillRect(x, 0, ANCHO_FRANJA + 1, H);
         }
-        ctx.putImageData(datos, 0, 0);
         return true;
     }
 
@@ -893,13 +874,15 @@
         requestAnimationFrame(bucle);
         if (ahora - ultimo < MS_ENTRE_CUADROS) return;
         ultimo = ahora;
-        pintar(false);
+        pintar(ahora);
     }
 
     function arrancar() {
         medir();
-        if (!pintar(true)) return;
-        hero.classList.add('tifo-listo');
+        // Con movimiento reducido igual se dibuja la tela, pero
+        // congelada en un pliegue: sigue leyéndose como bandera.
+        if (!pintar(sinMovimiento ? 3200 : performance.now())) return;
+        hero.classList.add('bandera-lista');
         if (sinMovimiento) return;
         activo = true;
         requestAnimationFrame(bucle);
@@ -907,7 +890,6 @@
 
     video.addEventListener('loadeddata', function () {
         if (sinMovimiento) {
-            // Queda un tifo fijo: el video no se reproduce.
             video.pause();
             arrancar();
             return;
@@ -940,7 +922,7 @@
         clearTimeout(temporizador);
         temporizador = setTimeout(function () {
             medir();
-            if (video.readyState >= 2) pintar(true);
+            if (video.readyState >= 2) pintar(sinMovimiento ? 3200 : performance.now());
         }, 180);
     });
 })();
