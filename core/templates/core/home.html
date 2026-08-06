@@ -67,6 +67,18 @@
         max-width: var(--page-max);
         margin: 0 auto;
         padding: 110px var(--page-pad) 130px var(--page-pad);
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 48px;
+        align-items: center;
+    }
+    /* Logo sobre el video, al costado del lema. */
+    .hero-logo {
+        justify-self: end;
+        width: 100%;
+        max-width: 330px;
+        height: auto;
+        filter: drop-shadow(0 6px 26px rgba(0, 0, 0, 0.35));
     }
     .hero-eyebrow {
         display: inline-block;
@@ -457,12 +469,13 @@
        RESPONSIVE
        ========================================================= */
     @media (max-width: 900px) {
-        .hero {
+        .hero-contenido {
             grid-template-columns: 1fr;
-            gap: 40px;
-            padding: 48px var(--page-pad) 48px var(--page-pad);
+            padding: 70px var(--page-pad) 90px var(--page-pad);
         }
-        .hero-ball { max-width: 280px; margin: 0 auto; }
+        /* En pantalla angosta el logo del hero se oculta: alargaría
+           mucho la portada y la marca ya está en el encabezado. */
+        .hero-logo { display: none; }
         .facts-inner { grid-template-columns: repeat(2, 1fr); gap: 26px; padding: 34px var(--page-pad); }
         .mission-grid { grid-template-columns: 1fr; gap: 24px; }
         .pillars { grid-template-columns: 1fr; gap: 26px; }
@@ -486,17 +499,26 @@
     <div class="hero-lavado"></div>
 
     <div class="hero-contenido">
-        <span class="hero-eyebrow">Fundada en 1987 · Región Metropolitana</span>
-        <h1>Educar a través<br>del <em>deporte</em></h1>
-        <p>
-            Somos una organización compuesta por educadores. Desde 1987 acompañamos
-            a niñas, niños y jóvenes de la Región Metropolitana a crecer dentro y
-            fuera de la cancha.
-        </p>
-        <div class="hero-actions">
-            <a href="{% url 'proyecto' %}" class="btn-cta">Conoce la Liga</a>
-            <a href="{% url 'archivo' %}" class="btn-ghost">Ver el Archivo</a>
+        <div>
+            <span class="hero-eyebrow">Fundada en 1987 · Región Metropolitana</span>
+            <h1>Educar a través<br>del <em>deporte</em></h1>
+            <p>
+                Somos una organización compuesta por educadores. Desde 1987 acompañamos
+                a niñas, niños y jóvenes de la Región Metropolitana a crecer dentro y
+                fuera de la cancha.
+            </p>
+            <div class="hero-actions">
+                <a href="{% url 'proyecto' %}" class="btn-cta">Conoce la Liga</a>
+                <a href="{% url 'archivo' %}" class="btn-ghost">Ver el Archivo</a>
+            </div>
         </div>
+
+        {% comment %}
+        El logo que salió del encabezado. Va como decorativo: la marca ya
+        se anuncia arriba, así que no se repite para lectores de pantalla.
+        {% endcomment %}
+        <img class="hero-logo" src="{% static 'core/img/logo-mark.png' %}"
+             alt="" aria-hidden="true">
     </div>
 
     <div class="hero-cinta" aria-hidden="true">
