@@ -233,20 +233,67 @@
     }
     .section-head a:hover { text-decoration: underline; }
 
+    /* Tres columnas explícitas, cada una arrancando a distinta
+       altura: así las publicaciones encajan entre sí en vez de quedar
+       alineadas en una reja, que es lo que las hacía ver pegadas. */
     .ig-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
+        gap: 24px;
         align-items: start;
     }
+    .ig-col {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+    .ig-col:nth-child(2) { margin-top: 54px; }
+    .ig-col:nth-child(3) { margin-top: 108px; }
+
+    /* El marco recorta las esquinas cuadradas del embed y lo despega
+       del fondo, para que se lea como pieza del sitio y no como algo
+       incrustado. */
+    .ig-card {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #ffffff;
+        box-shadow: 0 14px 34px rgba(var(--c-navy-rgb), 0.16);
+        transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.45s ease;
+    }
+    /* Filete de color arriba, ciclando la paleta: es el mismo recurso
+       que usan los ejes de la Liga, y amarra las publicaciones al
+       lenguaje del sitio en vez de dejarlas como algo ajeno. */
+    .ig-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        z-index: 1;
+        background: var(--c-navy);
+    }
+    .ig-col:nth-child(2) .ig-card::before { background: var(--c-orange); }
+    .ig-col:nth-child(3) .ig-card::before { background: var(--c-amber); }
+    .ig-col .ig-card:nth-child(2)::before { background: var(--c-green); }
+    .ig-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 22px 46px rgba(var(--c-navy-rgb), 0.24);
+    }
     /* Instagram fija medidas propias al montar cada publicación; se
-       neutralizan para que respeten las columnas de la grilla. */
-    .ig-grid .instagram-media {
+       neutralizan para que respeten la columna. */
+    .ig-card .instagram-media {
         min-width: 0 !important;
         max-width: 100% !important;
         width: 100% !important;
         margin: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
     }
+
     /* =========================================================
        CARRUSEL DE PATROCINADOR Y COLEGIOS
        ========================================================= */
@@ -386,7 +433,8 @@
         }
         .facts-inner { grid-template-columns: repeat(2, 1fr); gap: 26px; padding: 34px var(--page-pad); }
         .pillars { grid-template-columns: 1fr; gap: 26px; }
-        .ig-grid { grid-template-columns: 1fr; }
+        .ig-grid { grid-template-columns: 1fr; gap: 20px; }
+        .ig-col:nth-child(2), .ig-col:nth-child(3) { margin-top: 0; }
         .section-head { flex-direction: column; align-items: flex-start; gap: 12px; }
         .partners { padding: 48px 0; }
         .logo-plate { width: 120px; height: 90px; }
@@ -461,24 +509,42 @@
             </a>
         </div>
         <div class="ig-grid">
-            <blockquote class="instagram-media"
-                data-instgrm-permalink="https://www.instagram.com/p/DZd3qENDPKA/?utm_source=ig_embed"
-                data-instgrm-version="14"></blockquote>
-            <blockquote class="instagram-media"
-                data-instgrm-permalink="https://www.instagram.com/p/DZqWbS8nz_A/?utm_source=ig_embed"
-                data-instgrm-version="14"></blockquote>
-            <blockquote class="instagram-media"
-                data-instgrm-permalink="https://www.instagram.com/p/Dap8UmUEZdM/?utm_source=ig_embed"
-                data-instgrm-version="14"></blockquote>
-            <blockquote class="instagram-media"
-                data-instgrm-permalink="https://www.instagram.com/p/DbGlf2GkegB/?utm_source=ig_embed"
-                data-instgrm-version="14"></blockquote>
-            <blockquote class="instagram-media"
-                data-instgrm-permalink="https://www.instagram.com/p/DbhUi1YjOep/?utm_source=ig_embed"
-                data-instgrm-version="14"></blockquote>
-            <blockquote class="instagram-media"
-                data-instgrm-permalink="https://www.instagram.com/p/DblC_A0DImu/?utm_source=ig_embed"
-                data-instgrm-version="14"></blockquote>
+            <div class="ig-col">
+                    <div class="ig-card">
+                        <blockquote class="instagram-media"
+                            data-instgrm-permalink="https://www.instagram.com/p/DZd3qENDPKA/?utm_source=ig_embed"
+                            data-instgrm-version="14"></blockquote>
+                    </div>
+                    <div class="ig-card">
+                        <blockquote class="instagram-media"
+                            data-instgrm-permalink="https://www.instagram.com/p/DbGlf2GkegB/?utm_source=ig_embed"
+                            data-instgrm-version="14"></blockquote>
+                    </div>
+            </div>
+            <div class="ig-col">
+                    <div class="ig-card">
+                        <blockquote class="instagram-media"
+                            data-instgrm-permalink="https://www.instagram.com/p/DZqWbS8nz_A/?utm_source=ig_embed"
+                            data-instgrm-version="14"></blockquote>
+                    </div>
+                    <div class="ig-card">
+                        <blockquote class="instagram-media"
+                            data-instgrm-permalink="https://www.instagram.com/p/DbhUi1YjOep/?utm_source=ig_embed"
+                            data-instgrm-version="14"></blockquote>
+                    </div>
+            </div>
+            <div class="ig-col">
+                    <div class="ig-card">
+                        <blockquote class="instagram-media"
+                            data-instgrm-permalink="https://www.instagram.com/p/Dap8UmUEZdM/?utm_source=ig_embed"
+                            data-instgrm-version="14"></blockquote>
+                    </div>
+                    <div class="ig-card">
+                        <blockquote class="instagram-media"
+                            data-instgrm-permalink="https://www.instagram.com/p/DblC_A0DImu/?utm_source=ig_embed"
+                            data-instgrm-version="14"></blockquote>
+                    </div>
+            </div>
         </div>
     </div>
 </section>
