@@ -233,58 +233,60 @@
     }
     .section-head a:hover { text-decoration: underline; }
 
-    /* Tres columnas explícitas, cada una arrancando a distinta
-       altura: así las publicaciones encajan entre sí en vez de quedar
-       alineadas en una reja, que es lo que las hacía ver pegadas. */
-    .ig-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 24px;
-        align-items: start;
-    }
-    .ig-col {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-    }
-    .ig-col:nth-child(2) { margin-top: 54px; }
-    .ig-col:nth-child(3) { margin-top: 108px; }
+    /* Constelación: una publicación grande y las demás girando a su
+       alrededor en pequeño, con el logo de la Liga al costado.
 
-    /* El marco recorta las esquinas cuadradas del embed y lo despega
-       del fondo, para que se lea como pieza del sitio y no como algo
-       incrustado. */
-    .ig-card {
+       Instagram no permite renderizar sus publicaciones por debajo de
+       unos 326px de ancho, así que las pequeñas se dibujan a tamaño
+       normal y se reducen con transform. Por eso van en posición
+       absoluta: el transform no achica el espacio que ocupan. */
+    .ig-constelacion {
+        display: grid;
+        grid-template-columns: 1.35fr 1fr;
+        gap: 40px;
+        align-items: center;
+    }
+    .ig-cluster {
         position: relative;
+        height: 640px;
+    }
+
+    .ig-principal {
+        position: absolute;
+        top: 40px;
+        left: 90px;
+        width: 330px;
         border-radius: 16px;
         overflow: hidden;
         background: #ffffff;
-        box-shadow: 0 14px 34px rgba(var(--c-navy-rgb), 0.16);
-        transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-                    box-shadow 0.45s ease;
+        box-shadow: 0 18px 44px rgba(var(--c-navy-rgb), 0.20);
+        z-index: 2;
     }
-    /* Filete de color arriba, ciclando la paleta: es el mismo recurso
-       que usan los ejes de la Liga, y amarra las publicaciones al
-       lenguaje del sitio en vez de dejarlas como algo ajeno. */
-    .ig-card::before {
-        content: '';
+
+    .ig-satelite {
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        z-index: 1;
-        background: var(--c-navy);
+        width: 330px;
+        transform-origin: top left;
+        border-radius: 26px;
+        overflow: hidden;
+        background: #ffffff;
+        box-shadow: 0 10px 26px rgba(var(--c-navy-rgb), 0.16);
+        transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .ig-col:nth-child(2) .ig-card::before { background: var(--c-orange); }
-    .ig-col:nth-child(3) .ig-card::before { background: var(--c-amber); }
-    .ig-col .ig-card:nth-child(2)::before { background: var(--c-green); }
-    .ig-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 22px 46px rgba(var(--c-navy-rgb), 0.24);
-    }
-    /* Instagram fija medidas propias al montar cada publicación; se
-       neutralizan para que respeten la columna. */
-    .ig-card .instagram-media {
+    /* Cada satélite con su escala y su lugar. Los tamaños distintos
+       evitan que se lean como una fila y refuerzan que la grande es la
+       que manda. */
+    .ig-satelite.s1 { top:   0px; left:   0px; transform: scale(0.30); }
+    .ig-satelite.s2 { top: 300px; left: -40px; transform: scale(0.26); }
+    .ig-satelite.s3 { top:  60px; left: 470px; transform: scale(0.28); }
+    .ig-satelite.s4 { top: 250px; left: 520px; transform: scale(0.32); }
+    .ig-satelite.s5 { top: 470px; left: 420px; transform: scale(0.26); }
+
+    .ig-satelite:hover { transform: scale(0.34); z-index: 3; }
+    .ig-satelite.s4:hover { transform: scale(0.36); }
+
+    /* Instagram fija medidas propias al montar cada publicación. */
+    .ig-cluster .instagram-media {
         min-width: 0 !important;
         max-width: 100% !important;
         width: 100% !important;
@@ -292,6 +294,14 @@
         border: 0 !important;
         border-radius: 0 !important;
         box-shadow: none !important;
+    }
+
+    .ig-marca img {
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+        margin: 0 auto;
+        display: block;
     }
 
     /* =========================================================
@@ -433,8 +443,13 @@
         }
         .facts-inner { grid-template-columns: repeat(2, 1fr); gap: 26px; padding: 34px var(--page-pad); }
         .pillars { grid-template-columns: 1fr; gap: 26px; }
-        .ig-grid { grid-template-columns: 1fr; gap: 20px; }
-        .ig-col:nth-child(2), .ig-col:nth-child(3) { margin-top: 0; }
+        /* La constelación necesita ancho: en pantalla angosta queda
+           solo la publicación destacada, centrada, y el logo debajo. */
+        .ig-constelacion { grid-template-columns: 1fr; gap: 28px; }
+        .ig-cluster { height: auto; }
+        .ig-principal { position: static; width: 100%; max-width: 400px; margin: 0 auto; }
+        .ig-satelite { display: none; }
+        .ig-marca img { max-width: 260px; }
         .section-head { flex-direction: column; align-items: flex-start; gap: 12px; }
         .partners { padding: 48px 0; }
         .logo-plate { width: 120px; height: 90px; }
@@ -508,42 +523,44 @@
                 Seguir a @ligametropolitanavoley →
             </a>
         </div>
-        <div class="ig-grid">
-            <div class="ig-col">
-                    <div class="ig-card">
-                        <blockquote class="instagram-media"
-                            data-instgrm-permalink="https://www.instagram.com/p/DZd3qENDPKA/?utm_source=ig_embed"
-                            data-instgrm-version="14"></blockquote>
-                    </div>
-                    <div class="ig-card">
-                        <blockquote class="instagram-media"
-                            data-instgrm-permalink="https://www.instagram.com/p/DbGlf2GkegB/?utm_source=ig_embed"
-                            data-instgrm-version="14"></blockquote>
-                    </div>
+        <div class="ig-constelacion">
+            <div class="ig-cluster">
+                <div class="ig-principal">
+                    <blockquote class="instagram-media"
+                        data-instgrm-permalink="https://www.instagram.com/p/DZd3qENDPKA/?utm_source=ig_embed"
+                        data-instgrm-version="14"></blockquote>
+                </div>
+                <div class="ig-satelite s1">
+                    <blockquote class="instagram-media"
+                        data-instgrm-permalink="https://www.instagram.com/p/DZqWbS8nz_A/?utm_source=ig_embed"
+                        data-instgrm-version="14"></blockquote>
+                </div>
+                <div class="ig-satelite s2">
+                    <blockquote class="instagram-media"
+                        data-instgrm-permalink="https://www.instagram.com/p/Dap8UmUEZdM/?utm_source=ig_embed"
+                        data-instgrm-version="14"></blockquote>
+                </div>
+                <div class="ig-satelite s3">
+                    <blockquote class="instagram-media"
+                        data-instgrm-permalink="https://www.instagram.com/p/DbGlf2GkegB/?utm_source=ig_embed"
+                        data-instgrm-version="14"></blockquote>
+                </div>
+                <div class="ig-satelite s4">
+                    <blockquote class="instagram-media"
+                        data-instgrm-permalink="https://www.instagram.com/p/DbhUi1YjOep/?utm_source=ig_embed"
+                        data-instgrm-version="14"></blockquote>
+                </div>
+                <div class="ig-satelite s5">
+                    <blockquote class="instagram-media"
+                        data-instgrm-permalink="https://www.instagram.com/p/DblC_A0DImu/?utm_source=ig_embed"
+                        data-instgrm-version="14"></blockquote>
+                </div>
             </div>
-            <div class="ig-col">
-                    <div class="ig-card">
-                        <blockquote class="instagram-media"
-                            data-instgrm-permalink="https://www.instagram.com/p/DZqWbS8nz_A/?utm_source=ig_embed"
-                            data-instgrm-version="14"></blockquote>
-                    </div>
-                    <div class="ig-card">
-                        <blockquote class="instagram-media"
-                            data-instgrm-permalink="https://www.instagram.com/p/DbhUi1YjOep/?utm_source=ig_embed"
-                            data-instgrm-version="14"></blockquote>
-                    </div>
+
+            <div class="ig-marca">
+                <img src="{% static 'core/img/logo-borde.png' %}" alt="" aria-hidden="true">
             </div>
-            <div class="ig-col">
-                    <div class="ig-card">
-                        <blockquote class="instagram-media"
-                            data-instgrm-permalink="https://www.instagram.com/p/Dap8UmUEZdM/?utm_source=ig_embed"
-                            data-instgrm-version="14"></blockquote>
-                    </div>
-                    <div class="ig-card">
-                        <blockquote class="instagram-media"
-                            data-instgrm-permalink="https://www.instagram.com/p/DblC_A0DImu/?utm_source=ig_embed"
-                            data-instgrm-version="14"></blockquote>
-                    </div>
+        </div>
             </div>
         </div>
     </div>
