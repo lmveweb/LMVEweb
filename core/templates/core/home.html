@@ -67,18 +67,6 @@
         max-width: var(--page-max);
         margin: 0 auto;
         padding: 110px var(--page-pad) 130px var(--page-pad);
-        display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
-        gap: 48px;
-        align-items: center;
-    }
-    /* Logo sobre el video, al costado del lema. */
-    .hero-logo {
-        justify-self: end;
-        width: 100%;
-        max-width: 330px;
-        height: auto;
-        filter: drop-shadow(0 6px 26px rgba(0, 0, 0, 0.35));
     }
     .hero-eyebrow {
         display: inline-block;
@@ -193,28 +181,6 @@
     }
 
     /* =========================================================
-       MISIÓN (franja azul)
-       ========================================================= */
-    .mission-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 56px;
-        align-items: start;
-    }
-    .mission-grid h2 {
-        font-size: clamp(26px, 3vw, 34px);
-        font-weight: 700;
-        line-height: 1.25;
-        color: #ffffff;
-        letter-spacing: -0.5px;
-    }
-    .mission-grid p {
-        font-size: 17px;
-        line-height: 1.75;
-        color: rgba(255, 255, 255, 0.86);
-    }
-
-    /* =========================================================
        EJES
        ========================================================= */
     .pillars {
@@ -242,24 +208,24 @@
     }
 
     /* =========================================================
-       GALERÍA
+       PUBLICACIONES DE INSTAGRAM
        ========================================================= */
     .section-head {
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
         gap: 24px;
-        margin-bottom: 32px;
+        margin-bottom: 36px;
     }
     .section-head h2 {
         font-size: clamp(26px, 3vw, 36px);
         font-weight: 700;
-        color: var(--color-ink);
+        color: var(--c-navy);
         letter-spacing: -0.5px;
         line-height: 1.2;
     }
     .section-head a {
-        color: var(--color-accent);
+        color: var(--c-orange);
         font-size: 14px;
         font-weight: 700;
         text-decoration: none;
@@ -267,94 +233,20 @@
     }
     .section-head a:hover { text-decoration: underline; }
 
-    .gallery {
+    .ig-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        grid-auto-rows: 210px;
-        gap: 14px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        align-items: start;
     }
-    .gallery figure {
-        overflow: hidden;
-        border-radius: 6px;
-        position: relative;
+    /* Instagram fija medidas propias al montar cada publicación; se
+       neutralizan para que respeten las columnas de la grilla. */
+    .ig-grid .instagram-media {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
     }
-    .gallery figure:nth-child(1) { grid-column: span 2; grid-row: span 2; }
-    .gallery img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .gallery figure:hover img { transform: scale(1.05); }
-
-    /* =========================================================
-       COMUNIDAD / INSTAGRAM
-       ========================================================= */
-    .community {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 56px;
-        align-items: center;
-    }
-    .community h2 {
-        font-size: clamp(26px, 3vw, 36px);
-        font-weight: 700;
-        color: var(--color-ink);
-        letter-spacing: -0.5px;
-        margin-bottom: 18px;
-    }
-    .community p {
-        font-size: 17px;
-        line-height: 1.7;
-        color: var(--color-ink-muted);
-        margin-bottom: 24px;
-    }
-    .ig-frame {
-        border: 1px solid var(--c-line);
-        border-radius: 8px;
-        overflow: hidden;
-        background: var(--c-surface);
-    }
-    /* Ranura para el embed de Instagram: mantiene la altura del bloque
-       para que la maqueta no se desarme mientras no haya publicación. */
-    .ig-slot {
-        border-style: dashed;
-        border-color: var(--color-border);
-        min-height: 360px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 32px;
-        background: var(--color-bg);
-    }
-    .ig-slot-icon {
-        font-size: 34px;
-        color: var(--color-accent);
-        line-height: 1;
-        margin-bottom: 16px;
-    }
-    .ig-slot-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: var(--color-ink);
-        margin-bottom: 8px;
-    }
-    .ig-slot-text {
-        font-size: 14px;
-        color: var(--color-ink-muted);
-        max-width: 260px;
-        margin-bottom: 16px;
-    }
-    .ig-slot a {
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--color-accent);
-        text-decoration: none;
-    }
-    .ig-slot a:hover { text-decoration: underline; }
-
     /* =========================================================
        CARRUSEL DE PATROCINADOR Y COLEGIOS
        ========================================================= */
@@ -397,7 +289,7 @@
         align-items: center;
         gap: 18px;
         width: max-content;
-        animation: correr 90s linear infinite;
+        animation: correr 150s linear infinite;
     }
     @keyframes correr {
         from { transform: translateX(0); }
@@ -425,24 +317,43 @@
         object-fit: contain;
     }
 
-    /* El patrocinador principal se distingue del resto: placa más
-       ancha, filete ámbar y su rótulo. */
-    .logo-plate.principal {
-        width: 260px;
-        height: 130px;
-        border: 3px solid var(--c-amber);
-        flex-direction: column;
-        gap: 6px;
-        padding: 16px 22px;
+    /* Tarjeta del patrocinador principal, bajo el banner. */
+    .patrocinador-principal {
+        max-width: var(--page-max);
+        margin: 44px auto 0 auto;
+        padding: 0 var(--page-pad);
     }
-    .logo-plate.principal img { width: 100%; max-height: 44px; }
-    .logo-plate.principal .rotulo {
-        font-size: 9px;
+    .pp-tarjeta {
+        border: 1px solid var(--c-line);
+        border-top: 3px solid var(--c-amber);
+        border-radius: 0 0 10px 10px;
+        background: #ffffff;
+        padding: 34px 30px;
+        text-align: center;
+    }
+    .pp-rotulo {
+        display: block;
+        font-size: 11px;
         font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 1.6px;
-        color: var(--c-navy);
+        letter-spacing: 2.2px;
+        color: var(--c-orange);
+        margin-bottom: 20px;
     }
+    .pp-tarjeta img {
+        width: 100%;
+        max-width: 240px;
+        height: auto;
+        margin: 0 auto 18px auto;
+    }
+    .pp-tarjeta p {
+        font-size: 14px;
+        line-height: 1.65;
+        color: rgba(var(--c-navy-rgb), 0.78);
+        max-width: 420px;
+        margin: 0 auto;
+    }
+    .pp-tarjeta strong { color: var(--c-navy); }
 
     /* Con movimiento reducido el carrusel no se desplaza: se convierte
        en una grilla estática para que igual se vean todos los logos. */
@@ -473,18 +384,13 @@
             grid-template-columns: 1fr;
             padding: 70px var(--page-pad) 90px var(--page-pad);
         }
-        /* En pantalla angosta el logo del hero se oculta: alargaría
-           mucho la portada y la marca ya está en el encabezado. */
-        .hero-logo { display: none; }
         .facts-inner { grid-template-columns: repeat(2, 1fr); gap: 26px; padding: 34px var(--page-pad); }
-        .mission-grid { grid-template-columns: 1fr; gap: 24px; }
         .pillars { grid-template-columns: 1fr; gap: 26px; }
-        .gallery { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 150px; }
-        .gallery figure:nth-child(1) { grid-column: span 2; grid-row: span 2; }
-        .community { grid-template-columns: 1fr; gap: 32px; }
+        .ig-grid { grid-template-columns: 1fr; }
+        .section-head { flex-direction: column; align-items: flex-start; gap: 12px; }
         .partners { padding: 48px 0; }
         .logo-plate { width: 120px; height: 90px; }
-        .logo-plate.principal { width: 210px; height: 110px; }
+        .pp-tarjeta { padding: 26px 20px; }
     }
 </style>
 
@@ -499,7 +405,6 @@
     <div class="hero-lavado"></div>
 
     <div class="hero-contenido">
-        <div>
             <span class="hero-eyebrow">Fundada en 1987 · Región Metropolitana</span>
             <h1>Educar a través<br>del <em>deporte</em></h1>
             <p>
@@ -513,12 +418,6 @@
             </div>
         </div>
 
-        {% comment %}
-        El logo que salió del encabezado. Va como decorativo: la marca ya
-        se anuncia arriba, así que no se repite para lectores de pantalla.
-        {% endcomment %}
-        <img class="hero-logo" src="{% static 'core/img/logo-mark.png' %}"
-             alt="" aria-hidden="true">
     </div>
 
     <div class="hero-cinta" aria-hidden="true">
@@ -549,20 +448,37 @@
 </section>
 
 <!-- MISIÓN (franja azul) -->
+<!-- ASÍ SE VIVE LA LIGA (publicaciones de Instagram) -->
 <section class="band-blue">
     <div class="band-inner">
-        <div class="section-label">// Nuestra Misión</div>
-        <div class="mission-grid">
-            <h2>
-                Competencias educativas y de calidad, pensadas para que la
-                superación personal y colectiva quede de manifiesto.
-            </h2>
-            <p>
-                Somos una organización compuesta por educadores, orientada a ofrecer
-                espacios de competencia estructurados de tal manera que la
-                perseverancia, el respeto, la sana convivencia, el trabajo y la
-                superación queden de manifiesto durante todo el desarrollo deportivo.
-            </p>
+        <div class="section-head">
+            <div>
+                <div class="section-label">// Comunidad</div>
+                <h2>Así se vive la Liga</h2>
+            </div>
+            <a href="https://www.instagram.com/ligametropolitanavoley/" target="_blank" rel="noopener">
+                Seguir a @ligametropolitanavoley →
+            </a>
+        </div>
+        <div class="ig-grid">
+            <blockquote class="instagram-media"
+                data-instgrm-permalink="https://www.instagram.com/p/DZd3qENDPKA/?utm_source=ig_embed"
+                data-instgrm-version="14"></blockquote>
+            <blockquote class="instagram-media"
+                data-instgrm-permalink="https://www.instagram.com/p/DZqWbS8nz_A/?utm_source=ig_embed"
+                data-instgrm-version="14"></blockquote>
+            <blockquote class="instagram-media"
+                data-instgrm-permalink="https://www.instagram.com/p/Dap8UmUEZdM/?utm_source=ig_embed"
+                data-instgrm-version="14"></blockquote>
+            <blockquote class="instagram-media"
+                data-instgrm-permalink="https://www.instagram.com/p/DbGlf2GkegB/?utm_source=ig_embed"
+                data-instgrm-version="14"></blockquote>
+            <blockquote class="instagram-media"
+                data-instgrm-permalink="https://www.instagram.com/p/DbhUi1YjOep/?utm_source=ig_embed"
+                data-instgrm-version="14"></blockquote>
+            <blockquote class="instagram-media"
+                data-instgrm-permalink="https://www.instagram.com/p/DblC_A0DImu/?utm_source=ig_embed"
+                data-instgrm-version="14"></blockquote>
         </div>
     </div>
 </section>
@@ -595,71 +511,12 @@
     </div>
 </section>
 
-<!-- GALERÍA -->
-<section class="page-wrap" style="padding-top: 0;">
-    <div class="section-head">
-        <h2>Así se vive la Liga</h2>
-        <a href="{% url 'archivo' %}">Ver el archivo completo →</a>
-    </div>
-    <div class="gallery">
-        <figure><img src="{% static 'core/img/fotos/galeria-1.jpg' %}" alt="Jugada durante un partido de la LMVE"></figure>
-        <figure><img src="{% static 'core/img/fotos/galeria-2.jpg' %}" alt="Bloqueo en la red durante un partido de la LMVE"></figure>
-        <figure><img src="{% static 'core/img/fotos/galeria-3.jpg' %}" alt="Saque de salto en un partido de la LMVE"></figure>
-        <figure><img src="{% static 'core/img/fotos/galeria-4.jpg' %}" alt="Remate en la red durante un partido de la LMVE"></figure>
-        <figure><img src="{% static 'core/img/fotos/impacto-reconocimiento.jpg' %}" alt="Ceremonia de reconocimiento de la LMVE"></figure>
-    </div>
-</section>
 
-<!-- COMUNIDAD -->
-<section class="page-wrap" style="padding-top: 0;">
-    <div class="community">
-        <div>
-            <div class="section-label">// Comunidad</div>
-            <h2>La Liga, día a día</h2>
-            <p>
-                Cobertura de partidos, jugadas destacadas y momentos que las familias
-                comparten cada temporada. Todo eso vive en nuestro Instagram.
-            </p>
-            <a href="https://www.instagram.com/ligametropolitanavoley/" target="_blank" rel="noopener" class="btn-ghost">
-                Seguir a @ligametropolitanavoley
-            </a>
-        </div>
-        {% comment %}
-        RANURA DE LA ÚLTIMA PUBLICACIÓN DE INSTAGRAM
-
-        El embed oficial de Instagram (gratuito) solo funciona con la URL
-        de UNA publicación concreta, no con la del perfil. Para actualizarlo:
-
-          1. Abrir la publicación en instagram.com/ligametropolitanavoley
-          2. Menú "..." -> "Insertar" -> "Copiar código de inserción"
-          3. Reemplazar TODO el bloque .ig-slot de abajo por ese código
-          4. Dejar el script de embed.js que ya está al final de este archivo
-
-        No requiere programar: es copiar y pegar.
-        {% endcomment %}
-        <div class="ig-frame ig-slot">
-            <div class="ig-slot-icon">◎</div>
-            <p class="ig-slot-title">Última publicación</p>
-            <p class="ig-slot-text">
-                Aquí se muestra la publicación más reciente de la Liga.
-            </p>
-            <a href="https://www.instagram.com/ligametropolitanavoley/" target="_blank" rel="noopener">
-                @ligametropolitanavoley
-            </a>
-        </div>
-    </div>
-</section>
 
 <!-- PATROCINADOR Y COLEGIOS -->
 <section class="partners">
     <div class="partners-head">
-        <div class="section-label">// Quienes hacen posible la Liga</div>
-        <h2>Nuestro patrocinador y los colegios que compiten</h2>
-        <p>
-            La Liga juega con el balón <strong>Molten 5000</strong>, aprobado por
-            la Federación Internacional de Voleibol (FIVB), y reúne cada temporada
-            a los colegios de toda la Región Metropolitana.
-        </p>
+        <div class="section-label">// Instituciones que participan en la Liga</div>
     </div>
 
     {% comment %}
@@ -669,10 +526,6 @@
     {% endcomment %}
     <div class="carrusel">
         <div class="carrusel-pista">
-                    <div class="logo-plate principal">
-                        <img src="{% static 'core/img/molten.svg' %}" alt="Molten">
-                        <span class="rotulo">Patrocinador Principal</span>
-                    </div>
                     <div class="logo-plate"><img src="{% static 'core/img/colegios/1.png' %}" alt="Colegio participante de la Liga"></div>
                     <div class="logo-plate"><img src="{% static 'core/img/colegios/2.png' %}" alt="Colegio participante de la Liga"></div>
                     <div class="logo-plate"><img src="{% static 'core/img/colegios/3.png' %}" alt="Colegio participante de la Liga"></div>
@@ -718,10 +571,6 @@
                     <div class="logo-plate"><img src="{% static 'core/img/colegios/43.png' %}" alt="Colegio participante de la Liga"></div>
                     <div class="logo-plate"><img src="{% static 'core/img/colegios/44.png' %}" alt="Colegio participante de la Liga"></div>
             <!-- copia para el bucle continuo -->
-                    <div class="logo-plate principal copia">
-                        <img src="{% static 'core/img/molten.svg' %}" alt="Molten">
-                        <span class="rotulo">Patrocinador Principal</span>
-                    </div>
                     <div class="logo-plate copia"><img src="{% static 'core/img/colegios/1.png' %}" alt="Colegio participante de la Liga"></div>
                     <div class="logo-plate copia"><img src="{% static 'core/img/colegios/2.png' %}" alt="Colegio participante de la Liga"></div>
                     <div class="logo-plate copia"><img src="{% static 'core/img/colegios/3.png' %}" alt="Colegio participante de la Liga"></div>
@@ -768,6 +617,17 @@
                     <div class="logo-plate copia"><img src="{% static 'core/img/colegios/44.png' %}" alt="Colegio participante de la Liga"></div>
         </div>
     </div>
+
+    <div class="patrocinador-principal">
+        <div class="pp-tarjeta">
+            <span class="pp-rotulo">Patrocinador Principal</span>
+            <img src="{% static 'core/img/molten.svg' %}" alt="Molten">
+            <p>
+                Balón oficial <strong>Molten 5000</strong>, aprobado por la
+                Federación Internacional de Voleibol (FIVB).
+            </p>
+        </div>
+    </div>
 </section>
 {% endblock %}
 
@@ -793,11 +653,11 @@
     // ANCHO_FRANJA y ONDAS se ajustan al ancho en medir(): con los
     // mismos valores en una pantalla angosta la onda cambia demasiado
     // rápido de una franja a la otra y la tela se ve escalonada.
-    var ANCHO_FRANJA = 6;
-    var ONDAS = 2.1;          // pliegues a lo ancho
-    var AMPLITUD = 0.075;     // alto del pliegue, en proporción del alto
-    var VELOCIDAD = 0.00028;  // lenta a propósito
-    var SOMBRA = 0.30;        // cuánto marca el volumen de la tela
+    var ANCHO_FRANJA = 3;
+    var ONDAS = 1.25;         // pocos pliegues, anchos, como la seda
+    var AMPLITUD = 0.10;      // alto del pliegue, en proporción del alto
+    var VELOCIDAD = 0.00024;  // lenta a propósito
+    var SOMBRA = 0.34;        // cuánto marca el volumen de la tela
 
     var W = 0, H = 0, escala = 1;
     var activo = false, ultimo = 0;
@@ -815,9 +675,9 @@
         // Menos pliegues y franjas más finas cuando hay poco ancho: así
         // el desnivel entre franjas vecinas se mantiene suave y la tela
         // no se ve escalonada.
-        ONDAS = Math.max(1.1, Math.min(2.2, W / 700));
-        ANCHO_FRANJA = W < 560 ? 3 : 6;
-        AMPLITUD = W < 560 ? 0.05 : 0.075;
+        ONDAS = Math.max(0.8, Math.min(1.4, W / 780));
+        ANCHO_FRANJA = W < 560 ? 2 : 3;
+        AMPLITUD = W < 560 ? 0.07 : 0.10;
     }
 
     // Recorte del video para llenar el lienzo sin deformarlo.
@@ -859,7 +719,9 @@
             var fase = u * ONDAS * TAU - t;
             // Dos frecuencias en vez de una: el ondeo deja de parecer
             // una onda de reloj y se ve como tela.
-            var onda = Math.sin(fase) + 0.45 * Math.sin(fase * 0.5 + t * 0.6);
+            var onda = Math.sin(fase)
+                     + 0.45 * Math.sin(fase * 0.5 + t * 0.6)
+                     + 0.22 * Math.sin(fase * 1.7 - t * 0.35);
             var dy = amp * amarre * onda;
 
             // La pendiente de la onda indica hacia dónde mira la tela:
@@ -879,13 +741,24 @@
                 x, dy - amp, ANCHO_FRANJA + 1, altoTela
             );
 
-            // Volumen de la tela.
+            // Volumen de la tela. En vez de un velo plano por franja,
+            // se aplica un degradado vertical: el brillo se concentra
+            // hacia el centro y se apaga en los extremos, que es lo que
+            // hace que se lea como seda y no como una banda pintada.
             var luz = pendiente * SOMBRA;
+            var deg = ctx.createLinearGradient(0, 0, 0, H);
             if (luz > 0) {
-                ctx.fillStyle = 'rgba(255,255,255,' + (luz * 0.5).toFixed(3) + ')';
+                var b = luz * 0.55;
+                deg.addColorStop(0,    'rgba(255,255,255,' + (b * 0.25).toFixed(3) + ')');
+                deg.addColorStop(0.45, 'rgba(255,255,255,' + b.toFixed(3) + ')');
+                deg.addColorStop(1,    'rgba(255,255,255,' + (b * 0.30).toFixed(3) + ')');
             } else {
-                ctx.fillStyle = 'rgba(8,20,45,' + (-luz).toFixed(3) + ')';
+                var o = -luz;
+                deg.addColorStop(0,    'rgba(8,20,45,' + (o * 0.30).toFixed(3) + ')');
+                deg.addColorStop(0.55, 'rgba(8,20,45,' + o.toFixed(3) + ')');
+                deg.addColorStop(1,    'rgba(8,20,45,' + (o * 0.35).toFixed(3) + ')');
             }
+            ctx.fillStyle = deg;
             ctx.fillRect(x, 0, ANCHO_FRANJA + 1, H);
         }
         return true;

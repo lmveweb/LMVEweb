@@ -17,7 +17,8 @@
            ========================================================= */
         :root {
             --c-navy:   #163E73;   --c-navy-rgb:  22, 62, 115;
-            --c-blue:   #0511F2;   --c-blue-rgb:   5, 17, 242;
+            /* Blanco de la paleta de marca, para las franjas claras. */
+            --c-blanco: #f7f9fb;   --c-blanco-rgb: 247, 249, 251;
             --c-green:  #4B8C3A;   --c-green-rgb: 75, 140, 58;
             --c-amber:  #F2A413;   --c-amber-rgb: 242, 164, 19;
             --c-orange: #F2620F;   --c-orange-rgb: 242, 98, 15;
@@ -261,7 +262,9 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            background: var(--c-blue);
+            /* Azul oscuro y no el azul vivo: a pantalla completa ese
+               azul resultaba invasivo. */
+            background: var(--c-navy);
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s;
@@ -308,10 +311,12 @@
             padding: 72px var(--page-pad) 96px var(--page-pad);
         }
 
-        /* Franja de énfasis en azul vivo, a todo el ancho. */
+        /* Franja clara a todo el ancho. Antes era azul vivo, que sobre
+           el azul del sitio resultaba invasivo; ahora usa el blanco de
+           la paleta de marca y da un respiro entre secciones. */
         .band-blue {
-            background: var(--c-blue);
-            color: var(--c-text);
+            background: var(--c-blanco);
+            color: var(--c-navy);
             padding: 80px 0;
         }
         .band-blue .band-inner {
@@ -319,6 +324,11 @@
             margin: 0 auto;
             padding: 0 var(--page-pad);
         }
+        /* Sobre la franja clara todo el texto se invierte a azul. */
+        .band-blue h2,
+        .band-blue h3,
+        .band-blue h4 { color: var(--c-navy); }
+        .band-blue p { color: rgba(var(--c-navy-rgb), 0.82); }
 
         /* Rótulo de sección en ámbar: sobre el azul oscuro es el
            acento de la paleta que mantiene contraste legible. */
@@ -330,6 +340,10 @@
             color: var(--c-amber);
             margin-bottom: 22px;
         }
+        /* Sobre fondo claro el ámbar cae a 2:1 y no se lee: ahí el
+           rótulo va en azul, que además es el color que la marca usa
+           para organizar la información. */
+        .band-blue .section-label { color: var(--c-navy); }
 
         /* =========================================================
            FOOTER

@@ -108,12 +108,12 @@
     .archivo-cta h2 {
         font-size: clamp(24px, 2.8vw, 32px);
         font-weight: 700;
-        color: #fff;
+        color: var(--c-navy);
         margin-bottom: 14px;
     }
     .archivo-cta p {
         font-size: 17px;
-        color: rgba(255, 255, 255, 0.85);
+        color: rgba(var(--c-navy-rgb), 0.82);
         max-width: 620px;
         margin: 0 auto;
     }
@@ -374,7 +374,7 @@
     var key = new THREE.DirectionalLight(0xffffff, 0.55);
     key.position.set(18, 22, 24);
     scene.add(key);
-    var fill = new THREE.DirectionalLight(0x0511f2, 0.3);
+    var fill = new THREE.DirectionalLight(0x163e73, 0.3);
     fill.position.set(-20, -12, -18);
     scene.add(fill);
 
