@@ -7,19 +7,17 @@
 <style>
     /* =========================================================
        HERO CON VIDEO DE FONDO
-       El video ocupa todo el ancho, con un lavado de color encima para
-       que el texto se lea. Sin efectos sobre la imagen.
        ========================================================= */
     .hero {
         position: relative;
         width: 100vw;
         left: 50%;
         margin-left: -50vw;
-        min-height: 78vh;
+        min-height: 66vh;
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         overflow: hidden;
-        background: var(--c-navy);
+        background: var(--c-navy-deep);
     }
     .hero-video {
         position: absolute;
@@ -28,16 +26,14 @@
         height: 100%;
         object-fit: cover;
     }
-    /* Lavado para que el texto se lea. Cierra a la izquierda, donde va
-       el texto, y se abre casi del todo a la derecha. */
+    /* Lavado para que el texto se lea sobre el video. */
     .hero-lavado {
         position: absolute;
         inset: 0;
-        background: linear-gradient(100deg,
-            rgba(var(--c-navy-rgb), 0.94) 0%,
-            rgba(var(--c-navy-rgb), 0.86) 30%,
-            rgba(var(--c-navy-rgb), 0.42) 62%,
-            rgba(var(--c-navy-rgb), 0.06) 100%);
+        background: linear-gradient(
+            rgba(var(--c-navy-deep-rgb), 0.30) 0%,
+            rgba(var(--c-navy-deep-rgb), 0.62) 55%,
+            rgba(var(--c-navy-deep-rgb), 0.88) 100%);
     }
     .hero-contenido {
         position: relative;
@@ -45,227 +41,109 @@
         width: 100%;
         max-width: var(--page-max);
         margin: 0 auto;
-        padding: 110px var(--page-pad) 130px var(--page-pad);
-    }
-    .hero-eyebrow {
-        display: inline-block;
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 2.5px;
-        /* Ámbar y no verde: el verde de la paleta sobre el azul oscuro
-           queda en 2,6:1 y no es legible en texto pequeño. */
-        color: var(--c-amber);
-        margin-bottom: 24px;
+        padding: 150px var(--page-pad) 64px var(--page-pad);
     }
     .hero h1 {
-        font-size: clamp(40px, 6vw, 78px);
-        line-height: 1.02;
+        font-size: clamp(38px, 5.6vw, 66px);
+        line-height: 1.04;
         font-weight: 800;
-        letter-spacing: -1.8px;
+        text-transform: uppercase;
+        letter-spacing: -1px;
         color: var(--c-text);
-        margin-bottom: 24px;
-        text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+        margin-bottom: 20px;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
     }
-    .hero h1 em {
-        font-style: italic;
-        font-weight: 700;
-        color: var(--c-amber);
-    }
+    .hero h1 .acento { color: var(--c-orange); }
     .hero p {
-        font-size: 19px;
-        line-height: 1.65;
-        color: rgba(255, 255, 255, 0.92);
-        max-width: 540px;
-        margin-bottom: 34px;
-        text-shadow: 0 1px 12px rgba(0, 0, 0, 0.4);
+        font-size: 18px;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.94);
+        max-width: 560px;
+        margin-bottom: 28px;
+        text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
     }
     .hero-actions {
         display: flex;
         flex-wrap: wrap;
         gap: 14px;
     }
-    .btn-ghost {
+    .btn-relleno {
         display: inline-block;
-        border: 1px solid rgba(255, 255, 255, 0.55);
-        color: var(--c-text);
-        padding: 13px 26px;
+        background: var(--c-orange);
+        color: #ffffff;
+        padding: 12px 26px;
         border-radius: 4px;
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 700;
         text-decoration: none;
-        backdrop-filter: blur(4px);
-        transition: border-color 0.25s ease, color 0.25s ease, transform 0.12s ease;
+        transition: background 0.25s ease, transform 0.12s ease;
     }
-    .btn-ghost:hover { border-color: var(--c-amber); color: var(--c-amber); }
-    .btn-ghost:active { transform: scale(0.96); }
-
-    /* Cinta inferior, como en la referencia. */
-    .hero-cinta {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 2;
-        padding: 14px 0;
-        border-top: 1px solid rgba(255, 255, 255, 0.14);
-        background: rgba(var(--c-navy-rgb), 0.55);
-        overflow: hidden;
+    .btn-relleno:hover { background: #d4520a; }
+    .btn-relleno:active { transform: scale(0.96); }
+    .btn-contorno {
+        display: inline-block;
+        border: 2px solid #ffffff;
+        background: rgba(255, 255, 255, 0.10);
+        color: #ffffff;
+        padding: 10px 26px;
+        border-radius: 4px;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background 0.25s ease, color 0.25s ease, transform 0.12s ease;
     }
-    .hero-cinta-pista {
-        display: flex;
-        width: max-content;
-        animation: cinta 34s linear infinite;
-    }
-    .hero-cinta span {
-        font-size: 13px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 2.5px;
-        color: var(--c-amber);
-        padding: 0 22px;
-        white-space: nowrap;
-    }
-    @keyframes cinta {
-        from { transform: translateX(0); }
-        to   { transform: translateX(-50%); }
-    }
+    .btn-contorno:hover { background: #ffffff; color: var(--c-navy-deep); }
+    .btn-contorno:active { transform: scale(0.96); }
 
     /* =========================================================
-       CIFRAS
+       BARRA DE CIFRAS
        ========================================================= */
-    .facts {
-        border-top: 1px solid var(--color-border-soft);
-        border-bottom: 1px solid var(--color-border-soft);
+    .cifras {
+        background: var(--c-blue-soft);
     }
-    .facts-inner {
+    .cifras-inner {
         max-width: var(--page-max);
         margin: 0 auto;
-        padding: 44px var(--page-pad);
+        padding: 26px var(--page-pad);
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 32px;
     }
-    .fact-num {
-        font-size: 40px;
+    .cifra {
+        text-align: center;
+        padding: 8px 12px;
+    }
+    .cifra + .cifra { border-left: 1px solid rgba(255, 255, 255, 0.22); }
+    .cifra-num {
+        font-size: clamp(26px, 2.6vw, 34px);
         font-weight: 800;
         line-height: 1.1;
-        color: var(--color-ink);
-        letter-spacing: -1px;
+        color: #ffffff;
     }
-    .fact-label {
-        font-size: 14px;
-        color: var(--color-ink-muted);
-        margin-top: 6px;
+    .cifra-label {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.82);
+        margin-top: 4px;
     }
 
     /* =========================================================
-       EJES
+       REDES SOCIALES
        ========================================================= */
-    .pillars {
+    .redes-inner { max-width: var(--page-max); margin: 0 auto; padding: 0 var(--page-pad); }
+    .ig-fila {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 28px;
-        margin-top: 8px;
-    }
-    .pillar {
-        border-top: 3px solid var(--color-ink);
-        padding-top: 22px;
-    }
-    .pillar:nth-child(2) { border-top-color: var(--color-organize); }
-    .pillar:nth-child(3) { border-top-color: var(--color-elegant); }
-    .pillar h3 {
-        font-size: 20px;
-        font-weight: 700;
-        color: var(--color-ink);
-        margin-bottom: 12px;
-    }
-    .pillar p {
-        font-size: 15px;
-        line-height: 1.7;
-        color: var(--color-ink-muted);
-    }
-
-    /* =========================================================
-       PUBLICACIONES DE INSTAGRAM
-       ========================================================= */
-    .section-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
         gap: 24px;
-        margin-bottom: 36px;
+        align-items: start;
+        margin-top: 30px;
     }
-    .section-head h2 {
-        font-size: clamp(26px, 3vw, 36px);
-        font-weight: 700;
-        color: var(--c-navy);
-        letter-spacing: -0.5px;
-        line-height: 1.2;
-    }
-    .section-head a {
-        color: var(--c-orange);
-        font-size: 14px;
-        font-weight: 700;
-        text-decoration: none;
-        white-space: nowrap;
-    }
-    .section-head a:hover { text-decoration: underline; }
-
-    /* Constelación: una publicación grande y las demás girando a su
-       alrededor en pequeño, con el logo de la Liga al costado.
-
-       Instagram no permite renderizar sus publicaciones por debajo de
-       unos 326px de ancho, así que las pequeñas se dibujan a tamaño
-       normal y se reducen con transform. Por eso van en posición
-       absoluta: el transform no achica el espacio que ocupan. */
-    .ig-constelacion {
-        display: grid;
-        grid-template-columns: 1.35fr 1fr;
-        gap: 40px;
-        align-items: center;
-    }
-    .ig-cluster {
-        position: relative;
-        height: 640px;
-    }
-
-    .ig-principal {
-        position: absolute;
-        top: 40px;
-        left: 150px;
-        width: 330px;
-        border-radius: 16px;
+    .ig-card {
+        border-radius: 10px;
         overflow: hidden;
         background: #ffffff;
-        box-shadow: 0 18px 44px rgba(var(--c-navy-rgb), 0.20);
-        z-index: 2;
+        box-shadow: 0 12px 30px rgba(var(--c-navy-rgb), 0.18);
     }
-
-    .ig-satelite {
-        position: absolute;
-        width: 330px;
-        transform-origin: top left;
-        border-radius: 26px;
-        overflow: hidden;
-        background: #ffffff;
-        box-shadow: 0 10px 26px rgba(var(--c-navy-rgb), 0.16);
-        transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    /* Cada satélite con su escala y su lugar. Los tamaños distintos
-       evitan que se lean como una fila y refuerzan que la grande es la
-       que manda. */
-    .ig-satelite.s1 { top:   0px; left:   0px; transform: scale(0.30); }
-    .ig-satelite.s2 { top: 270px; left:   5px; transform: scale(0.27); }
-    .ig-satelite.s3 { top:  10px; left: 515px; transform: scale(0.28); }
-    .ig-satelite.s4 { top: 215px; left: 530px; transform: scale(0.32); }
-    .ig-satelite.s5 { top: 445px; left: 520px; transform: scale(0.27); }
-
-    .ig-satelite:hover { transform: scale(0.34); z-index: 3; }
-    .ig-satelite.s4:hover { transform: scale(0.36); }
-
     /* Instagram fija medidas propias al montar cada publicación. */
-    .ig-cluster .instagram-media {
+    .ig-card .instagram-media {
         min-width: 0 !important;
         max-width: 100% !important;
         width: 100% !important;
@@ -275,50 +153,48 @@
         box-shadow: none !important;
     }
 
-    .ig-marca img {
-        width: 100%;
-        max-width: 400px;
-        height: auto;
-        margin: 0 auto;
-        display: block;
-    }
-
     /* =========================================================
-       CARRUSEL DE PATROCINADOR Y COLEGIOS
+       INSTITUCIONES
        ========================================================= */
-    .partners {
-        border-top: 1px solid var(--c-line);
-        background: var(--c-surface);
-        padding: 64px 0;
+    .instituciones {
+        position: relative;
         overflow: hidden;
+        padding: 72px 0 0 0;
     }
-    .partners-head {
+    /* Marca de agua del logo detrás, como en el modelo. */
+    .instituciones::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: min(70vw, 720px);
+        aspect-ratio: 700 / 578;
+        transform: translate(-50%, -50%);
+        background: url('{% static "core/img/logo-watermark.png" %}') center / contain no-repeat;
+        opacity: 0.06;
+        pointer-events: none;
+    }
+    .instituciones-inner {
+        position: relative;
+        z-index: 1;
         max-width: var(--page-max);
-        margin: 0 auto 14px auto;
+        margin: 0 auto;
         padding: 0 var(--page-pad);
     }
-    .partners-head h2 {
-        font-size: clamp(24px, 2.6vw, 32px);
-        font-weight: 700;
-        color: var(--c-text);
-        letter-spacing: -0.5px;
-        margin-bottom: 12px;
-    }
-    .partners-head p {
+    .instituciones p {
         font-size: 16px;
-        line-height: 1.7;
-        color: var(--c-text-muted);
-        max-width: 620px;
+        line-height: 1.75;
+        color: var(--c-text-soft);
+        max-width: 900px;
     }
-    .partners-head strong { color: var(--c-amber); }
 
-    /* Pista del carrusel. Se duplica el contenido en el marcado para
-       que el desplazamiento se vea continuo, sin salto al reiniciar. */
+    /* Carrusel de logos */
     .carrusel {
         position: relative;
-        margin-top: 38px;
-        -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-                mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+        z-index: 1;
+        margin-top: 40px;
+        -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+                mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
     }
     .carrusel-pista {
         display: flex;
@@ -332,13 +208,12 @@
         to   { transform: translateX(-50%); }
     }
     .carrusel:hover .carrusel-pista { animation-play-state: paused; }
-
     .logo-plate {
         flex-shrink: 0;
         width: 150px;
-        height: 110px;
+        height: 112px;
         background: #ffffff;
-        border-radius: 10px;
+        border-radius: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -352,45 +227,6 @@
         width: auto;
         object-fit: contain;
     }
-
-    /* Tarjeta del patrocinador principal, bajo el banner. */
-    .patrocinador-principal {
-        max-width: var(--page-max);
-        margin: 44px auto 0 auto;
-        padding: 0 var(--page-pad);
-    }
-    .pp-tarjeta {
-        border: 1px solid var(--c-line);
-        border-top: 3px solid var(--c-amber);
-        border-radius: 0 0 10px 10px;
-        background: #ffffff;
-        padding: 34px 30px;
-        text-align: center;
-    }
-    .pp-rotulo {
-        display: block;
-        font-size: 11px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 2.2px;
-        color: var(--c-orange);
-        margin-bottom: 20px;
-    }
-    .pp-tarjeta img {
-        width: 100%;
-        max-width: 240px;
-        height: auto;
-        margin: 0 auto 18px auto;
-    }
-    .pp-tarjeta p {
-        font-size: 14px;
-        line-height: 1.65;
-        color: rgba(var(--c-navy-rgb), 0.78);
-        max-width: 420px;
-        margin: 0 auto;
-    }
-    .pp-tarjeta strong { color: var(--c-navy); }
-
     /* Con movimiento reducido el carrusel no se desplaza: se convierte
        en una grilla estática para que igual se vean todos los logos. */
     @media (prefers-reduced-motion: reduce) {
@@ -413,26 +249,78 @@
     }
 
     /* =========================================================
+       EL FUTURO DE LA LIGA
+       ========================================================= */
+    .futuro {
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        padding: 80px var(--page-pad) 90px var(--page-pad);
+    }
+    .futuro::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: min(80vw, 900px);
+        aspect-ratio: 700 / 578;
+        transform: translate(-50%, -50%);
+        background: url('{% static "core/img/logo-watermark.png" %}') center / contain no-repeat;
+        opacity: 0.05;
+        pointer-events: none;
+    }
+    .futuro-inner { position: relative; z-index: 1; }
+    .futuro h2 {
+        font-size: clamp(26px, 3.2vw, 38px);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: -0.5px;
+        color: var(--c-green);
+        margin-bottom: 34px;
+    }
+    .futuro-botones {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
+    .futuro-boton {
+        display: block;
+        background: var(--c-orange);
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 17px;
+        font-weight: 800;
+        text-transform: uppercase;
+        line-height: 1.3;
+        padding: 26px 34px;
+        border-radius: 6px;
+        min-width: 250px;
+        transition: background 0.25s ease, transform 0.15s ease;
+    }
+    .futuro-boton small {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        text-transform: none;
+        margin-top: 8px;
+        color: rgba(255, 255, 255, 0.9);
+    }
+    .futuro-boton:hover { background: #d4520a; transform: translateY(-3px); }
+    .futuro-boton:active { transform: scale(0.97); }
+
+    /* =========================================================
        RESPONSIVE
        ========================================================= */
-    @media (max-width: 900px) {
-        .hero-contenido {
-            grid-template-columns: 1fr;
-            padding: 70px var(--page-pad) 90px var(--page-pad);
-        }
-        .facts-inner { grid-template-columns: repeat(2, 1fr); gap: 26px; padding: 34px var(--page-pad); }
-        .pillars { grid-template-columns: 1fr; gap: 26px; }
-        /* La constelación necesita ancho: en pantalla angosta queda
-           solo la publicación destacada, centrada, y el logo debajo. */
-        .ig-constelacion { grid-template-columns: 1fr; gap: 28px; }
-        .ig-cluster { height: auto; }
-        .ig-principal { position: static; width: 100%; max-width: 400px; margin: 0 auto; }
-        .ig-satelite { display: none; }
-        .ig-marca img { max-width: 260px; }
-        .section-head { flex-direction: column; align-items: flex-start; gap: 12px; }
-        .partners { padding: 48px 0; }
-        .logo-plate { width: 120px; height: 90px; }
-        .pp-tarjeta { padding: 26px 20px; }
+    @media (max-width: 940px) {
+        .hero { min-height: 58vh; }
+        .hero-contenido { padding: 110px var(--page-pad) 48px var(--page-pad); }
+        .cifras-inner { grid-template-columns: repeat(2, 1fr); }
+        .cifra:nth-child(3) { border-left: none; }
+        .cifra { padding: 14px 10px; }
+        .ig-fila { grid-template-columns: 1fr; gap: 20px; }
+        .logo-plate { width: 120px; height: 92px; }
+        .futuro-boton { min-width: 0; width: 100%; }
     }
 </style>
 
@@ -446,138 +334,74 @@
     <div class="hero-lavado"></div>
 
     <div class="hero-contenido">
-            <span class="hero-eyebrow">Fundada en 1987 · Región Metropolitana</span>
-            <h1>Educar a través<br>del <em>deporte</em></h1>
-            <p>
-                Somos una organización compuesta por educadores. Desde 1987 acompañamos
-                a niñas, niños y jóvenes de la Región Metropolitana a crecer dentro y
-                fuera de la cancha.
-            </p>
-            <div class="hero-actions">
-                <a href="{% url 'proyecto' %}" class="btn-cta">Conoce la Liga</a>
-                <a href="{% url 'archivo' %}" class="btn-ghost">Ver el Archivo</a>
-            </div>
+        <h1>Educar a<br>Través del <span class="acento">Deporte</span></h1>
+        <p>
+            Hoy en día, la LMVE es una de las ligas escolares más competitivas,
+            difundidas y con mayor convocatoria a nivel nacional.
+        </p>
+        <div class="hero-actions">
+            <a href="{% url 'sobre' %}" class="btn-relleno">Sobre la LMVE</a>
+            <a href="{% url 'proyecto' %}" class="btn-contorno">Historia</a>
         </div>
-
-    </div>
-
-    <div class="hero-cinta" aria-hidden="true">
-        <div class="hero-cinta-pista"><span>LMVE</span><span>*</span><span>VOLEIBOL ESCOLAR</span><span>*</span><span>DESDE 1987</span><span>*</span><span>REGIÓN METROPOLITANA</span><span>*</span><span>LMVE</span><span>*</span><span>VOLEIBOL ESCOLAR</span><span>*</span><span>DESDE 1987</span><span>*</span><span>REGIÓN METROPOLITANA</span><span>*</span></div>
     </div>
 </section>
 
 <!-- CIFRAS -->
-<section class="facts">
-    <div class="facts-inner">
-        <div>
-            <div class="fact-num">1987</div>
-            <div class="fact-label">Año de fundación</div>
+<section class="cifras">
+    <div class="cifras-inner">
+        <div class="cifra">
+            <div class="cifra-num">1987</div>
+            <div class="cifra-label">Año de fundación</div>
         </div>
-        <div>
-            <div class="fact-num">+2.500</div>
-            <div class="fact-label">Deportistas por temporada</div>
+        <div class="cifra">
+            <div class="cifra-num">+2.500</div>
+            <div class="cifra-label">Deportistas por temporada</div>
         </div>
-        <div>
-            <div class="fact-num">60</div>
-            <div class="fact-label">Equipos en competencia</div>
+        <div class="cifra">
+            <div class="cifra-num">60</div>
+            <div class="cifra-label">Equipos en competencia</div>
         </div>
-        <div>
-            <div class="fact-num">39</div>
-            <div class="fact-label">Años de trayectoria</div>
+        <div class="cifra">
+            <div class="cifra-num">39</div>
+            <div class="cifra-label">Años de trayectoria</div>
         </div>
     </div>
 </section>
 
-<!-- MISIÓN (franja azul) -->
-<!-- ASÍ SE VIVE LA LIGA (publicaciones de Instagram) -->
+<!-- REDES SOCIALES -->
 <section class="band-blue">
-    <div class="band-inner">
-        <div class="section-head">
-            <div>
-                <div class="section-label">// Comunidad</div>
-                <h2>Así se vive la Liga</h2>
+    <div class="redes-inner">
+        <h2 class="titulo-seccion">Redes Sociales</h2>
+        <div class="ig-fila">
+            <div class="ig-card">
+                <blockquote class="instagram-media"
+                    data-instgrm-permalink="https://www.instagram.com/p/Dap8UmUEZdM/?utm_source=ig_embed"
+                    data-instgrm-version="14"></blockquote>
             </div>
-            <a href="https://www.instagram.com/ligametropolitanavoley/" target="_blank" rel="noopener">
-                Seguir a @ligametropolitanavoley →
-            </a>
-        </div>
-        <div class="ig-constelacion">
-            <div class="ig-cluster">
-                <div class="ig-principal">
-                    <blockquote class="instagram-media"
-                        data-instgrm-permalink="https://www.instagram.com/p/Dap8UmUEZdM/?utm_source=ig_embed"
-                        data-instgrm-version="14"></blockquote>
-                </div>
-                <div class="ig-satelite s1">
-                    <blockquote class="instagram-media"
-                        data-instgrm-permalink="https://www.instagram.com/p/DZqWbS8nz_A/?utm_source=ig_embed"
-                        data-instgrm-version="14"></blockquote>
-                </div>
-                <div class="ig-satelite s2">
-                    <blockquote class="instagram-media"
-                        data-instgrm-permalink="https://www.instagram.com/p/DZd3qENDPKA/?utm_source=ig_embed"
-                        data-instgrm-version="14"></blockquote>
-                </div>
-                <div class="ig-satelite s3">
-                    <blockquote class="instagram-media"
-                        data-instgrm-permalink="https://www.instagram.com/p/DbGlf2GkegB/?utm_source=ig_embed"
-                        data-instgrm-version="14"></blockquote>
-                </div>
-                <div class="ig-satelite s4">
-                    <blockquote class="instagram-media"
-                        data-instgrm-permalink="https://www.instagram.com/p/DbhUi1YjOep/?utm_source=ig_embed"
-                        data-instgrm-version="14"></blockquote>
-                </div>
-                <div class="ig-satelite s5">
-                    <blockquote class="instagram-media"
-                        data-instgrm-permalink="https://www.instagram.com/p/DblC_A0DImu/?utm_source=ig_embed"
-                        data-instgrm-version="14"></blockquote>
-                </div>
+            <div class="ig-card">
+                <blockquote class="instagram-media"
+                    data-instgrm-permalink="https://www.instagram.com/p/DblC_A0DImu/?utm_source=ig_embed"
+                    data-instgrm-version="14"></blockquote>
             </div>
-
-            <div class="ig-marca">
-                <img src="{% static 'core/img/logo-borde.png' %}" alt="" aria-hidden="true">
-            </div>
-        </div>
+            <div class="ig-card">
+                <blockquote class="instagram-media"
+                    data-instgrm-permalink="https://www.instagram.com/p/DbhUi1YjOep/?utm_source=ig_embed"
+                    data-instgrm-version="14"></blockquote>
             </div>
         </div>
     </div>
 </section>
 
-<!-- EJES -->
-<section class="page-wrap">
-    <div class="section-label">// Lo que sostiene a la Liga</div>
-    <div class="pillars">
-        <div class="pillar">
-            <h3>Formación</h3>
-            <p>
-                Categorías Sub-14, Sub-16 y Sub-18 que acompañan a cada deportista
-                durante toda su etapa escolar, con foco en el desarrollo integral.
-            </p>
-        </div>
-        <div class="pillar">
-            <h3>Organización</h3>
-            <p>
-                Torneos estructurados y sostenidos en el tiempo, con reglas claras y
-                una administración que lleva casi cuatro décadas funcionando.
-            </p>
-        </div>
-        <div class="pillar">
-            <h3>Comunidad</h3>
-            <p>
-                Colegios, familias y profesores que cada fin de semana hacen posible
-                la liga escolar de voleibol más antigua de la Región Metropolitana.
-            </p>
-        </div>
-    </div>
-</section>
-
-
-
-<!-- PATROCINADOR Y COLEGIOS -->
-<section class="partners">
-    <div class="partners-head">
-        <div class="section-label">// Instituciones que participan en la Liga</div>
+<!-- INSTITUCIONES -->
+<section class="instituciones">
+    <div class="instituciones-inner">
+        <h2 class="titulo-seccion">Instituciones que compiten en la LMVE</h2>
+        <p>
+            Cada temporada, colegios de toda la Región Metropolitana llevan a sus
+            equipos a la cancha. Estos son los establecimientos que forman parte de
+            la Liga y que, fin de semana a fin de semana, hacen posible la
+            competencia.
+        </p>
     </div>
 
     {% comment %}
@@ -587,106 +411,29 @@
     {% endcomment %}
     <div class="carrusel">
         <div class="carrusel-pista">
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/1.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/2.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/3.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/4.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/5.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/6.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/7.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/8.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/9.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/10.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/11.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/12.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/13.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/14.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/15.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/16.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/17.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/18.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/19.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/20.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/21.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/22.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/23.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/24.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/25.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/26.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/27.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/28.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/29.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/30.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/31.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/32.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/33.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/34.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/35.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/36.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/37.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/38.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/39.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/40.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/41.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/42.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/43.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate"><img src="{% static 'core/img/colegios/44.png' %}" alt="Colegio participante de la Liga"></div>
-            <!-- copia para el bucle continuo -->
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/1.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/2.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/3.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/4.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/5.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/6.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/7.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/8.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/9.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/10.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/11.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/12.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/13.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/14.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/15.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/16.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/17.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/18.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/19.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/20.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/21.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/22.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/23.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/24.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/25.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/26.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/27.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/28.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/29.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/30.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/31.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/32.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/33.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/34.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/35.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/36.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/37.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/38.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/39.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/40.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/41.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/42.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/43.png' %}" alt="Colegio participante de la Liga"></div>
-                    <div class="logo-plate copia"><img src="{% static 'core/img/colegios/44.png' %}" alt="Colegio participante de la Liga"></div>
+            {% for i in "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" %}
+            <div class="logo-plate"><img src="{% static 'core/img/colegios/' %}{{ forloop.counter }}.png" alt="Colegio participante de la Liga"></div>
+            {% endfor %}
+            {% for i in "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" %}
+            <div class="logo-plate copia"><img src="{% static 'core/img/colegios/' %}{{ forloop.counter }}.png" alt=""></div>
+            {% endfor %}
         </div>
     </div>
+</section>
 
-    <div class="patrocinador-principal">
-        <div class="pp-tarjeta">
-            <span class="pp-rotulo">Patrocinador Principal</span>
-            <img src="{% static 'core/img/molten.svg' %}" alt="Molten">
-            <p>
-                Balón oficial <strong>Molten 5000</strong>, aprobado por la
-                Federación Internacional de Voleibol (FIVB).
-            </p>
+<!-- EL FUTURO -->
+<section class="futuro">
+    <div class="futuro-inner">
+        <h2>El futuro de la LMVE</h2>
+        <div class="futuro-botones">
+            <a href="{% url 'contacto' %}" class="futuro-boton">
+                Proyecto de Auspicio 2026
+                <small>Alianzas corporativas para potenciar la experiencia deportiva</small>
+            </a>
+            <a href="{% url 'proyecto' %}" class="futuro-boton">
+                Rumbo a los 40 Años
+                <small>Cuatro décadas de deporte escolar en Chile</small>
+            </a>
         </div>
     </div>
 </section>
