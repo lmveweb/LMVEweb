@@ -1,402 +1,86 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}Archivo | LMVE{% endblock %}
-
-{# Archivo es la única vista que carga el motor 3D. #}
-{% block head_extra %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-{% endblock %}
-
-{# Sin marca de agua aquí: el protagonismo lo tiene la pelota. #}
-{% block body_class %}{% endblock %}
+{% block title %}Multimedia | LMVE{% endblock %}
 
 {% block content %}
 <style>
-    .archivo-hero {
+    .multimedia {
         max-width: var(--page-max);
         margin: 0 auto;
-        padding: 72px var(--page-pad) 48px var(--page-pad);
-        display: grid;
-        grid-template-columns: 1.15fr 0.85fr;
-        gap: 56px;
-        align-items: center;
+        padding: 62px var(--page-pad) 90px var(--page-pad);
     }
-    /* Pelota contenida en el encabezado, no como fondo de la página. */
-    .archivo-ball {
-        width: 100%;
-        max-width: 380px;
-        aspect-ratio: 1;
-        margin-left: auto;
-    }
-    .archivo-ball canvas { display: block; }
-    .archivo-hero h1 {
-        font-size: clamp(34px, 4.4vw, 54px);
+    .multimedia h1 {
+        font-size: clamp(30px, 4vw, 46px);
         font-weight: 800;
-        line-height: 1.1;
-        letter-spacing: -1px;
-        color: var(--color-ink);
-        margin-bottom: 22px;
-    }
-    .archivo-hero p {
-        font-size: 18px;
-        line-height: 1.7;
-        color: var(--color-ink-soft);
-        max-width: 640px;
-    }
-
-    .era {
-        max-width: var(--page-max);
-        margin: 0 auto;
-        padding: 0 var(--page-pad) 72px var(--page-pad);
-    }
-    .era-head {
-        display: flex;
-        align-items: baseline;
-        gap: 18px;
-        padding-bottom: 16px;
-        margin-bottom: 26px;
-        border-bottom: 2px solid var(--color-ink);
-    }
-    .era-year {
-        font-size: 28px;
-        font-weight: 800;
-        color: var(--color-ink);
+        text-transform: uppercase;
         letter-spacing: -0.5px;
+        color: #ffffff;
+        margin-bottom: 14px;
     }
-    .era-title {
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--color-ink-muted);
-    }
-    .era p.era-text {
+    .multimedia > p {
         font-size: 16px;
         line-height: 1.75;
-        color: var(--color-ink-muted);
-        max-width: 700px;
-        margin-bottom: 26px;
+        color: var(--c-text-soft);
+        max-width: 720px;
+        margin-bottom: 38px;
     }
 
-    .era-photos {
+    .fotos-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
+        gap: 18px;
     }
-    .era-photos.wide { grid-template-columns: repeat(2, 1fr); }
-    .era-photos figure {
+    .foto {
         margin: 0;
         border-radius: 6px;
         overflow: hidden;
-        background: var(--c-surface);
-        border: 1px solid var(--c-line);
+        background: var(--c-navy-deep);
+        aspect-ratio: 4 / 3;
     }
-    .era-photos img {
+    .foto img {
         width: 100%;
-        height: 260px;
+        height: 100%;
         object-fit: cover;
+        display: block;
         transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .era-photos figure:hover img { transform: scale(1.04); }
-    .era-photos figcaption {
-        font-size: 13px;
-        color: var(--color-ink-muted);
-        padding: 12px 14px;
-        line-height: 1.5;
-    }
+    .foto:hover img { transform: scale(1.05); }
 
-    .archivo-cta .band-inner { text-align: center; }
-    .archivo-cta h2 {
-        font-size: clamp(24px, 2.8vw, 32px);
-        font-weight: 700;
-        color: var(--c-navy);
-        margin-bottom: 14px;
+    @media (max-width: 940px) {
+        .multimedia { padding: 44px var(--page-pad) 64px var(--page-pad); }
+        .fotos-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
     }
-    .archivo-cta p {
-        font-size: 17px;
-        color: rgba(var(--c-navy-rgb), 0.82);
-        max-width: 620px;
-        margin: 0 auto;
-    }
-
-    @media (max-width: 900px) {
-        .archivo-hero {
-            grid-template-columns: 1fr;
-            gap: 36px;
-            padding: 48px var(--page-pad) 40px var(--page-pad);
-        }
-        .archivo-ball { max-width: 260px; margin: 0 auto; }
-        .era-photos, .era-photos.wide { grid-template-columns: 1fr; }
-        .era-photos img { height: 220px; }
-        .era-head { flex-direction: column; gap: 4px; }
+    @media (max-width: 560px) {
+        .fotos-grid { grid-template-columns: 1fr; }
     }
 </style>
 
-<section class="archivo-hero">
-    <div>
-        <div class="section-label">// Archivo Histórico</div>
-        <h1>Casi cuatro décadas<br>de voleibol escolar</h1>
-        <p>
-            Desde 1987, cada temporada deja una huella: equipos, generaciones y
-            momentos que forman parte de la memoria de la Liga. Este archivo reúne
-            ese registro y seguirá creciendo con el material que aporten los
-            colegios y las familias.
-        </p>
-    </div>
-
-    <div class="archivo-ball" id="archivoBall"></div>
-</section>
-
-<section class="era">
-    <div class="era-head">
-        <span class="era-year">Década de 1980</span>
-        <span class="era-title">Los primeros pasos</span>
-    </div>
-    <p class="era-text">
-        La Liga nació en 1987 como Liga Teresiana de Voleibol Escolar, impulsada
-        por un grupo de profesores de Educación Física. Comenzó con cerca de 16
-        colegios compitiendo en divisiones de Damas y Varones, los sábados por
-        la mañana.
+<section class="multimedia">
+    <h1>La Liga en fotos</h1>
+    <p>
+        Casi cuatro décadas de voleibol escolar en la Región Metropolitana. Este
+        registro reúne partidos, premiaciones y generaciones que pasaron por la
+        Liga, y seguirá creciendo con el material que aporten los colegios y las
+        familias.
     </p>
-    <div class="era-photos wide">
-        <figure>
-            <img src="{% static 'core/img/fotos/historia-1987.jpg' %}" alt="Equipo de la Liga a fines de los años 80">
-            <figcaption>Equipo participante en los primeros años de la Liga.</figcaption>
-        </figure>
-        <figure>
-            <img src="{% static 'core/img/fotos/archivo-80s-2.jpg' %}" alt="Equipo con su profesor en los años 80">
-            <figcaption>Equipo junto a su profesor, década de 1980.</figcaption>
-        </figure>
+
+    <div class="fotos-grid">
+        <figure class="foto"><img src="{% static 'core/img/fotos/galeria-1.jpg' %}" alt="Armado en zona de red durante un partido de la Liga"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/galeria-2.jpg' %}" alt="Bloqueo en la red durante un partido de la Liga"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/galeria-3.jpg' %}" alt="Saque de salto durante un partido de la Liga"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/impacto-reconocimiento.jpg' %}" alt="Ceremonia de reconocimiento a colaboradores de la Liga"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/galeria-4.jpg' %}" alt="Remate durante una jornada de competencia"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-hoy-2.jpg' %}" alt="Disputa de balón sobre la red"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-hoy-5.jpg' %}" alt="Remate frente al bloqueo rival"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-jornada-2.jpg' %}" alt="Equipos formados en cancha durante una ceremonia"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-jornada-3.jpg' %}" alt="Equipos posando junto a la red al término de una jornada"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-jornada-1.jpg' %}" alt="Presentación de los colegios participantes"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/impacto-banner-sponsor.jpg' %}" alt="Plantel completo en un recinto de la Liga"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-hoy-1.jpg' %}" alt="Trofeos y balones preparados para la premiación"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/historia-1987.jpg' %}" alt="Equipo de la Liga a fines de los años 80"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-80s-2.jpg' %}" alt="Equipo junto a su profesor, década de 1980"></figure>
+        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-90s-seleccion.jpg' %}" alt="Selección de la Liga, 1990"></figure>
     </div>
 </section>
-
-<section class="era">
-    <div class="era-head">
-        <span class="era-year">Década de 1990</span>
-        <span class="era-title">Consolidación y crecimiento</span>
-    </div>
-    <p class="era-text">
-        La participación creció hasta cerca de 25 colegios. Se incorporó el Mini
-        Voleibol para las categorías más pequeñas y la Liga alcanzó difusión en
-        medios, destacando el patrocinio del diario La Nación con la
-        "Copa Diario La Nación".
-    </p>
-    <div class="era-photos wide">
-        <figure>
-            <img src="{% static 'core/img/fotos/archivo-90s-seleccion.jpg' %}" alt="Selección de la Liga en 1990">
-            <figcaption>Selección de la Liga, 1990.</figcaption>
-        </figure>
-        <figure>
-            <img src="{% static 'core/img/fotos/historia-1996.jpg' %}" alt="Equipo de la Liga en los años 90">
-            <figcaption>Equipo representativo, década de 1990.</figcaption>
-        </figure>
-    </div>
-</section>
-
-<section class="era">
-    <div class="era-head">
-        <span class="era-year">Jornadas</span>
-        <span class="era-title">Inauguraciones y encuentros</span>
-    </div>
-    <p class="era-text">
-        Cada temporada parte con la presentación de todos los colegios
-        participantes. Estas imágenes forman parte del archivo entregado por la
-        Liga; su fecha exacta está por confirmar.
-    </p>
-    <div class="era-photos">
-        <figure>
-            <img src="{% static 'core/img/fotos/archivo-jornada-1.jpg' %}" alt="Deportistas reunidos en el gimnasio durante una inauguración">
-            <figcaption>Presentación de los colegios participantes.</figcaption>
-        </figure>
-        <figure>
-            <img src="{% static 'core/img/fotos/archivo-jornada-2.jpg' %}" alt="Equipos formados en la cancha durante una ceremonia">
-            <figcaption>Equipos formados en cancha durante la ceremonia de apertura.</figcaption>
-        </figure>
-        <figure>
-            <img src="{% static 'core/img/fotos/archivo-jornada-3.jpg' %}" alt="Equipos posando junto a la red">
-            <figcaption>Equipos posando junto a la red al término de una jornada.</figcaption>
-        </figure>
-    </div>
-</section>
-
-<section class="era">
-    <div class="era-head">
-        <span class="era-year">Hoy</span>
-        <span class="era-title">La Liga en cancha</span>
-    </div>
-    <p class="era-text">
-        Más de 2.500 deportistas y 60 equipos compiten cada temporada en las
-        categorías Sub-14, Sub-16 y Sub-18, en recintos de toda la Región
-        Metropolitana.
-    </p>
-    <div class="era-photos">
-        <figure>
-            <img src="{% static 'core/img/fotos/archivo-hoy-1.jpg' %}" alt="Trofeos y balones preparados para una premiación">
-            <figcaption>Trofeos y balones preparados para la premiación.</figcaption>
-        </figure>
-        <figure>
-            <img src="{% static 'core/img/fotos/impacto-banner-sponsor.jpg' %}" alt="Plantel en un recinto con presencia de marca en cancha">
-            <figcaption>Plantel completo en un recinto de la Liga.</figcaption>
-        </figure>
-        <figure>
-            <img src="{% static 'core/img/fotos/archivo-hoy-2.jpg' %}" alt="Disputa de balón sobre la red">
-            <figcaption>Disputa de balón sobre la red.</figcaption>
-        </figure>
-        <figure>
-            <img src="{% static 'core/img/fotos/galeria-1.jpg' %}" alt="Armado en zona de red durante un partido">
-            <figcaption>Armado en zona de red durante un partido oficial.</figcaption>
-        </figure>
-        <figure>
-            <img src="{% static 'core/img/fotos/archivo-hoy-5.jpg' %}" alt="Remate frente al bloqueo rival">
-            <figcaption>Remate frente al bloqueo rival.</figcaption>
-        </figure>
-        <figure>
-            <img src="{% static 'core/img/fotos/galeria-3.jpg' %}" alt="Saque de salto en pleno vuelo">
-            <figcaption>Saque de salto en pleno vuelo.</figcaption>
-        </figure>
-        <figure>
-            <img src="{% static 'core/img/fotos/galeria-2.jpg' %}" alt="Bloqueo en la red">
-            <figcaption>Bloqueo en la red en categoría escolar.</figcaption>
-        </figure>
-        <figure>
-            <img src="{% static 'core/img/fotos/galeria-4.jpg' %}" alt="Remate durante una jornada de competencia">
-            <figcaption>Remate durante una jornada de competencia.</figcaption>
-        </figure>
-        <figure>
-            <img src="{% static 'core/img/fotos/impacto-reconocimiento.jpg' %}" alt="Ceremonia de reconocimiento">
-            <figcaption>Ceremonia de reconocimiento a colaboradores.</figcaption>
-        </figure>
-    </div>
-</section>
-
-<section class="band-blue archivo-cta">
-    <div class="band-inner">
-        <h2>¿Tienes fotos de tu colegio en la Liga?</h2>
-        <p>
-            Este archivo se construye entre todos. Si guardas fotografías,
-            programas o recortes de alguna temporada, nos encantaría sumarlos.
-        </p>
-    </div>
-</section>
-{% endblock %}
-
-{% block scripts %}
-<!-- PELOTA 3D — discreta, contenida y sin seguimiento del cursor -->
-<script>
-(function () {
-    var mount = document.getElementById('archivoBall');
-    if (!mount || typeof THREE === 'undefined') return;
-
-    // Si el visitante pidió reducir movimiento, la pelota se dibuja una
-    // sola vez y se queda completamente quieta.
-    var sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    var size = mount.clientWidth;
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-    camera.position.z = 62;
-
-    var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(size, size);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    mount.appendChild(renderer.domElement);
-
-    var ball = new THREE.Group();
-
-    // Ámbar con costuras azules: se mantiene dentro de la paleta y a la
-    // vez recuerda al balón Molten amarillo y azul que usa la Liga.
-    ball.add(new THREE.Mesh(
-        new THREE.SphereGeometry(14, 64, 64),
-        new THREE.MeshPhysicalMaterial({
-            color: 0xf2a413,
-            roughness: 0.5,
-            metalness: 0.0,
-            clearcoat: 0.35,
-            clearcoatRoughness: 0.6
-        })
-    ));
-
-    // Costuras que siguen la curvatura real de la esfera.
-    class ArcCurve extends THREE.Curve {
-        constructor(axisSweep, valA, valB, axisA, axisB) {
-            super();
-            this.axisSweep = axisSweep;
-            this.valA = valA; this.valB = valB;
-            this.axisA = axisA; this.axisB = axisB;
-        }
-        getPoint(t, target = new THREE.Vector3()) {
-            target.set(0, 0, 0);
-            target[this.axisSweep] = (t * 2) - 1;
-            target[this.axisA] = this.valA;
-            target[this.axisB] = this.valB;
-            return target.normalize().multiplyScalar(14.1);
-        }
-    }
-
-    var seamMat = new THREE.MeshBasicMaterial({ color: 0x163e73 });
-    function seam(axisSweep, valA, valB, axisA, axisB) {
-        var curve = new ArcCurve(axisSweep, valA, valB, axisA, axisB);
-        ball.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 32, 0.16, 8, false), seamMat));
-    }
-
-    // Esqueleto de 18 paneles
-    seam('x', 1, 1, 'y', 'z');   seam('x', -1, 1, 'y', 'z');
-    seam('x', 1, -1, 'y', 'z');  seam('x', -1, -1, 'y', 'z');
-    seam('y', 1, 1, 'x', 'z');   seam('y', -1, 1, 'x', 'z');
-    seam('y', 1, -1, 'x', 'z');  seam('y', -1, -1, 'x', 'z');
-    seam('z', 1, 1, 'x', 'y');   seam('z', -1, 1, 'x', 'y');
-    seam('z', 1, -1, 'x', 'y');  seam('z', -1, -1, 'x', 'y');
-
-    var d = 0.35;
-    seam('y', d, 1, 'x', 'z');   seam('y', -d, 1, 'x', 'z');
-    seam('y', d, -1, 'x', 'z');  seam('y', -d, -1, 'x', 'z');
-    seam('z', d, 1, 'y', 'x');   seam('z', -d, 1, 'y', 'x');
-    seam('z', d, -1, 'y', 'x');  seam('z', -d, -1, 'y', 'x');
-    seam('x', d, 1, 'z', 'y');   seam('x', -d, 1, 'z', 'y');
-    seam('x', d, -1, 'z', 'y');  seam('x', -d, -1, 'z', 'y');
-
-    // Parche con el logo, curvado sobre la propia esfera.
-    var logoTex = new THREE.TextureLoader().load('{% static "core/img/logo-mark.png" %}');
-    var aspect = 961 / 794;
-    var R = 14.3, h = 5.2, w = h * aspect;
-    var tEx = h / R, pEx = w / R;
-    ball.add(new THREE.Mesh(
-        new THREE.SphereGeometry(R, 32, 32,
-            Math.PI / 2 - pEx / 2, pEx,
-            Math.PI / 2 - tEx / 2, tEx),
-        new THREE.MeshBasicMaterial({ map: logoTex, transparent: true, depthWrite: false })
-    ));
-
-    // Inclinación fija para que el logo se lea de frente.
-    ball.rotation.x = -0.18;
-    scene.add(ball);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.95));
-    var key = new THREE.DirectionalLight(0xffffff, 0.55);
-    key.position.set(18, 22, 24);
-    scene.add(key);
-    var fill = new THREE.DirectionalLight(0x163e73, 0.3);
-    fill.position.set(-20, -12, -18);
-    scene.add(fill);
-
-    window.addEventListener('resize', function () {
-        var s = mount.clientWidth;
-        renderer.setSize(s, s);
-        camera.updateProjectionMatrix();
-    });
-
-    if (sinMovimiento) {
-        renderer.render(scene, camera);
-        return;
-    }
-
-    // Giro lento sobre un solo eje. Sin seguimiento del cursor y sin
-    // acople al scroll: son los dos gatillantes principales de vértigo.
-    function animate() {
-        requestAnimationFrame(animate);
-        ball.rotation.y += 0.0016;
-        renderer.render(scene, camera);
-    }
-    animate();
-})();
-</script>
 {% endblock %}
