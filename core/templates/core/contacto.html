@@ -1,119 +1,129 @@
 {% extends "core/base.html" %}
+{% load static %}
 
-{% block title %}Auspiciar | LMVE{% endblock %}
+{% block title %}Contacto | LMVE{% endblock %}
 
 {% block content %}
 <style>
     /* =========================================================
-       HERO
+       CONTACTO SOBRE FOTOGRAFÍA, COMO EL MODELO
        ========================================================= */
-    .page-hero {
+    .contacto-seccion {
+        position: relative;
+        width: 100vw;
+        left: 50%;
+        margin-left: -50vw;
+        overflow: hidden;
+        background: var(--c-navy-deep);
+    }
+    .contacto-fondo {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    /* Lavado azul: sin él, el formulario blanco sobre la foto no se lee. */
+    .contacto-lavado {
+        position: absolute;
+        inset: 0;
+        background: rgba(var(--c-navy-rgb), 0.82);
+    }
+    .contacto-inner {
+        position: relative;
+        z-index: 1;
         max-width: var(--page-max);
         margin: 0 auto;
-        padding: 72px var(--page-pad) 48px var(--page-pad);
+        padding: 76px var(--page-pad) 90px var(--page-pad);
+        display: grid;
+        grid-template-columns: 0.75fr 1.25fr;
+        gap: 48px;
+        align-items: center;
     }
-    .page-hero-inner { max-width: 760px; }
-    .page-hero h1 {
-        font-size: clamp(36px, 4.6vw, 56px);
+
+    /* Columna izquierda */
+    .contacto-social h2 {
+        font-size: clamp(26px, 3vw, 34px);
         font-weight: 800;
-        line-height: 1.1;
-        letter-spacing: -1px;
-        color: var(--c-text);
+        text-transform: uppercase;
+        color: #ffffff;
+        margin-bottom: 18px;
+    }
+    .contacto-social p {
+        font-size: 16px;
+        line-height: 1.7;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 22px;
+        max-width: 320px;
+    }
+    .ig-enlace {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 700;
+        transition: color 0.25s ease, transform 0.15s ease;
+    }
+    .ig-enlace svg { width: 38px; height: 38px; flex-shrink: 0; }
+    .ig-enlace:hover { color: var(--c-amber); }
+    .ig-enlace:active { transform: scale(0.96); }
+
+    /* Columna derecha: formulario */
+    .contacto-form h2 {
+        font-size: clamp(26px, 3vw, 36px);
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #ffffff;
         margin-bottom: 24px;
     }
-    .page-hero h1 span { color: var(--c-amber); }
-    .page-hero p {
-        font-size: 18px;
-        line-height: 1.7;
-        color: var(--c-text-soft);
-    }
-
-    /* =========================================================
-       LAYOUT
-       ========================================================= */
-    .contact-grid {
-        max-width: var(--page-max);
-        margin: 0 auto;
-        padding: 0 var(--page-pad) 96px var(--page-pad);
-        display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        gap: 30px;
-        align-items: start;
-    }
-
-    /* =========================================================
-       FORMULARIO
-       ========================================================= */
-    .glass-form-container {
-        background: var(--c-surface);
-        border: 1px solid var(--c-line);
-        border-top: 3px solid var(--c-amber);
-        border-radius: 0 0 8px 8px;
-        padding: 36px 34px;
-    }
-    .form-group { margin-bottom: 22px; }
+    .form-group { margin-bottom: 16px; }
     .field-label {
         display: block;
-        color: var(--c-text);
-        font-size: 12px;
+        color: #ffffff;
+        font-size: 13px;
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
-    /* La paleta no tiene rojo, así que el obligatorio se marca en
-       naranja, que cumple el mismo rol de "atención" en el sistema. */
+    /* La paleta no tiene rojo: el obligatorio se marca en naranja, que
+       cumple el mismo papel de atención dentro del sistema. */
     .required-mark { color: var(--c-orange); }
 
     .field-input, .field-select, .field-textarea {
         width: 100%;
-        background: rgba(0, 0, 0, 0.18);
-        border: 1px solid var(--c-line);
-        color: var(--c-text);
-        padding: 14px 16px;
-        border-radius: 6px;
+        background: #ffffff;
+        border: 2px solid var(--c-orange);
+        border-radius: 4px;
+        color: #1a1a1a;
+        padding: 13px 15px;
         font-family: inherit;
         font-size: 15px;
-        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        transition: box-shadow 0.25s ease;
         outline: none;
     }
-    .field-textarea { resize: vertical; min-height: 120px; }
+    .field-textarea { resize: vertical; min-height: 130px; }
     .field-input:focus, .field-select:focus, .field-textarea:focus {
-        border-color: var(--c-amber);
-        box-shadow: 0 0 0 3px rgba(var(--c-amber-rgb), 0.22);
+        box-shadow: 0 0 0 3px rgba(var(--c-amber-rgb), 0.55);
     }
-    .field-input::placeholder, .field-textarea::placeholder {
-        color: var(--c-text-faint);
-    }
-    /* Las opciones del desplegable las dibuja el sistema operativo:
-       se fijan explícitamente para que no queden claro sobre claro. */
-    .field-select option {
-        background: var(--c-navy);
-        color: var(--c-text);
-    }
+    .field-input::placeholder, .field-textarea::placeholder { color: #8a8a8a; }
+    .field-select option { background: #ffffff; color: #1a1a1a; }
 
-    /* =========================================================
-       BOTÓN DE ENVÍO Y SUS ESTADOS
-       ========================================================= */
+    /* Botón de envío y sus estados */
     .submit-btn {
-        width: 100%;
-        background: var(--c-amber);
+        margin-top: 6px;
+        min-width: 190px;
+        background: #ffffff;
         color: var(--c-navy);
-        border: 2px solid var(--c-amber);
-        padding: 15px;
-        font-size: 15px;
+        border: 2px solid var(--c-orange);
+        padding: 13px 30px;
+        font-size: 16px;
         font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        border-radius: 6px;
+        border-radius: 4px;
         cursor: pointer;
         transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.12s ease;
     }
-    .submit-btn:hover {
-        background: var(--c-orange);
-        border-color: var(--c-orange);
-        color: var(--c-text);
-    }
+    .submit-btn:hover { background: var(--c-orange); color: #ffffff; }
     .submit-btn:active { transform: scale(0.97); }
     .submit-btn:disabled { cursor: default; }
 
@@ -134,25 +144,22 @@
     }
     @keyframes submit-spin { to { transform: rotate(360deg); } }
 
-    /* Enviando */
     .submit-btn.is-loading,
     .submit-btn.is-loading:hover {
         background: var(--c-orange);
         border-color: var(--c-orange);
-        color: var(--c-text);
+        color: #ffffff;
     }
     .submit-btn.is-loading .submit-btn-spinner { display: inline-block; }
 
-    /* Enviado — verde de la paleta como confirmación */
+    /* Enviado: verde de la paleta como confirmación. */
     .submit-btn.is-done,
     .submit-btn.is-done:hover {
         background: var(--c-green);
         border-color: var(--c-green);
-        color: var(--c-text);
+        color: #ffffff;
     }
-
-    /* Error — contorno naranja, distinto de "enviando" para que no se
-       confundan, y el botón vuelve a quedar disponible. */
+    /* Error: contorno, distinto de "enviando" para que no se confundan. */
     .submit-btn.is-error,
     .submit-btn.is-error:hover {
         background: transparent;
@@ -162,192 +169,106 @@
 
     .form-error-msg {
         display: none;
-        color: var(--c-orange);
-        font-size: 13px;
-        font-weight: 700;
-        margin-top: 12px;
-        text-align: center;
+        color: #ffffff;
+        background: var(--c-orange);
+        font-size: 14px;
+        font-weight: 600;
+        padding: 10px 14px;
+        border-radius: 4px;
+        margin-top: 14px;
         line-height: 1.5;
     }
     .form-error-msg.is-visible { display: block; }
 
     /* =========================================================
-       PANEL DE CONTACTO
-       ========================================================= */
-    .comm-panel {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-    .comm-card {
-        background: var(--c-surface);
-        border: 1px solid var(--c-line);
-        border-radius: 8px;
-        padding: 28px;
-    }
-    .comm-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 18px;
-        margin-bottom: 24px;
-    }
-    .comm-item:last-child { margin-bottom: 0; }
-    .comm-icon {
-        width: 42px; height: 42px;
-        background: rgba(var(--c-amber-rgb), 0.14);
-        border: 1px solid rgba(var(--c-amber-rgb), 0.4);
-        border-radius: 8px;
-        display: flex; justify-content: center; align-items: center;
-        font-size: 18px;
-        flex-shrink: 0;
-    }
-    .comm-data h4 {
-        color: var(--c-text-muted);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        margin-bottom: 6px;
-        font-weight: 700;
-    }
-    .comm-data p {
-        color: var(--c-text);
-        font-size: 16px;
-        font-weight: 700;
-    }
-    .comm-data span.placeholder-tag {
-        display: block;
-        color: var(--c-text-faint);
-        font-size: 11px;
-        font-weight: 600;
-        margin-top: 4px;
-    }
-
-    .location-card {
-        flex: 1;
-        min-height: 180px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        gap: 14px;
-    }
-    .location-pin {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        border: 2px dashed rgba(var(--c-amber-rgb), 0.55);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-    }
-    .location-card p {
-        color: var(--c-text);
-        font-weight: 800;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        font-size: 13px;
-    }
-
-    /* =========================================================
        RESPONSIVE
        ========================================================= */
-    @media (max-width: 900px) {
-        .contact-grid { grid-template-columns: 1fr; padding-bottom: 64px; }
-        .glass-form-container { padding: 28px 22px; }
+    @media (max-width: 940px) {
+        .contacto-inner {
+            grid-template-columns: 1fr;
+            gap: 34px;
+            padding: 48px var(--page-pad) 64px var(--page-pad);
+        }
+        .contacto-social p { max-width: none; }
     }
 </style>
 
-<!-- HERO -->
-<div class="page-hero">
-    <div class="page-hero-inner">
-        <div class="section-label">// Enlace Comercial</div>
-        <h1>Auspicia la <span>Liga</span></h1>
-        <p>
-            Establece comunicación directa con nuestro equipo para conocer el
-            dossier de patrocinio o coordinar una reunión.
-        </p>
-    </div>
-</div>
+<section class="contacto-seccion">
+    <img class="contacto-fondo" src="{% static 'core/img/fotos/galeria-2.jpg' %}"
+         alt="" aria-hidden="true">
+    <div class="contacto-lavado"></div>
 
-<div class="contact-grid">
-    <!-- FORMULARIO -->
-    <div class="glass-form-container">
-        <form action="{% url 'contacto' %}" method="POST" id="contactForm">
-            {% csrf_token %}
-            <div class="form-group">
-                <label class="field-label">Empresa o Marca <span class="required-mark">*</span></label>
-                <input type="text" name="empresa" class="field-input" placeholder="Ej. Sponsor Oficial" required>
-            </div>
-
-            <div class="form-group">
-                <label class="field-label">Nombre y Cargo <span class="required-mark">*</span></label>
-                <input type="text" name="contacto" class="field-input" placeholder="Tu nombre y cargo" required>
-            </div>
-
-            <div class="form-group">
-                <label class="field-label">Correo Electrónico <span class="required-mark">*</span></label>
-                <input type="email" name="email" class="field-input" placeholder="correo@empresa.com" required>
-            </div>
-
-            <div class="form-group">
-                <label class="field-label">Nivel de Interés <span class="required-mark">*</span></label>
-                <select name="interes" class="field-select" required>
-                    <option value="" disabled selected>Selecciona una opción de patrocinio...</option>
-                    <option value="naming">Main Sponsor (Naming Rights)</option>
-                    <option value="apparel">Indumentaria y Equipamiento</option>
-                    <option value="digital">Digital & Streaming Partner</option>
-                    <option value="other">Activaciones en recinto</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="field-label">Mensaje</label>
-                <textarea name="mensaje" class="field-textarea" placeholder="Cuéntanos sobre tus objetivos comerciales..."></textarea>
-            </div>
-
-            <button type="submit" class="submit-btn" id="contactSubmitBtn">
-                <span class="submit-btn-label" id="contactSubmitLabel">Enviar Propuesta</span>
-                <span class="submit-btn-spinner"></span>
-            </button>
-            <p class="form-error-msg" id="contactErrorMsg"></p>
-        </form>
-    </div>
-
-    <!-- PANEL DE CONTACTO -->
-    <div class="comm-panel">
-        <div class="comm-card">
-            <div class="comm-item">
-                <div class="comm-icon">📧</div>
-                <div class="comm-data">
-                    <h4>Correo</h4>
-                    <p>contacto@lmve.cl</p>
-                    <span class="placeholder-tag">(dato de ejemplo, a confirmar)</span>
-                </div>
-            </div>
-            <div class="comm-item">
-                <div class="comm-icon">📞</div>
-                <div class="comm-data">
-                    <h4>Teléfono</h4>
-                    <p>+56 9 0000 0000</p>
-                    <span class="placeholder-tag">(dato de ejemplo, a confirmar)</span>
-                </div>
-            </div>
+    <div class="contacto-inner">
+        <div class="contacto-social">
+            <h2>¡Síguenos!</h2>
+            <p>
+                Cobertura de partidos, jugadas destacadas y los momentos que las
+                familias comparten cada temporada.
+            </p>
+            <a class="ig-enlace" href="https://www.instagram.com/ligametropolitanavoley/"
+               target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <rect x="2" y="2" width="20" height="20" rx="5"/>
+                    <circle cx="12" cy="12" r="4"/>
+                    <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/>
+                </svg>
+                @ligametropolitanavoley
+            </a>
         </div>
 
-        <div class="comm-card location-card">
-            <div class="location-pin">📍</div>
-            <p>Región Metropolitana, Chile</p>
+        <div class="contacto-form">
+            <h2>Comunícate con nosotros</h2>
+
+            <form action="{% url 'contacto' %}" method="POST" id="contactForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="field-label">Empresa o Marca <span class="required-mark">*</span></label>
+                    <input type="text" name="empresa" class="field-input" placeholder="Ingresa el nombre de tu empresa" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="field-label">Nombre y Cargo <span class="required-mark">*</span></label>
+                    <input type="text" name="contacto" class="field-input" placeholder="Ingresa tu nombre" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="field-label">Correo Electrónico <span class="required-mark">*</span></label>
+                    <input type="email" name="email" class="field-input" placeholder="Ingresa tu correo" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="field-label">Nivel de Interés <span class="required-mark">*</span></label>
+                    <select name="interes" class="field-select" required>
+                        <option value="" disabled selected>Selecciona una opción...</option>
+                        <option value="naming">Main Sponsor (Naming Rights)</option>
+                        <option value="apparel">Indumentaria y Equipamiento</option>
+                        <option value="digital">Digital &amp; Streaming Partner</option>
+                        <option value="other">Activaciones en recinto</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="field-label">Mensaje</label>
+                    <textarea name="mensaje" class="field-textarea" placeholder="Mensaje"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="contactSubmitBtn">
+                    <span class="submit-btn-label" id="contactSubmitLabel">Enviar</span>
+                    <span class="submit-btn-spinner"></span>
+                </button>
+                <p class="form-error-msg" id="contactErrorMsg"></p>
+            </form>
         </div>
     </div>
-</div>
+</section>
+{% endblock %}
 
+{% block scripts %}
 <script>
     // Envía el formulario a la vista de Django por fetch() (sin recargar
-    // la página) y solo muestra "¡Propuesta Enviada!" cuando el servidor
-    // confirmó que guardó el mensaje. Si algo falla (falta un campo, error
-    // de red), se muestra el motivo en vez de fingir un éxito.
+    // la página) y solo muestra el éxito cuando el servidor confirmó que
+    // guardó el mensaje. Si algo falla (falta un campo, error de red), se
+    // muestra el motivo en vez de fingir un éxito.
     (function () {
         var form = document.getElementById('contactForm');
         var btn = document.getElementById('contactSubmitBtn');
@@ -384,13 +305,13 @@
                     btn.classList.remove('is-loading');
                     if (result.ok && result.data.ok) {
                         btn.classList.add('is-done');
-                        label.textContent = '¡Propuesta Enviada!';
+                        label.textContent = '¡Mensaje enviado!';
                         form.reset();
                     } else {
                         btn.classList.add('is-error');
                         btn.disabled = false;
                         label.textContent = 'Revisa los datos';
-                        var mensajes = (result.data && result.data.errores) || ['No se pudo enviar la propuesta. Intenta de nuevo.'];
+                        var mensajes = (result.data && result.data.errores) || ['No se pudo enviar el mensaje. Intenta de nuevo.'];
                         errorMsg.textContent = mensajes.join(' ');
                         errorMsg.classList.add('is-visible');
                     }
@@ -406,5 +327,4 @@
         });
     })();
 </script>
-
 {% endblock %}
