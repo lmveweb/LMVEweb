@@ -19,8 +19,9 @@ def archivo(request):
     return render(request, 'core/archivo.html')
 
 
-def redes(request):
-    return render(request, 'core/redes.html')
+def sobre(request):
+    return render(request, 'core/sobre.html')
+
 
 def contacto(request):
     if request.method == 'POST':

@@ -1,0 +1,226 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Sobre la LMVE | LMVE{% endblock %}
+
+{% block content %}
+<style>
+    /* =========================================================
+       ENCABEZADO: imagen al costado y título, como el modelo
+       ========================================================= */
+    .sobre-hero {
+        background: var(--c-blue-soft);
+        display: grid;
+        grid-template-columns: 0.9fr 1.1fr;
+        align-items: center;
+        gap: 40px;
+    }
+    .sobre-hero img {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+    }
+    .sobre-hero h1 {
+        font-size: clamp(30px, 4.2vw, 50px);
+        font-weight: 800;
+        text-transform: uppercase;
+        line-height: 1.15;
+        color: #ffffff;
+        padding-right: var(--page-pad);
+    }
+    .sobre-hero h1 .v { color: var(--c-amber); }
+    .sobre-hero h1 .m { color: var(--c-orange); }
+
+    /* =========================================================
+       BLOQUES DE VISIÓN Y MISIÓN
+       ========================================================= */
+    .bloque {
+        position: relative;
+        overflow: hidden;
+    }
+    /* Marca de agua del logo detrás, como en el modelo. */
+    .bloque::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: min(64vw, 660px);
+        aspect-ratio: 700 / 578;
+        transform: translate(-50%, -50%);
+        background: url('{% static "core/img/logo-watermark.png" %}') center / contain no-repeat;
+        opacity: 0.06;
+        pointer-events: none;
+    }
+    .bloque-inner {
+        position: relative;
+        z-index: 1;
+        max-width: var(--page-max);
+        margin: 0 auto;
+        padding: 76px var(--page-pad);
+        display: grid;
+        grid-template-columns: 0.85fr 1.15fr;
+        gap: 48px;
+        align-items: center;
+    }
+    /* La Misión invierte el orden, igual que en el modelo. */
+    .bloque.invertido .bloque-inner { grid-template-columns: 1.15fr 0.85fr; }
+    .bloque.invertido .bloque-texto { order: -1; }
+
+    .bloque figure {
+        margin: 0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .bloque figure img {
+        width: 100%;
+        height: 340px;
+        object-fit: cover;
+    }
+    .bloque h2 {
+        font-size: clamp(26px, 3.2vw, 38px);
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #ffffff;
+        margin-bottom: 18px;
+    }
+    .bloque h2 .acento { color: var(--c-orange); }
+    .bloque p {
+        font-size: 16px;
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.92);
+        margin-bottom: 16px;
+    }
+    .bloque p:last-child { margin-bottom: 0; }
+
+    /* =========================================================
+       MIRANDO HACIA EL FUTURO
+       ========================================================= */
+    .futuro-bloque { background: var(--c-blue-soft); }
+    .futuro-inner {
+        max-width: var(--page-max);
+        margin: 0 auto;
+        padding: 70px var(--page-pad);
+    }
+    .futuro-inner h2 {
+        font-size: clamp(26px, 3.2vw, 38px);
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #ffffff;
+        margin-bottom: 26px;
+    }
+    .futuro-inner h2 .acento { color: var(--c-orange); }
+    .futuro-items {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+    .futuro-item {
+        border-left: 4px solid var(--c-orange);
+        padding-left: 20px;
+    }
+    .futuro-item h3 {
+        font-size: 19px;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 8px;
+    }
+    .futuro-item p {
+        font-size: 15px;
+        line-height: 1.75;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+    @media (max-width: 940px) {
+        .sobre-hero { grid-template-columns: 1fr; gap: 0; }
+        .sobre-hero img { height: 200px; }
+        .sobre-hero h1 { padding: 30px var(--page-pad); }
+        .bloque-inner,
+        .bloque.invertido .bloque-inner {
+            grid-template-columns: 1fr;
+            gap: 26px;
+            padding: 48px var(--page-pad);
+        }
+        /* En una sola columna la imagen va siempre arriba. */
+        .bloque.invertido .bloque-texto { order: 0; }
+        .bloque figure img { height: 230px; }
+        .futuro-items { grid-template-columns: 1fr; gap: 24px; }
+    }
+</style>
+
+<!-- ENCABEZADO -->
+<section class="sobre-hero">
+    <img src="{% static 'core/img/fotos/archivo-hoy-5.jpg' %}"
+         alt="Remate frente al bloqueo durante un partido de la Liga">
+    <h1>Nuestra <span class="v">Visión</span><br>y <span class="m">Misión</span></h1>
+</section>
+
+<!-- VISIÓN -->
+<section class="bloque">
+    <div class="bloque-inner">
+        <figure>
+            <img src="{% static 'core/img/fotos/archivo-hoy-2.jpg' %}"
+                 alt="Recepción de balón durante un partido de la Liga">
+        </figure>
+        <div class="bloque-texto">
+            <h2>Nuestra <span class="acento">Visión</span></h2>
+            <p>
+                La Liga Metropolitana de Voleibol Escolar aspira, en su contexto, a
+                constituirse en un referente por su liderazgo en la propuesta
+                organizacional y deportiva, promoviendo en la formación de nuestros
+                jóvenes deportistas, jugadores y jugadoras estudiantes, a personas
+                íntegras, justas y perseverantes.
+            </p>
+            <p>
+                Aspiramos a consolidar una organización que construye un clima de
+                apoyo, responsabilidad y compromiso con la excelencia deportiva.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- MISIÓN -->
+<section class="bloque invertido">
+    <div class="bloque-inner">
+        <div class="bloque-texto">
+            <h2>Nuestra <span class="acento">Misión</span></h2>
+            <p>
+                Somos una organización compuesta por educadores y que está orientada a
+                ofrecer espacios de competencias educativas y de calidad, estructuradas
+                y pensadas de tal manera que la perseverancia, el respeto, la sana
+                convivencia, el trabajo y la superación personal y colectiva queden de
+                manifiesto durante todo su desarrollo deportivo.
+            </p>
+        </div>
+        <figure>
+            <img src="{% static 'core/img/fotos/galeria-2.jpg' %}"
+                 alt="Bloqueo en la red durante un partido de la Liga">
+        </figure>
+    </div>
+</section>
+
+<!-- FUTURO -->
+<section class="futuro-bloque">
+    <div class="futuro-inner">
+        <h2>Mirando hacia el <span class="acento">Futuro</span></h2>
+        <div class="futuro-items">
+            <div class="futuro-item">
+                <h3>Proyecto de Auspicio 2026</h3>
+                <p>
+                    Enfocado en gestionar alianzas corporativas y beneficios directos
+                    para potenciar la experiencia deportiva de nuestros jóvenes.
+                </p>
+            </div>
+            <div class="futuro-item">
+                <h3>Rumbo a los 40 años (2027)</h3>
+                <p>
+                    Nos preparamos para celebrar cuatro décadas promoviendo la actividad
+                    física, la formación humana y la excelencia deportiva en Chile.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
