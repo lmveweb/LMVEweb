@@ -1,362 +1,311 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}La Liga | LMVE{% endblock %}
+{% block title %}Historia | LMVE{% endblock %}
 
 {% block content %}
 <style>
     /* =========================================================
-       HERO
+       ENCABEZADO DE LA VISTA
        ========================================================= */
-    .page-hero {
+    .historia-hero { background: var(--c-blue-soft); }
+    .historia-hero-inner {
         max-width: var(--page-max);
         margin: 0 auto;
-        padding: 72px var(--page-pad) 56px var(--page-pad);
-        max-width: min(var(--page-max), 100%);
+        padding: 64px var(--page-pad);
+        display: grid;
+        grid-template-columns: 1.5fr 0.8fr;
+        gap: 44px;
+        align-items: center;
     }
-    .page-hero-inner { max-width: 760px; }
-    .page-hero h1 {
-        font-size: clamp(36px, 4.6vw, 56px);
+    .historia-hero h1 {
+        font-size: clamp(30px, 4vw, 46px);
         font-weight: 800;
+        text-transform: uppercase;
         line-height: 1.1;
-        letter-spacing: -1px;
-        color: var(--c-text);
+        letter-spacing: -0.5px;
+        color: #ffffff;
         margin-bottom: 24px;
     }
-    .page-hero h1 span { color: var(--c-amber); }
-    .page-hero p {
-        font-size: 18px;
-        line-height: 1.7;
-        color: var(--c-text-soft);
-    }
-
-    /* =========================================================
-       LEMA (franja de énfasis)
-       ========================================================= */
-    .lema-band p {
-        font-size: clamp(28px, 4vw, 48px);
-        font-weight: 800;
-        line-height: 1.15;
-        letter-spacing: -1px;
-        text-align: center;
-        color: var(--c-navy);
-    }
-    /* Naranja y no ámbar: sobre fondo claro el ámbar no alcanza
-       contraste, y aquí es texto grande donde el naranja sí funciona. */
-    .lema-band p span { color: var(--c-orange); }
-
-    /* =========================================================
-       PROPÓSITO Y VALORES
-       ========================================================= */
-    .quienes-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 56px;
-    }
-    .quienes-grid p {
-        font-size: 17px;
+    .historia-hero p {
+        font-size: 16px;
         line-height: 1.75;
-        color: var(--c-text-soft);
-        margin-bottom: 22px;
+        color: rgba(255, 255, 255, 0.92);
+        margin-bottom: 18px;
+        max-width: 640px;
     }
-    .valores-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
+    .historia-hero p:last-child { margin-bottom: 0; }
+    .historia-hero strong { color: var(--c-amber); }
+    .historia-foto {
+        border-radius: 10px;
+        overflow: hidden;
+        border: 3px solid rgba(255, 255, 255, 0.5);
     }
-    .valor-tag {
-        border: 1px solid var(--c-amber);
-        color: var(--c-amber);
-        padding: 8px 18px;
-        border-radius: 50px;
-        font-size: 13px;
-        font-weight: 700;
-        letter-spacing: 0.4px;
+    .historia-foto img {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
     }
 
     /* =========================================================
-       LÍNEA DE TIEMPO
+       LÍNEA DE TIEMPO POR ÉPOCAS
        ========================================================= */
-    .timeline {
-        position: relative;
-        max-width: 980px;
+    .epocas {
+        max-width: var(--page-max);
         margin: 0 auto;
-        padding-top: 8px;
+        padding: 66px var(--page-pad) 90px var(--page-pad);
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 30px;
+        align-items: start;
     }
-    .timeline::after {
-        content: '';
-        position: absolute;
-        width: 2px;
-        background: var(--c-line);
-        top: 0;
-        bottom: 0;
-        left: 50%;
-        margin-left: -1px;
-    }
-    .tl-item {
-        position: relative;
-        width: 50%;
-        padding: 0 40px 44px 40px;
-    }
-    .tl-item.left { left: 0; text-align: right; }
-    .tl-item.right { left: 50%; }
-    .tl-dot {
-        position: absolute;
-        top: 6px;
-        width: 15px;
-        height: 15px;
-        border-radius: 50%;
-        background: var(--c-amber);
-        border: 3px solid var(--c-navy);
-        z-index: 2;
-    }
-    .tl-item.left .tl-dot { right: -8px; }
-    .tl-item.right .tl-dot { left: -7px; }
 
-    .tl-card {
-        background: var(--c-surface);
-        border: 1px solid var(--c-line);
-        border-radius: 8px;
-        overflow: hidden;
+    .epocas-tabs {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
     }
-    .tl-photo {
+    .epoca-tab {
+        display: block;
         width: 100%;
-        height: 190px;
+        text-align: center;
+        background: transparent;
+        border: 2px solid var(--c-orange);
+        border-radius: 8px;
+        color: #ffffff;
+        font-family: inherit;
+        font-size: 16px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 18px 14px;
+        cursor: pointer;
+        transition: background 0.25s ease, transform 0.12s ease;
+    }
+    .epoca-tab:hover { background: rgba(var(--c-orange-rgb), 0.22); }
+    .epoca-tab:active { transform: scale(0.98); }
+    .epoca-tab[aria-selected="true"] {
+        background: var(--c-orange);
+        border-color: var(--c-orange);
+    }
+    .epoca-tab:focus-visible {
+        outline: 3px solid #ffffff;
+        outline-offset: 2px;
+    }
+
+    .epoca-panel[hidden] { display: none; }
+    .epoca-marco {
+        border: 3px solid var(--c-orange);
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--c-navy-deep);
+    }
+    .epoca-marco img {
+        width: 100%;
+        height: 430px;
         object-fit: cover;
         display: block;
     }
-    .tl-body { padding: 22px 24px 24px 24px; }
-    .tl-date {
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1.6px;
-        color: var(--c-amber);
-        margin-bottom: 8px;
-    }
-    .tl-body h4 {
-        font-size: 20px;
-        font-weight: 700;
-        color: var(--c-text);
-        margin-bottom: 10px;
-        line-height: 1.25;
-    }
-    .tl-body p {
+    .epoca-pie {
+        background: var(--c-orange);
+        color: #ffffff;
+        padding: 18px 22px;
         font-size: 15px;
-        line-height: 1.7;
-        color: var(--c-text-muted);
+        font-weight: 600;
+        line-height: 1.6;
     }
-
-    /* =========================================================
-       MIRANDO AL FUTURO
-       ========================================================= */
-    .futuro-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 28px;
-    }
-    .futuro-card {
-        border-top: 3px solid var(--c-orange);
-        background: var(--c-surface);
-        padding: 30px 28px;
-        border-radius: 0 0 8px 8px;
-    }
-    .futuro-card h4 {
-        font-size: 12px;
-        font-weight: 700;
+    .epoca-pie b {
+        display: block;
+        font-size: 13px;
+        font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 2px;
-        color: var(--c-amber);
-        margin-bottom: 12px;
-    }
-    .futuro-card h5 {
-        font-size: 22px;
-        font-weight: 700;
-        color: var(--c-text);
-        margin-bottom: 12px;
-    }
-    .futuro-card p {
-        font-size: 15px;
-        line-height: 1.7;
-        color: var(--c-text-muted);
+        letter-spacing: 1.4px;
+        margin-bottom: 6px;
+        color: rgba(255, 255, 255, 0.92);
     }
 
     /* =========================================================
        RESPONSIVE
        ========================================================= */
-    @media (max-width: 900px) {
-        .quienes-grid { grid-template-columns: 1fr; gap: 32px; }
-        .timeline::after { left: 8px; }
-        .tl-item {
-            width: 100%;
-            left: 0 !important;
-            text-align: left !important;
-            padding: 0 0 32px 34px;
+    @media (max-width: 940px) {
+        .historia-hero-inner {
+            grid-template-columns: 1fr;
+            gap: 28px;
+            padding: 44px var(--page-pad);
         }
-        .tl-item .tl-dot { left: 1px !important; right: auto !important; }
-        .tl-photo { height: 170px; }
-        .futuro-grid { grid-template-columns: 1fr; gap: 20px; }
+        .historia-foto img { height: 200px; }
+        .epocas {
+            grid-template-columns: 1fr;
+            gap: 24px;
+            padding: 44px var(--page-pad) 64px var(--page-pad);
+        }
+        /* Las épocas pasan a una fila desplazable para no ocupar
+           media pantalla antes de llegar a la foto. */
+        .epocas-tabs {
+            flex-direction: row;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+        }
+        .epoca-tab {
+            width: auto;
+            flex: 0 0 auto;
+            font-size: 14px;
+            padding: 12px 18px;
+            white-space: nowrap;
+        }
+        .epoca-marco img { height: 260px; }
     }
 </style>
 
-<!-- HERO -->
-<section class="page-hero">
-    <div class="page-hero-inner">
-        <div class="section-label">// Fundada en 1987</div>
-        <h1>Nuestra <span>Historia</span></h1>
-        <p>
-            Fundada en 1987 por un grupo de profesores de Educación Física
-            —inicialmente como Liga Teresiana de Voleibol Escolar—, la Liga
-            Metropolitana de Voleibol Escolar es una institución deportiva sin
-            fines de lucro enfocada en el desarrollo integral de niños y jóvenes.
-        </p>
-    </div>
-</section>
-
-<!-- LEMA -->
-<section class="band-blue lema-band">
-    <div class="band-inner">
-        <p><span>"</span>Educar a Través del Deporte<span>"</span></p>
-    </div>
-</section>
-
-<!-- PROPÓSITO Y VALORES -->
-<section class="page-wrap">
-    <div class="section-label">// Propósito y Valores</div>
-    <div class="quienes-grid">
+<!-- ENCABEZADO -->
+<section class="historia-hero">
+    <div class="historia-hero-inner">
         <div>
+            <h1>Nuestra Historia y Propósito</h1>
             <p>
-                Somos una organización compuesta por educadores, orientada a
-                ofrecer espacios de competencias educativas y de calidad, donde
-                la perseverancia, el respeto, la sana convivencia, el trabajo y
-                la superación personal y colectiva quedan de manifiesto durante
-                todo el desarrollo deportivo.
+                Fundada en 1987 por un grupo de profesores de Educación Física
+                —inicialmente como Liga Teresiana de Voleibol Escolar—, la Liga
+                Metropolitana de Voleibol Escolar es una institución deportiva sin
+                fines de lucro enfocada en el desarrollo integral de niños y jóvenes.
+            </p>
+            <p>
+                Bajo el lema <strong>"Educar a Través del Deporte"</strong>, aspiramos
+                a ser un referente nacional del deporte escolar, promoviendo valores
+                como la justicia, la perseverancia, la responsabilidad y la excelencia
+                en un ambiente de apoyo constante.
             </p>
         </div>
-        <div>
-            <p>
-                Nuestros valores fundacionales guían cada torneo, cada colegio y
-                cada equipo que forma parte de la liga:
-            </p>
-            <div class="valores-list">
-                <span class="valor-tag">Justicia</span>
-                <span class="valor-tag">Perseverancia</span>
-                <span class="valor-tag">Responsabilidad</span>
-                <span class="valor-tag">Excelencia</span>
+
+        <figure class="historia-foto">
+            <img src="{% static 'core/img/fotos/galeria-3.jpg' %}"
+                 alt="Saque de salto durante un partido de la Liga">
+        </figure>
+    </div>
+</section>
+
+<!-- ÉPOCAS -->
+<section class="epocas">
+    {% comment %}
+    Las cinco épocas y sus textos salen de la Reseña Histórica 2026. El
+    modelo repetía "Década del 90" en las últimas pestañas: eran
+    marcadores sin llenar, aquí van las reales.
+    {% endcomment %}
+    <div class="epocas-tabs" role="tablist" aria-label="Épocas de la Liga">
+        <button class="epoca-tab" role="tab" id="tab-1" aria-controls="panel-1" aria-selected="true">1987 – 1989</button>
+        <button class="epoca-tab" role="tab" id="tab-2" aria-controls="panel-2" aria-selected="false" tabindex="-1">Década del 90</button>
+        <button class="epoca-tab" role="tab" id="tab-3" aria-controls="panel-3" aria-selected="false" tabindex="-1">Década de 2000</button>
+        <button class="epoca-tab" role="tab" id="tab-4" aria-controls="panel-4" aria-selected="false" tabindex="-1">2022 a la fecha</button>
+        <button class="epoca-tab" role="tab" id="tab-5" aria-controls="panel-5" aria-selected="false" tabindex="-1">2025 – Presente</button>
+    </div>
+
+    <div class="epocas-paneles">
+        <div class="epoca-panel" role="tabpanel" id="panel-1" aria-labelledby="tab-1" tabindex="0">
+            <div class="epoca-marco">
+                <img src="{% static 'core/img/fotos/historia-1987.jpg' %}"
+                     alt="Equipo de la Liga a fines de los años 80">
+                <div class="epoca-pie">
+                    <b>1987 – 1989 · Inicios</b>
+                    La Liga comenzó con cerca de 16 colegios compitiendo en divisiones
+                    de Damas y Varones a través de los torneos Apertura u Oficial,
+                    disputados los sábados por la mañana.
+                </div>
+            </div>
+        </div>
+
+        <div class="epoca-panel" role="tabpanel" id="panel-2" aria-labelledby="tab-2" tabindex="0" hidden>
+            <div class="epoca-marco">
+                <img src="{% static 'core/img/fotos/historia-1996.jpg' %}"
+                     alt="Selección de la Liga en la década de 1990">
+                <div class="epoca-pie">
+                    <b>Década de 1990 · Consolidación y cobertura</b>
+                    La participación creció a 25 colegios. Se incorporaron los
+                    encuentros de Mini Voleibol (4° a 6° Básico) y se logró una
+                    importante difusión en medios, destacando el patrocinio del diario
+                    La Nación con la "Copa Diario La Nación".
+                </div>
+            </div>
+        </div>
+
+        <div class="epoca-panel" role="tabpanel" id="panel-3" aria-labelledby="tab-3" tabindex="0" hidden>
+            <div class="epoca-marco">
+                <img src="{% static 'core/img/fotos/archivo-jornada-1.jpg' %}"
+                     alt="Deportistas reunidos en el gimnasio durante una jornada de la Liga">
+                <div class="epoca-pie">
+                    <b>Década de 2000 · Estructura y alianzas</b>
+                    Se consolidó la estructura directiva y administrativa
+                    (coordinadores, comisiones de disciplina y RR. PP., personalidad
+                    jurídica, sitio web y marca institucional). Se impulsaron
+                    capacitaciones para árbitros y seminarios para entrenadores, sumado
+                    a alianzas con Barlosport (Molten), Arte Bismarck y Productora
+                    Kraneo, con cobertura en El Mercurio y La Tercera.
+                </div>
+            </div>
+        </div>
+
+        <div class="epoca-panel" role="tabpanel" id="panel-4" aria-labelledby="tab-4" tabindex="0" hidden>
+            <div class="epoca-marco">
+                <img src="{% static 'core/img/fotos/galeria-1.jpg' %}"
+                     alt="Jugada en zona de red durante un partido reciente de la Liga">
+                <div class="epoca-pie">
+                    <b>2022 a la fecha · Retorno post-pandemia</b>
+                    Tras la pausa obligada por la pandemia, la Liga reinició sus
+                    actividades en 2022 con renovado entusiasmo de los colegios
+                    asociados, expandiendo su alcance a comunas como Colina (Chicureo),
+                    Puente Alto, Calera de Tango, Pirque, La Pintana, Talagante, Maipú,
+                    Las Condes y Lo Barnechea.
+                </div>
+            </div>
+        </div>
+
+        <div class="epoca-panel" role="tabpanel" id="panel-5" aria-labelledby="tab-5" tabindex="0" hidden>
+            <div class="epoca-marco">
+                <img src="{% static 'core/img/fotos/archivo-hoy-1.jpg' %}"
+                     alt="Trofeos y balones preparados para una premiación de la Liga">
+                <div class="epoca-pie">
+                    <b>2025 – Presente</b>
+                    La organización se constituye como la Fundación para el Desarrollo
+                    del Deporte Escolar, manteniendo a la Liga Metropolitana de Voleibol
+                    Escolar como su pilar central.
+                </div>
             </div>
         </div>
     </div>
 </section>
+{% endblock %}
 
-<!-- LÍNEA DE TIEMPO -->
-<section class="page-wrap" style="padding-top: 0;">
-    <div class="section-label">// Evolución y Crecimiento</div>
-    <div class="timeline">
-        <div class="tl-item left">
-            <div class="tl-dot"></div>
-            <div class="tl-card">
-                <img class="tl-photo" src="{% static 'core/img/fotos/historia-1987.jpg' %}" alt="Equipo de la Liga a fines de los años 80">
-                <div class="tl-body">
-                    <div class="tl-date">1987 — 1989 // Inicios</div>
-                    <h4>Los primeros pasos</h4>
-                    <p>
-                        La Liga comenzó con cerca de 16 colegios compitiendo en
-                        divisiones de Damas y Varones a través de los torneos
-                        Apertura u Oficial, disputados los sábados por la mañana.
-                    </p>
-                </div>
-            </div>
-        </div>
+{% block scripts %}
+<script>
+(function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.epoca-tab'));
+    if (!tabs.length) return;
 
-        <div class="tl-item right">
-            <div class="tl-dot"></div>
-            <div class="tl-card">
-                <img class="tl-photo" src="{% static 'core/img/fotos/historia-1996.jpg' %}" alt="Selección de la Liga en los años 90">
-                <div class="tl-body">
-                    <div class="tl-date">Década de 1990 // Consolidación</div>
-                    <h4>Cobertura y crecimiento</h4>
-                    <p>
-                        La participación creció a 25 colegios. Se incorporó el
-                        Mini Voleibol (4° a 6° Básico) y se logró difusión en
-                        medios, destacando el patrocinio del diario La Nación con
-                        la "Copa Diario La Nación".
-                    </p>
-                </div>
-            </div>
-        </div>
+    function mostrar(indice, mover_foco) {
+        tabs.forEach(function (tab, i) {
+            var activo = i === indice;
+            tab.setAttribute('aria-selected', activo ? 'true' : 'false');
+            // Solo la pestaña activa queda en el recorrido del tabulador;
+            // entre pestañas se navega con las flechas.
+            tab.tabIndex = activo ? 0 : -1;
+            document.getElementById(tab.getAttribute('aria-controls')).hidden = !activo;
+        });
+        if (mover_foco) tabs[indice].focus();
+    }
 
-        <div class="tl-item left">
-            <div class="tl-dot"></div>
-            <div class="tl-card">
-                <div class="tl-body">
-                    <div class="tl-date">Década de 2000 // Estructura y alianzas</div>
-                    <h4>Profesionalización</h4>
-                    <p>
-                        Se consolidó la estructura directiva y administrativa
-                        (personalidad jurídica, sitio web y marca institucional),
-                        junto a alianzas estratégicas con Barlosport (Molten),
-                        Arte Bismarck y Productora Kraneo, con cobertura en El
-                        Mercurio y La Tercera.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <div class="tl-item right">
-            <div class="tl-dot"></div>
-            <div class="tl-card">
-                <div class="tl-body">
-                    <div class="tl-date">2022 a la fecha // Retorno post-pandemia</div>
-                    <h4>Nueva expansión</h4>
-                    <p>
-                        Tras la pausa por la pandemia, la Liga reinició sus
-                        actividades en 2022, expandiendo su alcance a Colina
-                        (Chicureo), Puente Alto, Calera de Tango, Pirque, La
-                        Pintana, Talagante, Maipú, Las Condes y Lo Barnechea.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <div class="tl-item left">
-            <div class="tl-dot"></div>
-            <div class="tl-card">
-                <div class="tl-body">
-                    <div class="tl-date">2025 — Presente</div>
-                    <h4>Fundación para el Desarrollo del Deporte Escolar</h4>
-                    <p>
-                        La organización se constituye como fundación, manteniendo
-                        a la Liga como su pilar central para seguir promoviendo el
-                        deporte escolar a nivel nacional.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- MIRANDO AL FUTURO -->
-<section class="page-wrap" style="padding-top: 0;">
-    <div class="section-label">// Mirando hacia adelante</div>
-    <div class="futuro-grid">
-        <div class="futuro-card">
-            <h4>Proyecto de Auspicio 2026</h4>
-            <h5>Alianzas corporativas</h5>
-            <p>
-                Enfocado en gestionar alianzas corporativas y beneficios directos
-                para potenciar la experiencia deportiva de nuestros jóvenes
-                atletas.
-            </p>
-        </div>
-        <div class="futuro-card">
-            <h4>Rumbo a los 40 años</h4>
-            <h5>Celebración 2027</h5>
-            <p>
-                Nos preparamos para celebrar cuatro décadas promoviendo la
-                actividad física, la formación humana y la excelencia deportiva
-                en Chile.
-            </p>
-        </div>
-    </div>
-</section>
+    tabs.forEach(function (tab, i) {
+        tab.addEventListener('click', function () { mostrar(i, false); });
+        tab.addEventListener('keydown', function (e) {
+            var salto = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+            if (salto) {
+                e.preventDefault();
+                mostrar((i + salto + tabs.length) % tabs.length, true);
+            } else if (e.key === 'Home') {
+                e.preventDefault(); mostrar(0, true);
+            } else if (e.key === 'End') {
+                e.preventDefault(); mostrar(tabs.length - 1, true);
+            }
+        });
+    });
+})();
+</script>
 {% endblock %}
