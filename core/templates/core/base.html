@@ -10,27 +10,30 @@
 
     <style>
         /* =========================================================
-           PALETA LMVE — 5 colores, sin blanco como color de superficie.
-           El azul oscuro es la base de todo el sitio; el azul vivo
-           marca los momentos de énfasis. El blanco queda reservado
-           únicamente para texto sobre esos fondos (legibilidad).
+           PALETA LMVE
+
+           El modelo trabaja con dos azules: uno profundo en el
+           encabezado y las franjas, y el cuerpo algo más claro. El
+           segundo no se inventa: es el mismo azul de marca, y el
+           profundo se obtiene oscureciéndolo, para no meter un color
+           ajeno a la paleta.
            ========================================================= */
         :root {
-            --c-navy:   #163E73;   --c-navy-rgb:  22, 62, 115;
-            /* Blanco de la paleta de marca, para las franjas claras. */
-            --c-blanco: #f7f9fb;   --c-blanco-rgb: 247, 249, 251;
-            --c-green:  #4B8C3A;   --c-green-rgb: 75, 140, 58;
-            --c-amber:  #F2A413;   --c-amber-rgb: 242, 164, 19;
-            --c-orange: #F2620F;   --c-orange-rgb: 242, 98, 15;
+            --c-navy-deep: #10365F;  --c-navy-deep-rgb: 16, 54, 95;
+            --c-navy:      #163E73;  --c-navy-rgb:      22, 62, 115;
+            --c-blue-soft: #1B5490;  --c-blue-soft-rgb: 27, 84, 144;
+            --c-green:     #4B8C3A;  --c-green-rgb:     75, 140, 58;
+            --c-amber:     #F2A413;  --c-amber-rgb:    242, 164, 19;
+            --c-orange:    #F2620F;  --c-orange-rgb:   242, 98, 15;
+            --c-blanco:    #f7f9fb;  --c-blanco-rgb:  247, 249, 251;
 
-            /* Texto y superficies derivadas del propio fondo */
             --c-text:       #ffffff;
-            --c-text-soft:  rgba(255, 255, 255, 0.80);
-            --c-text-muted: rgba(255, 255, 255, 0.66);
-            --c-text-faint: rgba(255, 255, 255, 0.48);
-            --c-line:       rgba(255, 255, 255, 0.16);
+            --c-text-soft:  rgba(255, 255, 255, 0.86);
+            --c-text-muted: rgba(255, 255, 255, 0.70);
+            --c-text-faint: rgba(255, 255, 255, 0.50);
+            --c-line:       rgba(255, 255, 255, 0.18);
             --c-line-soft:  rgba(255, 255, 255, 0.10);
-            --c-surface:    rgba(255, 255, 255, 0.05);
+            --c-surface:    rgba(255, 255, 255, 0.06);
 
             /* Alias que usan las plantillas de cada vista */
             --color-bg: var(--c-navy);        --color-bg-rgb: var(--c-navy-rgb);
@@ -44,7 +47,7 @@
             --color-elegant: var(--c-amber);
             --color-organize: var(--c-green);
 
-            --header-h: 96px;
+            --header-h: 104px;
             --page-max: 1200px;
             --page-pad: 40px;
         }
@@ -71,9 +74,7 @@
         }
         img { max-width: 100%; display: block; }
 
-        /* Respeto a la preferencia del sistema de reducir movimiento.
-           Si el visitante la tiene activada (Windows: Configuración →
-           Accesibilidad → Efectos visuales), el sitio queda quieto. */
+        /* Respeto a la preferencia del sistema de reducir movimiento. */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -84,98 +85,57 @@
         }
 
         /* =========================================================
-           MARCA DE AGUA DE FONDO (todas las vistas salvo Archivo)
-           ========================================================= */
-        body.has-watermark::before {
-            content: '';
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            width: min(62vw, 680px);
-            aspect-ratio: 700 / 578;
-            transform: translate(-50%, -50%);
-            background: url('{% static "core/img/logo-watermark.png" %}') center / contain no-repeat;
-            opacity: 0.05;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Variante alternativa: fotografía real difuminada. */
-        body.has-photo-bg::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: url('{% static "core/img/fotos/galeria-1.jpg" %}') center / cover no-repeat;
-            filter: blur(16px) saturate(0.7);
-            transform: scale(1.06);
-            opacity: 0.22;
-            pointer-events: none;
-            z-index: 0;
-        }
-        body.has-photo-bg::after {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(rgba(var(--c-navy-rgb), 0.82), rgba(var(--c-navy-rgb), 0.94));
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* =========================================================
-           HEADER
+           ENCABEZADO
            ========================================================= */
         .site-header {
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(var(--c-navy-rgb), 0.92);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--c-line-soft);
+            background: var(--c-navy-deep);
             transition: box-shadow 0.3s ease;
         }
         .site-header.is-scrolled {
-            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
         }
         .header-inner {
             max-width: var(--page-max);
             margin: 0 auto;
             padding: 0 var(--page-pad);
-            height: var(--header-h);
+            min-height: var(--header-h);
             display: flex;
             align-items: center;
-            gap: 28px;
+            gap: 22px;
         }
 
-        /* Bloque de marca: logo + lema institucional */
+        /* El logo va sobre placa clara, como en el modelo. */
         .brand-lockup {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 18px;
             text-decoration: none;
             flex-shrink: 0;
         }
-        /* Esta versión del logo trae contorno blanco, así que ya no
-           necesita ir sobre una placa clara: se apoya directamente
-           sobre el azul sin perderse. */
-        .brand-logo {
-            height: 64px;
-            width: auto;
-            display: block;
+        .brand-plate {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            padding: 8px 12px;
+            border-radius: 4px;
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .brand-lockup:hover .brand-logo { transform: scale(1.04); }
-        .brand-lockup:active .brand-logo { transform: scale(0.97); }
-        .brand-lema {
-            display: block;
-            padding-left: 20px;
-            border-left: 2px solid var(--c-orange);
-            font-size: 14px;
-            font-style: italic;
-            font-weight: 500;
-            line-height: 1.35;
+        .brand-plate img {
+            height: 74px;
+            width: auto;
+        }
+        .brand-lockup:hover .brand-plate { transform: scale(1.03); }
+        .brand-lockup:active .brand-plate { transform: scale(0.98); }
+        .brand-nombre {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.3;
             color: var(--c-text);
-            white-space: nowrap;
+            max-width: 210px;
         }
 
         .header-spacer { flex: 1; }
@@ -184,41 +144,38 @@
             list-style: none;
             display: flex;
             align-items: center;
-            gap: 30px;
+        }
+        /* Separadores verticales entre secciones, como el modelo. */
+        .site-nav li + li {
+            border-left: 1px solid rgba(255, 255, 255, 0.35);
         }
         .site-nav a {
             display: inline-block;
             color: var(--c-text);
             text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            padding: 6px 0;
-            border-bottom: 2px solid transparent;
-            transition: color 0.25s ease, border-color 0.25s ease;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 4px 16px;
+            transition: color 0.25s ease;
         }
-        .site-nav a:hover { color: var(--c-amber); border-bottom-color: var(--c-amber); }
+        .site-nav a:hover { color: var(--c-amber); }
         .site-nav a:active { transform: translateY(1px); }
 
-        /* Botón principal: ámbar con texto azul oscuro. Es la
-           combinación de la paleta con mejor contraste (5.1:1). */
+        /* Botón de acción en naranja. */
         .btn-cta {
             display: inline-block;
-            background: var(--c-amber);
-            color: var(--c-navy);
-            padding: 13px 26px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 800;
+            background: var(--c-orange);
+            color: #ffffff;
+            padding: 11px 26px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 700;
             text-decoration: none;
             white-space: nowrap;
-            transition: background 0.25s ease, transform 0.12s ease, box-shadow 0.25s ease;
+            margin-left: 16px;
+            transition: background 0.25s ease, transform 0.12s ease;
         }
-        .btn-cta:hover {
-            background: var(--c-orange);
-            color: var(--c-text);
-            box-shadow: 0 6px 20px rgba(var(--c-orange-rgb), 0.35);
-        }
+        .btn-cta:hover { background: #d4520a; }
         .btn-cta:active { transform: scale(0.96); }
 
         /* =========================================================
@@ -261,10 +218,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            /* Azul oscuro y no el azul vivo: a pantalla completa ese
-               azul resultaba invasivo. */
-            background: var(--c-navy);
+            gap: 6px;
+            background: var(--c-navy-deep);
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s;
@@ -273,7 +228,7 @@
         .mobile-nav a {
             color: var(--c-text);
             text-decoration: none;
-            font-size: 30px;
+            font-size: 28px;
             font-weight: 700;
             padding: 10px 0;
             transition: color 0.25s ease, transform 0.15s ease;
@@ -281,19 +236,18 @@
         .mobile-nav a:hover { color: var(--c-amber); }
         .mobile-nav a:active { transform: scale(0.96); }
         .mobile-nav .mobile-lema {
-            margin-top: 28px;
+            margin-top: 26px;
             font-size: 15px;
             font-style: italic;
             color: rgba(255, 255, 255, 0.8);
         }
         .mobile-nav a.mobile-cta {
-            margin-top: 22px;
+            margin-top: 20px;
             font-size: 16px;
-            font-weight: 800;
-            background: var(--c-amber);
-            color: var(--c-navy);
-            padding: 14px 34px;
-            border-radius: 4px;
+            background: var(--c-orange);
+            color: #ffffff;
+            padding: 13px 34px;
+            border-radius: 50px;
         }
 
         /* =========================================================
@@ -311,9 +265,7 @@
             padding: 72px var(--page-pad) 96px var(--page-pad);
         }
 
-        /* Franja clara a todo el ancho. Antes era azul vivo, que sobre
-           el azul del sitio resultaba invasivo; ahora usa el blanco de
-           la paleta de marca y da un respiro entre secciones. */
+        /* Franja clara a todo el ancho. */
         .band-blue {
             background: var(--c-blanco);
             color: var(--c-navy);
@@ -324,14 +276,23 @@
             margin: 0 auto;
             padding: 0 var(--page-pad);
         }
-        /* Sobre la franja clara todo el texto se invierte a azul. */
         .band-blue h2,
         .band-blue h3,
         .band-blue h4 { color: var(--c-navy); }
         .band-blue p { color: rgba(var(--c-navy-rgb), 0.82); }
 
-        /* Rótulo de sección en ámbar: sobre el azul oscuro es el
-           acento de la paleta que mantiene contraste legible. */
+        /* Franja en el azul intermedio del modelo. */
+        .band-soft {
+            background: var(--c-blue-soft);
+            padding: 72px 0;
+        }
+        .band-soft .band-inner {
+            max-width: var(--page-max);
+            margin: 0 auto;
+            padding: 0 var(--page-pad);
+        }
+
+        /* Rótulo de sección. */
         .section-label {
             font-size: 12px;
             font-weight: 700;
@@ -340,120 +301,171 @@
             color: var(--c-amber);
             margin-bottom: 22px;
         }
-        /* Sobre fondo claro el ámbar cae a 2:1 y no se lee: ahí el
-           rótulo va en azul, que además es el color que la marca usa
-           para organizar la información. */
+        /* Sobre fondo claro el ámbar cae a 2:1: ahí va en azul. */
         .band-blue .section-label { color: var(--c-navy); }
 
+        /* Título de sección, el recurso más repetido del modelo. */
+        .titulo-seccion {
+            font-size: clamp(28px, 3.4vw, 42px);
+            font-weight: 800;
+            line-height: 1.12;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+            color: var(--c-text);
+            margin-bottom: 26px;
+        }
+        .titulo-seccion .acento { color: var(--c-orange); }
+        .titulo-seccion .acento-ambar { color: var(--c-amber); }
+        .band-blue .titulo-seccion { color: var(--c-navy); }
+
         /* =========================================================
-           FOOTER
+           PIE DE PÁGINA
            ========================================================= */
         .site-footer {
             position: relative;
             z-index: 1;
-            background: var(--c-surface);
-            border-top: 3px solid var(--c-orange);
-            color: var(--c-text-muted);
-            padding: 64px var(--page-pad) 0 var(--page-pad);
+            background: var(--c-green);
+            color: #ffffff;
+            padding: 60px var(--page-pad) 0 var(--page-pad);
         }
         .footer-grid {
             max-width: var(--page-max);
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1.5fr 1fr 1fr;
-            gap: 48px;
-            padding-bottom: 48px;
+            grid-template-columns: 1.4fr 1fr 1fr 1fr;
+            gap: 40px;
+            padding-bottom: 44px;
         }
-        .footer-logo {
-            height: 62px;
-            width: auto;
-            display: block;
-            margin-bottom: 22px;
+        .footer-logo-plate {
+            display: inline-block;
+            background: #ffffff;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-bottom: 20px;
         }
+        .footer-logo-plate img { height: 62px; width: auto; }
         .footer-lema {
             font-size: 17px;
             font-style: italic;
-            color: var(--c-amber);
-            margin-bottom: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
         }
+        /* El blanco sobre el verde queda en 4,1:1, justo en el límite:
+           por eso el texto del pie va algo más grande y con más peso
+           que el del resto del sitio. */
         .footer-brand p {
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 500;
             line-height: 1.7;
-            max-width: 380px;
+            max-width: 330px;
+            color: #ffffff;
         }
         .site-footer h4 {
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 13px;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--c-text);
-            margin-bottom: 18px;
+            letter-spacing: 1.6px;
+            color: #ffffff;
+            margin-bottom: 16px;
         }
         .site-footer ul { list-style: none; }
-        .site-footer li { margin-bottom: 11px; }
-        .site-footer a {
-            color: var(--c-text-muted);
-            text-decoration: none;
-            font-size: 14px;
-            transition: color 0.25s ease;
+        .site-footer li {
+            margin-bottom: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #ffffff;
         }
-        .site-footer a:hover { color: var(--c-amber); }
+        .site-footer a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: opacity 0.25s ease;
+        }
+        .site-footer a:hover { opacity: 0.75; text-decoration: underline; }
+
+        /* Patrocinador, que en el modelo cerraba la página. */
+        .footer-sponsor .sponsor-plate {
+            background: #ffffff;
+            border-radius: 6px;
+            padding: 18px 20px;
+            text-align: center;
+        }
+        .footer-sponsor .sponsor-plate img {
+            width: 100%;
+            max-width: 150px;
+            margin: 0 auto;
+        }
+        .footer-sponsor small {
+            display: block;
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #ffffff;
+            text-align: center;
+        }
+
         .footer-bottom {
             max-width: var(--page-max);
             margin: 0 auto;
-            border-top: 1px solid var(--c-line-soft);
-            padding: 24px 0 30px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 20px 0 26px 0;
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 12px;
-            font-size: 13px;
-            color: var(--c-text-faint);
+            font-size: 14px;
+            font-weight: 500;
+            color: #ffffff;
         }
 
         /* =========================================================
            RESPONSIVE
            ========================================================= */
-        @media (max-width: 1080px) {
-            .brand-lema { display: none; }
-            .site-nav ul { gap: 22px; }
+        @media (max-width: 1140px) {
+            .brand-nombre { display: none; }
+            .site-nav a { padding: 4px 12px; font-size: 14px; }
         }
-        @media (max-width: 900px) {
-            :root { --header-h: 78px; --page-pad: 20px; }
-            .brand-logo { height: 46px; }
+        @media (max-width: 940px) {
+            :root { --header-h: 82px; --page-pad: 20px; }
+            .brand-plate img { height: 52px; }
+            .brand-plate { padding: 6px 9px; }
             .site-nav { display: none; }
             .header-inner .btn-cta { display: none; }
             .menu-toggle { display: flex; }
             .page-wrap { padding: 48px var(--page-pad) 64px var(--page-pad); }
-            .band-blue { padding: 56px 0; }
-            .footer-grid { grid-template-columns: 1fr; gap: 36px; }
-            .footer-bottom { flex-direction: column; text-align: left; }
+            .band-blue, .band-soft { padding: 52px 0; }
+            .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+            .footer-sponsor .sponsor-plate { max-width: 260px; }
+            .footer-bottom { flex-direction: column; }
         }
     </style>
 </head>
-<body class="{% block body_class %}has-watermark{% endblock %}">
+<body class="{% block body_class %}{% endblock %}">
 
     <header class="site-header" id="siteHeader">
         <div class="header-inner">
             <a href="{% url 'home' %}" class="brand-lockup">
-                <img src="{% static 'core/img/logo-borde-compacto.png' %}"
-                     alt="LMVE — Liga Metropolitana de Voleibol Escolar"
-                     class="brand-logo">
-                <span class="brand-lema">Educar a Través del Deporte</span>
+                <span class="brand-plate">
+                    <img src="{% static 'core/img/logo-borde-compacto.png' %}"
+                         alt="LMVE — Liga Metropolitana de Voleibol Escolar">
+                </span>
+                <span class="brand-nombre">Liga Metropolitana de Voleibol Escolar</span>
             </a>
 
             <div class="header-spacer"></div>
 
             <nav class="site-nav">
                 <ul>
-                    <li><a href="{% url 'proyecto' %}">La Liga</a></li>
-                    <li><a href="{% url 'archivo' %}">Archivo</a></li>
-                    <li><a href="{% url 'impacto' %}">Impacto</a></li>
-                    <li><a href="{% url 'redes' %}">Comunidad</a></li>
+                    <li><a href="{% url 'home' %}">Inicio</a></li>
+                    <li><a href="{% url 'proyecto' %}">Historia</a></li>
+                    <li><a href="{% url 'sobre' %}">Sobre la LMVE</a></li>
+                    <li><a href="{% url 'archivo' %}">Multimedia</a></li>
                 </ul>
             </nav>
 
-            <a href="{% url 'contacto' %}" class="btn-cta">Auspiciar</a>
+            <a href="{% url 'contacto' %}" class="btn-cta">Contacto</a>
 
             <button class="menu-toggle" id="menuToggle" type="button"
                     aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav">
@@ -464,12 +476,11 @@
 
     <nav class="mobile-nav" id="mobileNav">
         <a href="{% url 'home' %}">Inicio</a>
-        <a href="{% url 'proyecto' %}">La Liga</a>
-        <a href="{% url 'archivo' %}">Archivo</a>
-        <a href="{% url 'impacto' %}">Impacto</a>
-        <a href="{% url 'redes' %}">Comunidad</a>
+        <a href="{% url 'proyecto' %}">Historia</a>
+        <a href="{% url 'sobre' %}">Sobre la LMVE</a>
+        <a href="{% url 'archivo' %}">Multimedia</a>
         <span class="mobile-lema">"Educar a Través del Deporte"</span>
-        <a href="{% url 'contacto' %}" class="mobile-cta">Auspiciar</a>
+        <a href="{% url 'contacto' %}" class="mobile-cta">Contacto</a>
     </nav>
 
     <main class="site-main">
@@ -479,24 +490,25 @@
     <footer class="site-footer">
         <div class="footer-grid">
             <div class="footer-brand">
-                <img src="{% static 'core/img/logo-borde-compacto.png' %}"
-                     alt="LMVE" class="footer-logo">
+                <span class="footer-logo-plate">
+                    <img src="{% static 'core/img/logo-borde-compacto.png' %}" alt="LMVE">
+                </span>
                 <div class="footer-lema">"Educar a Través del Deporte"</div>
                 <p>
-                    Liga Metropolitana de Voleibol Escolar. Institución deportiva sin
-                    fines de lucro que desde 1987 forma a niñas, niños y jóvenes de la
-                    Región Metropolitana a través del voleibol.
+                    Institución deportiva sin fines de lucro que desde 1987 forma a
+                    niñas, niños y jóvenes de la Región Metropolitana a través del
+                    voleibol.
                 </p>
             </div>
 
             <div>
                 <h4>Navegación</h4>
                 <ul>
-                    <li><a href="{% url 'proyecto' %}">La Liga</a></li>
-                    <li><a href="{% url 'archivo' %}">Archivo</a></li>
-                    <li><a href="{% url 'impacto' %}">Impacto</a></li>
-                    <li><a href="{% url 'redes' %}">Comunidad</a></li>
-                    <li><a href="{% url 'contacto' %}">Auspiciar</a></li>
+                    <li><a href="{% url 'home' %}">Inicio</a></li>
+                    <li><a href="{% url 'proyecto' %}">Historia</a></li>
+                    <li><a href="{% url 'sobre' %}">Sobre la LMVE</a></li>
+                    <li><a href="{% url 'archivo' %}">Multimedia</a></li>
+                    <li><a href="{% url 'contacto' %}">Contacto</a></li>
                 </ul>
             </div>
 
@@ -508,6 +520,14 @@
                     <li><a href="https://www.instagram.com/ligametropolitanavoley/" target="_blank" rel="noopener">Instagram</a></li>
                 </ul>
             </div>
+
+            <div class="footer-sponsor">
+                <h4>Patrocinador</h4>
+                <div class="sponsor-plate">
+                    <img src="{% static 'core/img/molten.svg' %}" alt="Molten">
+                </div>
+                <small>Balón oficial Molten 5000</small>
+            </div>
         </div>
 
         <div class="footer-bottom">
@@ -516,7 +536,7 @@
         </div>
     </footer>
 
-    <!-- Sombra del header al hacer scroll -->
+    <!-- Sombra del encabezado al hacer scroll -->
     <script>
         (function () {
             var header = document.getElementById('siteHeader');
@@ -557,7 +577,7 @@
             });
 
             window.addEventListener('resize', function () {
-                if (window.innerWidth > 900) setMenu(false);
+                if (window.innerWidth > 940) setMenu(false);
             });
         })();
     </script>
