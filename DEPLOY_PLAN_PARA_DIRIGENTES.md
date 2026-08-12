@@ -153,6 +153,28 @@ Tu sitio tiene un **formulario de contacto** donde los patrocinadores envían su
 
 ---
 
+## ¿De quién es el sitio? (Cuenta de Organización, no Personal)
+
+Mauricio ofreció acompañar el sitio durante **6 meses** después de publicarlo. Pasado ese tiempo, la Liga tiene que poder seguir operándolo sola, sin depender de él.
+
+**El problema, si no lo planificamos:** hoy, tanto el código (GitHub) como el servidor (Render) y el dominio se crearían a nombre personal de Mauricio. Es como si el título de propiedad del departamento quedara a su nombre en vez de al nombre del Club — el día que Mauricio ya no esté disponible, "traspasar" todo de golpe es engorroso y riesgoso (contraseñas, cuentas, dominios).
+
+**El plan:** crear una **cuenta de organización** (a nombre de la Liga, no de una persona) desde el principio, en los tres lugares donde vive el proyecto:
+
+| Servicio | Hoy (a evitar) | Plan (cuenta de organización) |
+|---|---|---|
+| **GitHub** (donde vive el código) | Cuenta personal de Mauricio | Organización de GitHub a nombre de la LMVE — gratis, ilimitada |
+| **Render** (donde vive el servidor) | Cuenta personal | Cuenta/equipo creado con un correo institucional de la Liga |
+| **Dominio lmve.cl** | A nombre personal | Registrado con los datos de la Liga (no el RUT personal de Mauricio) |
+
+Con esto, Mauricio queda como **colaborador temporal** durante los 6 meses de soporte — no como dueño. Al terminar ese período, simplemente se le quita el acceso: no hay nada que "traspasar" de urgencia, porque la propiedad siempre fue de la Liga.
+
+**Qué necesitamos de la Junta Directiva para esto:**
+- Un correo institucional de la Liga (para crear las cuentas de GitHub y Render)
+- Confirmar quién de la Junta va a quedar como segundo administrador (además de Mauricio, mientras dure el soporte), para que no dependa de una sola persona ni siquiera durante esos 6 meses
+
+---
+
 ## Antes y Después
 
 ### HOY (Antes)
@@ -235,8 +257,10 @@ TOTAL: 8-10 días hábiles (2 semanas calendario)
 - [ ] Entiendo que el sitio va a estar siempre en línea (24/7)
 - [ ] Entiendo que cuesta ~$13 USD + $9.990 CLP al año
 - [ ] Entiendo que debo publicar una Política de Privacidad
-- [ ] Autorizamos a Mauricio a registrar el dominio lmve.cl
-- [ ] Autorizamos al estudiante a crear cuenta en Render
+- [ ] Autorizamos a Mauricio a registrar el dominio lmve.cl **a nombre de la Liga**
+- [ ] Autorizamos al estudiante a crear cuenta en Render, **como cuenta de organización, no personal**
+- [ ] Vamos a crear una Organización de GitHub para la Liga (no dejar el código en una cuenta personal)
+- [ ] Designamos a un segundo dirigente como administrador, además de Mauricio, durante los 6 meses de soporte
 - [ ] Confirmo que todos los datos de contactos se guardarán en PostgreSQL (más seguro que SQLite)
 - [ ] Entiendo que si hay ataque, Cloudflare nos protege automáticamente
 - [ ] Estamos preparados para revisar logs si algo sale mal
