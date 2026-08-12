@@ -200,3 +200,17 @@ STORAGES = {
         'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
     },
 }
+
+
+# Seguridad para HTTPS (producción)
+# https://docs.djangoproject.com/en/6.0/topics/security/
+#
+# Envuelto en "if not DEBUG" para no forzar HTTPS en desarrollo local
+# (runserver sirve por http:// sin certificado).
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 año
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
