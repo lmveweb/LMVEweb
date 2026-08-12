@@ -6,6 +6,7 @@ from django.core.mail import EmailMessage
 from django.core.validators import validate_email
 from django.http import JsonResponse
 from django.shortcuts import render
+from django_ratelimit.decorators import ratelimit
 
 from .models import MensajePatrocinio
 
@@ -60,8 +61,15 @@ def sobre(request):
     return render(request, 'core/sobre.html')
 
 
+@ratelimit(key='ip', rate='5/m', method='POST', block=False)
 def contacto(request):
     if request.method == 'POST':
+        if getattr(request, 'limited', False):
+            return JsonResponse(
+                {'ok': False, 'errores': ['Demasiados intentos. Espera un minuto e intenta de nuevo.']},
+                status=429,
+            )
+
         empresa = request.POST.get('empresa', '').strip()
         contacto_nombre = request.POST.get('contacto', '').strip()
         email = request.POST.get('email', '').strip()

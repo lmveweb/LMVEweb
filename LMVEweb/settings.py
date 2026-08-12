@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_ratelimit',
     'core',
 ]
 
@@ -207,6 +208,28 @@ STORAGES = {
 #
 # Envuelto en "if not DEBUG" para no forzar HTTPS en desarrollo local
 # (runserver sirve por http:// sin certificado).
+# Cache en base de datos: la usa el rate limiting del formulario de
+# Contacto (django-ratelimit). Tiene que ser compartida entre los workers
+# de Gunicorn en producción, por eso no alcanza con la caché en memoria
+# por defecto (cada worker tendría su propio conteo). La tabla la crea
+# "python manage.py createcachetable" (ver Procfile, release phase).
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'cache_table',
+    }
+}
+
+# django-ratelimit solo da por "soportados" sin advertencia a Memcached o
+# Redis, porque son los únicos con incremento atómico garantizado. Sumar
+# cualquiera de los dos es un servicio de infraestructura nuevo que este
+# proyecto no necesita todavía: para el volumen de un formulario de
+# auspicios de una liga escolar, una condición de carrera ocasional (que
+# deje pasar 1-2 intentos de más bajo tráfico concurrente real) no es un
+# riesgo que justifique esa complejidad. Se acepta la advertencia y se
+# silencia solo el error puntual de "no atómico" (E003), no todo el check.
+SILENCED_SYSTEM_CHECKS = ['django_ratelimit.E003']
+
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
