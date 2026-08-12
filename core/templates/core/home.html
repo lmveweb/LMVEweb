@@ -47,17 +47,25 @@
         margin: 0 auto;
         padding: 150px var(--page-pad) 64px var(--page-pad);
     }
+    /* Con la condensada el mismo texto ocupa bastante menos ancho, así
+       que el titular puede crecer mucho sin desbordar ni empujar al
+       resto del hero: es justo el tamaño lo que lo vuelve contundente. */
     .hero h1 {
-        font-size: clamp(38px, 5.6vw, 66px);
-        line-height: 1.04;
+        font-size: clamp(48px, 8vw, 96px);
+        line-height: 0.92;
         font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: -1px;
+        letter-spacing: 0.5px;
         color: var(--c-text);
-        margin-bottom: 20px;
+        margin-bottom: 22px;
         text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
     }
-    .hero h1 .acento { color: var(--c-orange); }
+    /* "Deporte" en cursiva: cierra la frase con el gesto de movimiento
+       y de paso separa las dos ideas del lema. */
+    .hero h1 .acento {
+        color: var(--c-orange);
+        font-style: italic;
+    }
     .hero p {
         font-size: 18px;
         line-height: 1.6;
@@ -120,10 +128,12 @@
     }
     .cifra + .cifra { border-left: 1px solid rgba(255, 255, 255, 0.22); }
     .cifra-num {
-        font-size: clamp(26px, 2.6vw, 34px);
+        font-size: clamp(32px, 3.4vw, 46px);
         font-weight: 800;
-        line-height: 1.1;
+        line-height: 1.05;
+        letter-spacing: 0.5px;
         color: #ffffff;
+        font-variant-numeric: tabular-nums;
     }
     .cifra-label {
         font-size: 13px;
@@ -266,10 +276,11 @@
     }
     .futuro-inner { position: relative; z-index: 1; }
     .futuro h2 {
-        font-size: clamp(26px, 3.2vw, 38px);
+        font-size: clamp(32px, 4.2vw, 52px);
         font-weight: 800;
+        line-height: 1.0;
         text-transform: uppercase;
-        letter-spacing: -0.5px;
+        letter-spacing: 0.5px;
         color: var(--c-green);
         margin-bottom: 34px;
     }

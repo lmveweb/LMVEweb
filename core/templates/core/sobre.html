@@ -3,12 +3,6 @@
 
 {% block title %}Sobre la LMVE | LMVE{% endblock %}
 
-{# Esta vista monta las dos pelotas 3D miniatura (Visión y Misión). #}
-{% block head_extra %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="{% static 'core/js/pelota3d.js' %}?v=13"></script>
-{% endblock %}
-
 {% block content %}
 <style nonce="{{ request.csp_nonce }}">
     /* =========================================================
@@ -27,13 +21,19 @@
         object-fit: cover;
     }
     .sobre-hero h1 {
-        font-size: clamp(30px, 4.2vw, 50px);
+        font-size: clamp(40px, 6vw, 76px);
         font-weight: 800;
         text-transform: uppercase;
-        line-height: 1.15;
+        line-height: 0.95;
+        letter-spacing: 0.5px;
         color: #ffffff;
         padding-right: var(--page-pad);
     }
+    /* Las dos palabras que dan nombre a la página, en cursiva y cada
+       una con su color: son el título más "hablado" del sitio y así
+       se leen como un gesto y no como dos palabras más de la frase. */
+    .sobre-hero h1 .v,
+    .sobre-hero h1 .m { font-style: italic; }
     .sobre-hero h1 .v { color: var(--c-amber); }
     .sobre-hero h1 .m { color: var(--c-orange); }
 
@@ -77,11 +77,9 @@
         object-fit: cover;
     }
     .bloque h2 {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        font-size: clamp(26px, 3.2vw, 38px);
+        font-size: clamp(38px, 5vw, 64px);
         font-weight: 800;
+        line-height: 1.0;
         letter-spacing: 0.5px;
         text-transform: uppercase;
         color: #ffffff;
@@ -102,15 +100,15 @@
         content: '';
         position: absolute;
         z-index: -1;
-        left: -0.06em;
-        right: -0.12em;
+        left: -0.10em;
+        right: -0.14em;
         top: 50%;
         /* Ajustado al cuerpo de las mayúsculas, no a la caja de línea:
            un destacador se pasa sobre la palabra, no sobre el renglón
            entero. Las tildes de Ó quedan afuera, que es justamente lo
            que pasa al destacar a mano. */
-        height: 0.95em;
-        transform: translateY(-50%) rotate(-0.8deg);
+        height: 1.05em;
+        transform: translateY(-50%) rotate(-1.4deg);
         background-color: var(--tinta);
         background-image:
             /* Tinta acumulada contra el filo del plumón, arriba y abajo. */
@@ -123,34 +121,40 @@
                 rgba(0, 0, 0, 0.10) 0%, rgba(255, 255, 255, 0.10) 18%,
                 rgba(0, 0, 0, 0.05) 55%, rgba(255, 255, 255, 0.07) 78%,
                 rgba(0, 0, 0, 0.10) 100%);
-        /* Un plumón de punta chata deja el filo RECTO arriba y abajo;
-           lo irregular está en los extremos, donde se apoya y se
-           levanta. Los bordes ondulados de la versión anterior eran
-           justamente lo que se veía raro. */
-        clip-path: polygon(1.5% 3%, 99% 0%, 100% 52%, 98% 100%, 2.5% 97%, 0% 48%);
+        /* La silueta del trazo sale de una máscara SVG, no de un
+           clip-path. Antes era un polígono de seis puntos: prácticamente
+           un rectángulo con las esquinas apenas movidas, y por eso se
+           leía como una caja de color y no como un plumón.
+
+           Con curvas el filo puede ondular de verdad a lo largo de toda
+           la pasada, engrosando y afinando como cuando la mano no
+           mantiene la presión pareja, y los extremos quedan romos y
+           torcidos —donde el plumón se apoya y se levanta— en vez de
+           cortados a escuadra. */
+        -webkit-mask-image: var(--trazo);
+                mask-image: var(--trazo);
+        -webkit-mask-size: 100% 100%;
+                mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+                mask-repeat: no-repeat;
     }
-    /* Un color por palabra, y cada trazo con su propia inclinación y
-       sus propios extremos: dos brochazos idénticos se notarían como un
+    /* Un color por palabra, y cada trazo con su propio recorrido y su
+       propia inclinación: dos brochazos idénticos se notarían como un
        patrón repetido, no como algo hecho a mano. */
-    .bloque:not(.invertido) h2 .acento { --tinta: #FFD34E; }
-    .bloque.invertido h2 .acento { --tinta: #9BD65B; }
+    .bloque:not(.invertido) h2 .acento {
+        --tinta: #FFD34E;
+        --trazo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 80' preserveAspectRatio='none'%3E%3Cpath d='M2,18C70,11,140,16,210,9C260,4,295,13,318,6L316,31C318,49,313,62,311,73C245,78,175,70,105,75C68,78,32,72,6,76C3,58,1,38,2,18Z' fill='%23000'/%3E%3C/svg%3E");
+    }
+    .bloque.invertido h2 .acento {
+        --tinta: #9BD65B;
+        --trazo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 80' preserveAspectRatio='none'%3E%3Cpath d='M6,11C62,17,128,6,196,13C246,17,288,7,314,14L317,36C315,51,318,64,312,75C250,69,180,78,112,71C74,67,36,76,7,70C4,53,7,29,6,11Z' fill='%23000'/%3E%3C/svg%3E");
+    }
     .bloque.invertido h2 .acento::before {
-        transform: translateY(-50%) rotate(0.7deg);
-        clip-path: polygon(0.5% 0%, 98.5% 3%, 100% 50%, 99% 97%, 1.5% 100%, 0% 45%);
+        transform: translateY(-50%) rotate(1.1deg);
     }
-    /* Pelota 3D miniatura, como ícono junto al título. */
-    .mini-ball {
-        width: 108px;
-        height: 108px;
-        flex-shrink: 0;
-    }
-    .mini-ball canvas { display: block; }
     /* Título y párrafo son ambos blancos sobre el mismo azul: sin algo
        que los separe se leen como un solo bloque. La barra marca dónde
-       termina el título y empieza el texto. Es un elemento propio (no
-       un ::after del h2) porque el h2 ahora es flex por la pelota, y
-       un pseudo-elemento ahí quedaría como tercer ítem de la fila en
-       vez de pasar a la línea siguiente. */
+       termina el título y empieza el texto. */
     .titulo-divisor {
         width: 56px;
         height: 4px;
@@ -177,13 +181,18 @@
         padding: 70px var(--page-pad);
     }
     .futuro-inner h2 {
-        font-size: clamp(26px, 3.2vw, 38px);
+        font-size: clamp(32px, 4.2vw, 52px);
         font-weight: 800;
+        line-height: 1.0;
+        letter-spacing: 0.5px;
         text-transform: uppercase;
         color: #ffffff;
         margin-bottom: 26px;
     }
-    .futuro-inner h2 .acento { color: var(--c-orange); }
+    .futuro-inner h2 .acento {
+        color: var(--c-orange);
+        font-style: italic;
+    }
     .futuro-items {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -194,8 +203,9 @@
         padding-left: 20px;
     }
     .futuro-item h3 {
-        font-size: 19px;
+        font-size: 22px;
         font-weight: 800;
+        letter-spacing: 0.3px;
         color: #ffffff;
         margin-bottom: 8px;
     }
@@ -247,7 +257,7 @@
                  alt="Recepción de balón durante un partido de la Liga">
         </figure>
         <div class="bloque-texto">
-            <h2><span class="mini-ball" id="ballVision"></span> <span class="acento">Visión</span></h2>
+            <h2><span class="acento">Visión</span></h2>
             <div class="titulo-divisor"></div>
             <p>
                 La Liga Metropolitana de Voleibol Escolar aspira, en su contexto, a
@@ -268,7 +278,7 @@
 <section class="bloque invertido">
     <div class="bloque-inner">
         <div class="bloque-texto">
-            <h2><span class="mini-ball" id="ballMision"></span> <span class="acento">Misión</span></h2>
+            <h2><span class="acento">Misión</span></h2>
             <div class="titulo-divisor"></div>
             <p>
                 Somos una organización compuesta por educadores y que está orientada a
@@ -317,14 +327,3 @@ sostiene y expande su proyecto institucional, no la oferta a marcas.
 </section>
 {% endblock %}
 
-{% block scripts %}
-<script nonce="{{ request.csp_nonce }}">
-(function () {
-    if (!window.crearPelotaLMVE) return;
-    var vision = document.getElementById('ballVision');
-    var mision = document.getElementById('ballMision');
-    if (vision) crearPelotaLMVE(vision);
-    if (mision) crearPelotaLMVE(mision);
-})();
-</script>
-{% endblock %}

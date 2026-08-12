@@ -257,6 +257,9 @@ CONTENT_SECURITY_POLICY = {
         'script-src': [SELF, NONCE, 'cdnjs.cloudflare.com', 'www.instagram.com'],
         'style-src': [SELF, NONCE],
         'img-src': [SELF, 'data:'],
+        # Barlow Condensed se sirve desde el propio sitio (core/static/
+        # core/fonts/), no desde un CDN.
+        'font-src': [SELF],
         'connect-src': [SELF, 'www.instagram.com'],
         'frame-src': ['www.instagram.com'],
         'base-uri': [SELF],

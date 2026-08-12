@@ -10,6 +10,57 @@
 
     <style nonce="{{ request.csp_nonce }}">
         /* =========================================================
+           TIPOGRAFÍA
+
+           Barlow Condensed (SIL Open Font License, ver OFL.txt junto
+           a los .woff2) auto-hospedada: los CDN de fuentes están
+           bloqueados por la CSP del sitio, y además así la tipografía
+           no depende de que un tercero siga en línea.
+
+           Es una condensada con cursiva real: el registro de la
+           gráfica deportiva (camisetas, transmisiones). Los títulos
+           estaban en Helvetica recta, que es la fuente más neutra que
+           existe y por eso se leían planos.
+
+           Solo el subconjunto "latin": cubre todas las tildes y la ñ.
+           ========================================================= */
+        @font-face {
+            font-family: 'Barlow Condensed';
+            font-style: normal;
+            font-weight: 600;
+            font-display: swap;
+            src: url('{% static "core/fonts/barlow-condensed-600.woff2" %}') format('woff2');
+        }
+        @font-face {
+            font-family: 'Barlow Condensed';
+            font-style: normal;
+            font-weight: 700;
+            font-display: swap;
+            src: url('{% static "core/fonts/barlow-condensed-700.woff2" %}') format('woff2');
+        }
+        @font-face {
+            font-family: 'Barlow Condensed';
+            font-style: normal;
+            font-weight: 800;
+            font-display: swap;
+            src: url('{% static "core/fonts/barlow-condensed-800.woff2" %}') format('woff2');
+        }
+        @font-face {
+            font-family: 'Barlow Condensed';
+            font-style: italic;
+            font-weight: 700;
+            font-display: swap;
+            src: url('{% static "core/fonts/barlow-condensed-700-italic.woff2" %}') format('woff2');
+        }
+        @font-face {
+            font-family: 'Barlow Condensed';
+            font-style: italic;
+            font-weight: 800;
+            font-display: swap;
+            src: url('{% static "core/fonts/barlow-condensed-800-italic.woff2" %}') format('woff2');
+        }
+
+        /* =========================================================
            PALETA LMVE
 
            El modelo trabaja con dos azules: uno profundo en el
@@ -54,6 +105,12 @@
             --color-elegant: var(--c-amber);
             --color-organize: var(--c-green);
 
+            /* Display para títulos, neutra para el texto corrido: la
+               condensada tiene mucha personalidad en un titular, pero
+               cansa en un párrafo largo. */
+            --font-display: 'Barlow Condensed', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+            --font-body: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
             --header-h: 104px;
             --page-max: 1200px;
             --page-pad: 40px;
@@ -68,7 +125,7 @@
             padding: 0;
         }
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: var(--font-body);
             background-color: var(--c-navy);
             color: var(--c-text-soft);
             line-height: 1.6;
@@ -80,6 +137,18 @@
             min-height: 100vh;
         }
         img { max-width: 100%; display: block; }
+
+        /* Una sola regla acá y la display alcanza a los títulos de
+           todas las vistas, sin repetir font-family en cada plantilla.
+           Las cifras entran también: en una condensada los números
+           grandes ganan bastante carácter. */
+        h1, h2, h3, h4, h5, h6,
+        .titulo-seccion,
+        .section-label,
+        .cifra-num,
+        .brand-nombre {
+            font-family: var(--font-display);
+        }
 
         /* Respeto a la preferencia del sistema de reducir movimiento. */
         @media (prefers-reduced-motion: reduce) {
@@ -351,9 +420,10 @@
             padding: 0 var(--page-pad);
         }
 
-        /* Rótulo de sección. */
+        /* Rótulo de sección. Un punto más de cuerpo que antes: la
+           condensada es más angosta y a 12px se afinaba demasiado. */
         .section-label {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 2.5px;
@@ -363,15 +433,27 @@
         /* Sobre fondo claro el ámbar cae a 2:1: ahí va en azul. */
         .band-blue .section-label { color: var(--c-navy); }
 
-        /* Título de sección, el recurso más repetido del modelo. */
+        /* Título de sección, el recurso más repetido del modelo.
+           Sube bastante de cuerpo respecto de la versión en Helvetica:
+           al ser condensada ocupa menos ancho con el mismo texto, así
+           que el mismo tamaño se veía más chico y más tímido. Grande y
+           con las líneas juntas es donde una condensada se luce. */
         .titulo-seccion {
-            font-size: clamp(28px, 3.4vw, 42px);
+            font-size: clamp(34px, 4.6vw, 58px);
             font-weight: 800;
-            line-height: 1.12;
-            letter-spacing: -0.5px;
+            line-height: 1.0;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
             color: var(--c-text);
             margin-bottom: 26px;
+            text-wrap: balance;
+        }
+        /* La palabra acentuada va en cursiva además de en color: la
+           itálica de una condensada inclina el bloque y es lo que le
+           da el movimiento que al título recto le faltaba. */
+        .titulo-seccion .acento,
+        .titulo-seccion .acento-ambar {
+            font-style: italic;
         }
         .titulo-seccion .acento { color: var(--c-orange); }
         .titulo-seccion .acento-ambar { color: var(--c-amber); }
@@ -433,7 +515,7 @@
             color: #ffffff;
         }
         .site-footer h4 {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1.6px;
