@@ -263,3 +263,50 @@ CONTENT_SECURITY_POLICY = {
         'frame-ancestors': [NONE],
     },
 }
+
+
+# Logging
+# https://docs.djangoproject.com/en/6.0/topics/logging/
+#
+# Handler de consola siempre activo: con DEBUG=False los errores ya no se
+# muestran en pantalla, así que esto es lo mínimo para que no queden
+# completamente invisibles (por ejemplo, en los logs de Render) aunque
+# todavía no haya Sentry configurado.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'core': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# Sentry (opcional): sin SENTRY_DSN en el entorno, simplemente no se activa.
+SENTRY_DSN = os.environ.get('SENTRY_DSN')
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+    )
