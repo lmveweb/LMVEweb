@@ -14,23 +14,38 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# En producción las variables las provee el hosting directamente; acá solo
+# hace falta para que el .env local (no versionado) se cargue en desarrollo.
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# En desarrollo local no hace falta configurar nada: estos valores por
-# defecto solo aplican cuando las variables de entorno no existen. En
-# producción, el hosting las provee (nunca se commitea un SECRET_KEY real).
-SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-)muka9a326k(l*$yofxwa&r+_(8q*#a**$$ifryf6t3tm=#bz8',
-)
+# Seguro por defecto: si se olvida definir la variable en el hosting, la
+# app arranca en modo producción (sin páginas de error con el stack trace
+# completo) en vez de quedar en modo debug por accidente.
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+# En desarrollo (DEBUG=True) alcanza con no definir DJANGO_SECRET_KEY: se
+# usa esta clave de siempre (ya expuesta en el historial del repo, nunca
+# usar fuera de un entorno local). En producción es obligatoria: si falta,
+# la app no arranca, en vez de exponer secretos con una clave conocida.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = 'django-insecure-)muka9a326k(l*$yofxwa&r+_(8q*#a**$$ifryf6t3tm=#bz8'
+    else:
+        raise ImproperlyConfigured(
+            'Falta la variable de entorno DJANGO_SECRET_KEY '
+            '(obligatoria cuando DJANGO_DEBUG no es True).'
+        )
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -159,9 +174,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-cl'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Santiago'
 
 USE_I18N = True
 
