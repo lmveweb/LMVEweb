@@ -3,6 +3,12 @@
 
 {% block title %}Historia | LMVE{% endblock %}
 
+{# Esta vista monta la pelota 3D del encabezado. #}
+{% block head_extra %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="{% static 'core/js/pelota3d.js' %}?v=13"></script>
+{% endblock %}
+
 {% block content %}
 <style>
     /* =========================================================
@@ -36,16 +42,14 @@
     }
     .historia-hero p:last-child { margin-bottom: 0; }
     .historia-hero strong { color: var(--c-amber); }
-    .historia-foto {
-        border-radius: 10px;
-        overflow: hidden;
-        border: 3px solid rgba(255, 255, 255, 0.5);
-    }
-    .historia-foto img {
+    /* Pelota 3D en vez de la foto que iba aquí antes. */
+    .historia-ball {
         width: 100%;
-        height: 250px;
-        object-fit: cover;
+        max-width: 320px;
+        aspect-ratio: 1;
+        margin: 0 auto;
     }
+    .historia-ball canvas { display: block; }
 
     /* =========================================================
        LÍNEA DE TIEMPO POR ÉPOCAS
@@ -104,6 +108,7 @@
         width: 100%;
         height: 430px;
         object-fit: cover;
+        object-position: center top;
         display: block;
     }
     .epoca-pie {
@@ -123,6 +128,22 @@
         margin-bottom: 6px;
         color: rgba(255, 255, 255, 0.92);
     }
+    /* Aviso para tramos sin material histórico verificado todavía:
+       texto de continuidad general, marcado para no pasar por dato
+       confirmado hasta que el product owner lo valide. */
+    .epoca-aviso {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px dashed rgba(255, 255, 255, 0.7);
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        padding: 5px 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
 
     /* =========================================================
        RESPONSIVE
@@ -133,7 +154,7 @@
             gap: 28px;
             padding: 44px var(--page-pad);
         }
-        .historia-foto img { height: 200px; }
+        .historia-ball { max-width: 220px; }
         .epocas {
             grid-template-columns: 1fr;
             gap: 24px;
@@ -177,26 +198,25 @@
             </p>
         </div>
 
-        <figure class="historia-foto">
-            <img src="{% static 'core/img/fotos/galeria-3.jpg' %}"
-                 alt="Saque de salto durante un partido de la Liga">
-        </figure>
+        <div class="historia-ball" id="historiaBall"></div>
     </div>
 </section>
 
 <!-- ÉPOCAS -->
 <section class="epocas">
     {% comment %}
-    Las cinco épocas y sus textos salen de la Reseña Histórica 2026. El
-    modelo repetía "Década del 90" en las últimas pestañas: eran
-    marcadores sin llenar, aquí van las reales.
+    Los textos con hechos concretos salen de la Reseña Histórica 2026.
+    La década de 2010 es la excepción: el documento no cubre ese tramo
+    (salta de los 2000 al retorno post-pandemia), así que ese panel
+    lleva un texto general de continuidad, marcado con un aviso, a la
+    espera de que la organización aporte material específico.
     {% endcomment %}
     <div class="epocas-tabs" role="tablist" aria-label="Épocas de la Liga">
         <button class="epoca-tab" role="tab" id="tab-1" aria-controls="panel-1" aria-selected="true">1987 – 1989</button>
         <button class="epoca-tab" role="tab" id="tab-2" aria-controls="panel-2" aria-selected="false" tabindex="-1">Década del 90</button>
-        <button class="epoca-tab" role="tab" id="tab-3" aria-controls="panel-3" aria-selected="false" tabindex="-1">Década de 2000</button>
-        <button class="epoca-tab" role="tab" id="tab-4" aria-controls="panel-4" aria-selected="false" tabindex="-1">2022 a la fecha</button>
-        <button class="epoca-tab" role="tab" id="tab-5" aria-controls="panel-5" aria-selected="false" tabindex="-1">2025 – Presente</button>
+        <button class="epoca-tab" role="tab" id="tab-3" aria-controls="panel-3" aria-selected="false" tabindex="-1">Década del 2000</button>
+        <button class="epoca-tab" role="tab" id="tab-4" aria-controls="panel-4" aria-selected="false" tabindex="-1">Década del 2010</button>
+        <button class="epoca-tab" role="tab" id="tab-5" aria-controls="panel-5" aria-selected="false" tabindex="-1">2020 a la fecha</button>
     </div>
 
     <div class="epocas-paneles">
@@ -232,7 +252,7 @@
                 <img src="{% static 'core/img/fotos/archivo-jornada-1.jpg' %}"
                      alt="Deportistas reunidos en el gimnasio durante una jornada de la Liga">
                 <div class="epoca-pie">
-                    <b>Década de 2000 · Estructura y alianzas</b>
+                    <b>Década del 2000 · Estructura y alianzas</b>
                     Se consolidó la estructura directiva y administrativa
                     (coordinadores, comisiones de disciplina y RR. PP., personalidad
                     jurídica, sitio web y marca institucional). Se impulsaron
@@ -245,15 +265,16 @@
 
         <div class="epoca-panel" role="tabpanel" id="panel-4" aria-labelledby="tab-4" tabindex="0" hidden>
             <div class="epoca-marco">
-                <img src="{% static 'core/img/fotos/galeria-1.jpg' %}"
-                     alt="Jugada en zona de red durante un partido reciente de la Liga">
+                <img src="{% static 'core/img/fotos/archivo-jornada-2.jpg' %}"
+                     alt="Equipos formados en cancha durante una ceremonia de la Liga">
                 <div class="epoca-pie">
-                    <b>2022 a la fecha · Retorno post-pandemia</b>
-                    Tras la pausa obligada por la pandemia, la Liga reinició sus
-                    actividades en 2022 con renovado entusiasmo de los colegios
-                    asociados, expandiendo su alcance a comunas como Colina (Chicureo),
-                    Puente Alto, Calera de Tango, Pirque, La Pintana, Talagante, Maipú,
-                    Las Condes y Lo Barnechea.
+                    <span class="epoca-aviso">⚠ Texto general, pendiente de validar con la organización</span>
+                    <b>Década del 2010 · Continuidad institucional</b>
+                    Este tramo aún no cuenta con material específico confirmado por la
+                    Liga. Mientras se recopila esa información, este texto describe de
+                    forma general la continuidad de la consolidación institucional
+                    lograda en la década anterior, y se reemplazará en cuanto se cuente
+                    con los datos y fotografías propias del período.
                 </div>
             </div>
         </div>
@@ -263,9 +284,14 @@
                 <img src="{% static 'core/img/fotos/archivo-hoy-1.jpg' %}"
                      alt="Trofeos y balones preparados para una premiación de la Liga">
                 <div class="epoca-pie">
-                    <b>2025 – Presente</b>
-                    La organización se constituye como la Fundación para el Desarrollo
-                    del Deporte Escolar, manteniendo a la Liga Metropolitana de Voleibol
+                    <b>2020 a la fecha · Retorno y Fundación</b>
+                    Tras la pausa obligada por la pandemia, la Liga reinició sus
+                    actividades en 2022 con renovado entusiasmo de los colegios
+                    asociados, expandiendo su alcance a comunas como Colina (Chicureo),
+                    Puente Alto, Calera de Tango, Pirque, La Pintana, Talagante, Maipú,
+                    Las Condes y Lo Barnechea. Desde 2025, la organización se constituye
+                    como la Fundación para el Desarrollo del Deporte Escolar,
+                    manteniendo a la Liga Metropolitana de Voleibol
                     Escolar como su pilar central.
                 </div>
             </div>
@@ -275,6 +301,12 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+(function () {
+    var mount = document.getElementById('historiaBall');
+    if (mount && window.crearPelotaLMVE) crearPelotaLMVE(mount);
+})();
+</script>
 <script>
 (function () {
     var tabs = Array.prototype.slice.call(document.querySelectorAll('.epoca-tab'));

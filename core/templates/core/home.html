@@ -8,8 +8,12 @@
     /* =========================================================
        HERO CON VIDEO DE FONDO
        ========================================================= */
+    /* El hero y la barra de cifras traen fondo propio, así que se
+       elevan por encima de la marca de agua fija (ver base.html): la
+       marca solo tiene que asomar sobre el azul base de la página. */
     .hero {
         position: relative;
+        z-index: 1;
         width: 100vw;
         left: 50%;
         margin-left: -50vw;
@@ -99,6 +103,8 @@
        BARRA DE CIFRAS
        ========================================================= */
     .cifras {
+        position: relative;
+        z-index: 1;
         background: var(--c-blue-soft);
     }
     .cifras-inner {
@@ -136,13 +142,22 @@
         align-items: start;
         margin-top: 30px;
     }
+    /* Cada publicación trae su propio alto (según la foto y si el
+       widget de Instagram terminó de cargar el encabezado con avatar).
+       Antes se forzaba un alto fijo recortando el sobrante por arriba,
+       pero eso a veces cortaba justo el encabezado de la publicación
+       más alta, dejándola con una pinta distinta a las otras dos — el
+       "bug" reportado. Mejor dejar que cada tarjeta crezca a su alto
+       natural: nunca se esconde contenido, y las tres siempre se ven
+       completas y consistentes entre sí, aunque el borde inferior no
+       quede perfectamente a la misma altura.
+    */
     .ig-card {
         border-radius: 10px;
         overflow: hidden;
         background: #ffffff;
         box-shadow: 0 12px 30px rgba(var(--c-navy-rgb), 0.18);
     }
-    /* Instagram fija medidas propias al montar cada publicación. */
     .ig-card .instagram-media {
         min-width: 0 !important;
         max-width: 100% !important;
@@ -156,23 +171,15 @@
     /* =========================================================
        INSTITUCIONES
        ========================================================= */
+    /* La marca de agua ya no vive acá: antes había una por sección, y
+       cada una se desplazaba con su propia sección. Ahora es una sola
+       fija a la ventana (.marca-agua-fija, en base.html), compartida
+       con Sobre la LMVE. El overflow se mantiene porque es lo que evita
+       que la pista del carrusel genere scroll horizontal. */
     .instituciones {
         position: relative;
         overflow: hidden;
         padding: 72px 0 0 0;
-    }
-    /* Marca de agua del logo detrás, como en el modelo. */
-    .instituciones::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: min(70vw, 720px);
-        aspect-ratio: 700 / 578;
-        transform: translate(-50%, -50%);
-        background: url('{% static "core/img/logo-watermark.png" %}') center / contain no-repeat;
-        opacity: 0.06;
-        pointer-events: none;
     }
     .instituciones-inner {
         position: relative;
@@ -257,18 +264,6 @@
         text-align: center;
         padding: 80px var(--page-pad) 90px var(--page-pad);
     }
-    .futuro::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: min(80vw, 900px);
-        aspect-ratio: 700 / 578;
-        transform: translate(-50%, -50%);
-        background: url('{% static "core/img/logo-watermark.png" %}') center / contain no-repeat;
-        opacity: 0.05;
-        pointer-events: none;
-    }
     .futuro-inner { position: relative; z-index: 1; }
     .futuro h2 {
         font-size: clamp(26px, 3.2vw, 38px);
@@ -323,6 +318,8 @@
         .futuro-boton { min-width: 0; width: 100%; }
     }
 </style>
+
+<div class="marca-agua-fija" aria-hidden="true"></div>
 
 <!-- HERO -->
 <section class="hero" id="hero">

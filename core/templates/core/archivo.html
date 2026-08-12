@@ -37,19 +37,116 @@
         overflow: hidden;
         background: var(--c-navy-deep);
         aspect-ratio: 4 / 3;
+        cursor: pointer;
+        border: 0;
+        padding: 0;
+        display: block;
+        width: 100%;
     }
     .foto img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         display: block;
-        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        opacity: 0;
+        transform: scale(0.94);
+        transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .foto:hover img { transform: scale(1.05); }
+    /* El "pop" de escala 0.94 → 1 combinado con el fundido es lo que
+       hace visible la carga progresiva: si solo cambiara la opacidad,
+       con fotos livianas y buena conexión el cambio pasa casi
+       desapercibido. El hover-zoom se separa a su propia regla (solo
+       sobre fotos ya cargadas) para no pelear con esta animación. */
+    .foto img.esta-cargada { opacity: 1; transform: scale(1); }
+    .foto:hover img.esta-cargada { transform: scale(1.05); }
+    .foto:focus-visible {
+        outline: 3px solid var(--c-amber);
+        outline-offset: 2px;
+    }
+
+    .grid-sentinel {
+        height: 4px;
+    }
+
+    /* =========================================================
+       LIGHTBOX — carrusel a pantalla completa
+       ========================================================= */
+    .lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 300;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(6, 16, 31, 0.94);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease, visibility 0.25s;
+    }
+    .lightbox.is-open { opacity: 1; visibility: visible; }
+    .lightbox-img {
+        max-width: min(88vw, 1100px);
+        max-height: 84vh;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 4px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    .lightbox-cerrar {
+        position: absolute;
+        top: 18px;
+        right: 22px;
+        background: transparent;
+        border: 0;
+        color: #ffffff;
+        font-size: 34px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 8px;
+        opacity: 0.85;
+        transition: opacity 0.2s ease, transform 0.15s ease;
+    }
+    .lightbox-cerrar:hover { opacity: 1; }
+    .lightbox-cerrar:active { transform: scale(0.9); }
+    .lightbox-flecha {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #ffffff;
+        font-size: 30px;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease, transform 0.15s ease;
+    }
+    .lightbox-flecha:hover { background: rgba(255, 255, 255, 0.25); }
+    .lightbox-flecha:active { transform: translateY(-50%) scale(0.92); }
+    .lightbox-prev { left: 18px; }
+    .lightbox-next { right: 18px; }
+    .lightbox-contador {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
 
     @media (max-width: 940px) {
         .multimedia { padding: 44px var(--page-pad) 64px var(--page-pad); }
         .fotos-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .lightbox-flecha { width: 42px; height: 42px; font-size: 24px; }
+        .lightbox-prev { left: 8px; }
+        .lightbox-next { right: 8px; }
     }
     @media (max-width: 560px) {
         .fotos-grid { grid-template-columns: 1fr; }
@@ -65,22 +162,122 @@
         familias.
     </p>
 
-    <div class="fotos-grid">
-        <figure class="foto"><img src="{% static 'core/img/fotos/galeria-1.jpg' %}" alt="Armado en zona de red durante un partido de la Liga"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/galeria-2.jpg' %}" alt="Bloqueo en la red durante un partido de la Liga"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/galeria-3.jpg' %}" alt="Saque de salto durante un partido de la Liga"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/impacto-reconocimiento.jpg' %}" alt="Ceremonia de reconocimiento a colaboradores de la Liga"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/galeria-4.jpg' %}" alt="Remate durante una jornada de competencia"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-hoy-2.jpg' %}" alt="Disputa de balón sobre la red"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-hoy-5.jpg' %}" alt="Remate frente al bloqueo rival"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-jornada-2.jpg' %}" alt="Equipos formados en cancha durante una ceremonia"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-jornada-3.jpg' %}" alt="Equipos posando junto a la red al término de una jornada"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-jornada-1.jpg' %}" alt="Presentación de los colegios participantes"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/impacto-banner-sponsor.jpg' %}" alt="Plantel completo en un recinto de la Liga"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-hoy-1.jpg' %}" alt="Trofeos y balones preparados para la premiación"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/historia-1987.jpg' %}" alt="Equipo de la Liga a fines de los años 80"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-80s-2.jpg' %}" alt="Equipo junto a su profesor, década de 1980"></figure>
-        <figure class="foto"><img src="{% static 'core/img/fotos/archivo-90s-seleccion.jpg' %}" alt="Selección de la Liga, 1990"></figure>
+    {% comment %}
+    Las imágenes no cargan todas de una: cada <img> arranca sin "src"
+    (solo "data-src") y un IntersectionObserver le asigna el "src" real
+    cuando está por entrar en pantalla, como en la grilla web de
+    Instagram. Al hacer clic se abre el carrusel, que sí conoce todas
+    las fotos (estén cargadas o no en la grilla) porque arma su lista
+    a partir de los mismos data-src/alt.
+    {% endcomment %}
+    <div class="fotos-grid" id="fotosGrid">
+        {% for foto in fotos %}
+        <button type="button" class="foto" data-index="{{ forloop.counter0 }}" aria-label="Ver foto ampliada {{ forloop.counter }} de {{ fotos|length }}">
+            <img data-src="{% static foto.src %}" alt="{{ foto.alt }}">
+        </button>
+        {% endfor %}
     </div>
+    <div id="gridSentinel" class="grid-sentinel" aria-hidden="true"></div>
 </section>
+{% endblock %}
+
+{% block modals %}
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Foto ampliada" hidden>
+    <button class="lightbox-cerrar" id="lightboxCerrar" type="button" aria-label="Cerrar">&times;</button>
+    <button class="lightbox-flecha lightbox-prev" id="lightboxPrev" type="button" aria-label="Foto anterior">&#8249;</button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="">
+    <button class="lightbox-flecha lightbox-next" id="lightboxNext" type="button" aria-label="Foto siguiente">&#8250;</button>
+    <div class="lightbox-contador" id="lightboxContador"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var figuras = Array.prototype.slice.call(document.querySelectorAll('.foto'));
+    if (!figuras.length) return;
+
+    var fotos = figuras.map(function (fig) {
+        var img = fig.querySelector('img');
+        return { src: img.getAttribute('data-src'), alt: img.getAttribute('alt') };
+    });
+
+    /* ---------- Carga progresiva al hacer scroll ---------- */
+    if ('IntersectionObserver' in window) {
+        var cargador = new IntersectionObserver(function (entradas, obs) {
+            entradas.forEach(function (entrada) {
+                if (!entrada.isIntersecting) return;
+                var img = entrada.target.querySelector('img');
+                if (img && !img.src) {
+                    img.src = img.getAttribute('data-src');
+                    img.addEventListener('load', function () { img.classList.add('esta-cargada'); }, { once: true });
+                }
+                obs.unobserve(entrada.target);
+            });
+        }, { rootMargin: '80px 0px' });
+        figuras.forEach(function (fig) { cargador.observe(fig); });
+    } else {
+        // Sin soporte de IntersectionObserver, se cargan todas de una.
+        figuras.forEach(function (fig) {
+            var img = fig.querySelector('img');
+            img.src = img.getAttribute('data-src');
+            img.classList.add('esta-cargada');
+        });
+    }
+
+    /* ---------- Lightbox / carrusel ---------- */
+    var lightbox = document.getElementById('lightbox');
+    var lightboxImg = document.getElementById('lightboxImg');
+    var contador = document.getElementById('lightboxContador');
+    var btnCerrar = document.getElementById('lightboxCerrar');
+    var btnPrev = document.getElementById('lightboxPrev');
+    var btnNext = document.getElementById('lightboxNext');
+    var indiceActual = 0;
+    var elementoAntesDeAbrir = null;
+
+    function mostrarFoto(indice) {
+        indiceActual = (indice + fotos.length) % fotos.length;
+        var foto = fotos[indiceActual];
+        lightboxImg.src = foto.src;
+        lightboxImg.alt = foto.alt;
+        contador.textContent = (indiceActual + 1) + ' / ' + fotos.length;
+    }
+
+    function abrirLightbox(indice) {
+        elementoAntesDeAbrir = document.activeElement;
+        mostrarFoto(indice);
+        lightbox.hidden = false;
+        requestAnimationFrame(function () { lightbox.classList.add('is-open'); });
+        document.body.style.overflow = 'hidden';
+        btnCerrar.focus();
+    }
+
+    function cerrarLightbox() {
+        lightbox.classList.remove('is-open');
+        document.body.style.overflow = '';
+        setTimeout(function () { lightbox.hidden = true; }, 250);
+        if (elementoAntesDeAbrir) elementoAntesDeAbrir.focus();
+    }
+
+    figuras.forEach(function (fig, i) {
+        fig.addEventListener('click', function () { abrirLightbox(i); });
+    });
+
+    btnCerrar.addEventListener('click', cerrarLightbox);
+    btnPrev.addEventListener('click', function () { mostrarFoto(indiceActual - 1); });
+    btnNext.addEventListener('click', function () { mostrarFoto(indiceActual + 1); });
+
+    // Tapear el fondo oscuro (no la foto ni los controles) cierra.
+    lightbox.addEventListener('click', function (e) {
+        if (e.target === lightbox) cerrarLightbox();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (lightbox.hidden) return;
+        if (e.key === 'Escape') cerrarLightbox();
+        else if (e.key === 'ArrowLeft') mostrarFoto(indiceActual - 1);
+        else if (e.key === 'ArrowRight') mostrarFoto(indiceActual + 1);
+    });
+})();
+</script>
 {% endblock %}

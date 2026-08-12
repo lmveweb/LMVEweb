@@ -29,6 +29,20 @@
         inset: 0;
         background: rgba(var(--c-navy-rgb), 0.82);
     }
+    /* La foto llegaba nítida hasta el borde mismo de la sección, y ahí
+       empezaba el pie de golpe — un corte muy brusco. Este degradado
+       funde la foto a navy sólido (el mismo tono en que arranca el
+       degradado del pie) en el último tramo, así la transición queda
+       continua en vez de un salto. */
+    .contacto-desvanecido {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 220px;
+        background: linear-gradient(180deg, rgba(var(--c-navy-rgb), 0) 0%, var(--c-navy) 100%);
+        pointer-events: none;
+    }
     .contacto-inner {
         position: relative;
         z-index: 1;
@@ -197,6 +211,7 @@
     <img class="contacto-fondo" src="{% static 'core/img/fotos/galeria-2.jpg' %}"
          alt="" aria-hidden="true">
     <div class="contacto-lavado"></div>
+    <div class="contacto-desvanecido" aria-hidden="true"></div>
 
     <div class="contacto-inner">
         <div class="contacto-social">

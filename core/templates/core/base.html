@@ -23,8 +23,15 @@
             --c-navy:      #163E73;  --c-navy-rgb:      22, 62, 115;
             --c-blue-soft: #1B5490;  --c-blue-soft-rgb: 27, 84, 144;
             --c-green:     #4B8C3A;  --c-green-rgb:     75, 140, 58;
+            /* Verde más oscuro, solo para el pie: mejora el contraste
+               del texto blanco y da un punto de llegada más sólido al
+               degradado que baja desde el azul de la página. */
+            --c-green-deep: #3A6E2D; --c-green-deep-rgb: 58, 110, 45;
             --c-amber:     #F2A413;  --c-amber-rgb:    242, 164, 19;
             --c-orange:    #F2620F;  --c-orange-rgb:   242, 98, 15;
+            /* Rojo de las llamas del isotipo: no estaba en la paleta,
+               se toma directo del logo (muestreado del PNG). */
+            --c-red:       #D70A18;  --c-red-rgb:      215, 10, 24;
             --c-blanco:    #f7f9fb;  --c-blanco-rgb:  247, 249, 251;
 
             --c-text:       #ffffff;
@@ -135,7 +142,7 @@
             font-weight: 700;
             line-height: 1.3;
             color: var(--c-text);
-            max-width: 210px;
+            white-space: nowrap;
         }
 
         .header-spacer { flex: 1; }
@@ -210,43 +217,60 @@
         .menu-toggle.is-active span:nth-child(2) { opacity: 0; }
         .menu-toggle.is-active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
+        /* Cuadro desplegable bajo el encabezado, no una pantalla
+           completa: el resto de la página queda visible y tapear ahí
+           afuera cierra el menú (ver script más abajo). */
         .mobile-nav {
             position: fixed;
-            inset: 0;
+            top: var(--header-h);
+            left: 0;
+            right: 0;
             z-index: 200;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
             background: var(--c-navy-deep);
+            box-shadow: 0 18px 34px rgba(0, 0, 0, 0.35);
+            padding: 6px 24px 26px 24px;
+            max-height: calc(100vh - var(--header-h));
+            overflow-y: auto;
+            transform-origin: top;
+            transform: scaleY(0.96) translateY(-6px);
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s;
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
         }
-        .mobile-nav.is-open { opacity: 1; visibility: visible; }
+        .mobile-nav.is-open {
+            opacity: 1;
+            visibility: visible;
+            transform: scaleY(1) translateY(0);
+        }
         .mobile-nav a {
             color: var(--c-text);
             text-decoration: none;
-            font-size: 28px;
+            font-size: 19px;
             font-weight: 700;
-            padding: 10px 0;
-            transition: color 0.25s ease, transform 0.15s ease;
+            padding: 16px 2px;
+            transition: color 0.25s ease;
+        }
+        .mobile-nav > a:not(.mobile-cta) {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.14);
         }
         .mobile-nav a:hover { color: var(--c-amber); }
-        .mobile-nav a:active { transform: scale(0.96); }
+        .mobile-nav a:active { opacity: 0.7; }
         .mobile-nav .mobile-lema {
-            margin-top: 26px;
-            font-size: 15px;
+            margin: 18px 0 4px 0;
+            font-size: 14px;
             font-style: italic;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.75);
         }
         .mobile-nav a.mobile-cta {
-            margin-top: 20px;
+            display: inline-block;
+            align-self: flex-start;
+            margin-top: 14px;
             font-size: 16px;
             background: var(--c-orange);
             color: #ffffff;
-            padding: 13px 34px;
+            padding: 13px 32px;
             border-radius: 50px;
         }
 
@@ -265,8 +289,41 @@
             padding: 72px var(--page-pad) 96px var(--page-pad);
         }
 
+        /* Marca de agua del logo, fija a la ventana: se queda quieta
+           mientras el usuario baja, centrada y cubriendo todo el alto
+           visible. Va acá y no en cada vista porque la usan Inicio y
+           Sobre la LMVE por igual.
+
+           Al ser un elemento posicionado, se pinta por encima del fondo
+           de las secciones que no están posicionadas. Por eso las
+           franjas que traen fondo propio (.band-blue, .band-soft y las
+           equivalentes de cada vista) se elevan con z-index: así la
+           marca solo asoma donde el fondo es el azul base de la página,
+           que es donde tiene sentido. */
+        .marca-agua-fija {
+            position: fixed;
+            inset: 0;
+            /* "contain" y no "auto 100%": el lockup es más alto que
+               ancho, así que forzarle el alto lo desbordaría por los
+               costados en pantallas angostas. Con contain entra
+               completo, centrado, ocupando todo el alto disponible. */
+            /* ?v= al final: mismo problema que con pelota3d.js — el
+               archivo se sobrescribe con el mismo nombre cada vez que
+               se regenera, y el navegador lo sirve de caché sin pedirlo
+               de nuevo. La query string fuerza a tratarlo como una URL
+               distinta. Subir este número cada vez que se reemplace
+               logo-watermark.png. */
+            background: url('{% static "core/img/logo-watermark.png" %}?v=2')
+                        center center / contain no-repeat;
+            opacity: 0.07;
+            pointer-events: none;
+            z-index: 0;
+        }
+
         /* Franja clara a todo el ancho. */
         .band-blue {
+            position: relative;
+            z-index: 1;
             background: var(--c-blanco);
             color: var(--c-navy);
             padding: 80px 0;
@@ -283,6 +340,8 @@
 
         /* Franja en el azul intermedio del modelo. */
         .band-soft {
+            position: relative;
+            z-index: 1;
             background: var(--c-blue-soft);
             padding: 72px 0;
         }
@@ -324,7 +383,19 @@
         .site-footer {
             position: relative;
             z-index: 1;
-            background: var(--c-green);
+            /* Llega desde el azul de la página y se asienta en un
+               verde más oscuro que el resto del sitio, para que el
+               pie tenga un cierre propio en vez de un corte brusco.
+               Empieza en --c-navy (no --c-blue-soft) porque ese es el
+               fondo real de la mayoría de las vistas justo antes del
+               pie (Inicio, Historia, Multimedia caen al navy del body
+               por defecto); con blue-soft se notaba una costura dura
+               en todas menos en Sobre la LMVE, que sí usa ese azul en
+               su última sección. */
+            background: linear-gradient(180deg,
+                var(--c-navy) 0%,
+                var(--c-green-deep) 200px,
+                var(--c-green-deep) 100%);
             color: #ffffff;
             padding: 60px var(--page-pad) 0 var(--page-pad);
         }
@@ -332,7 +403,7 @@
             max-width: var(--page-max);
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1.4fr 1fr 1fr 1fr;
+            grid-template-columns: 1.4fr 1fr 1fr;
             gap: 40px;
             padding-bottom: 44px;
         }
@@ -385,25 +456,14 @@
         }
         .site-footer a:hover { opacity: 0.75; text-decoration: underline; }
 
-        /* Patrocinador, que en el modelo cerraba la página. */
-        .footer-sponsor .sponsor-plate {
-            background: #ffffff;
-            border-radius: 6px;
-            padding: 18px 20px;
-            text-align: center;
+        /* Patrocinador: solo el isotipo, sin card ni leyenda, cerrando
+           la columna de Navegación, como pidió Mauricio. */
+        .footer-sponsor-mark {
+            margin-top: 28px;
         }
-        .footer-sponsor .sponsor-plate img {
-            width: 100%;
-            max-width: 150px;
-            margin: 0 auto;
-        }
-        .footer-sponsor small {
-            display: block;
-            margin-top: 12px;
-            font-size: 13px;
-            font-weight: 500;
-            color: #ffffff;
-            text-align: center;
+        .footer-sponsor-mark img {
+            height: 30px;
+            width: auto;
         }
 
         .footer-bottom {
@@ -437,7 +497,6 @@
             .page-wrap { padding: 48px var(--page-pad) 64px var(--page-pad); }
             .band-blue, .band-soft { padding: 52px 0; }
             .footer-grid { grid-template-columns: 1fr; gap: 32px; }
-            .footer-sponsor .sponsor-plate { max-width: 260px; }
             .footer-bottom { flex-direction: column; }
         }
     </style>
@@ -487,6 +546,15 @@
         {% block content %}{% endblock %}
     </main>
 
+    {% comment %}
+    Fuera de <main> a propósito: .site-main abre su propio stacking
+    context (position:relative + z-index), y cualquier overlay de
+    pantalla completa (lightbox, modales) quedaría atrapado debajo
+    del header sticky sin importar su z-index. Este bloque, al ser
+    hermano del header, sí puede superponerse a todo.
+    {% endcomment %}
+    {% block modals %}{% endblock %}
+
     <footer class="site-footer">
         <div class="footer-grid">
             <div class="footer-brand">
@@ -510,6 +578,9 @@
                     <li><a href="{% url 'archivo' %}">Multimedia</a></li>
                     <li><a href="{% url 'contacto' %}">Contacto</a></li>
                 </ul>
+                <div class="footer-sponsor-mark">
+                    <img src="{% static 'core/img/molten.svg' %}" alt="Molten">
+                </div>
             </div>
 
             <div>
@@ -519,14 +590,6 @@
                     <li>contacto@lmve.cl</li>
                     <li><a href="https://www.instagram.com/ligametropolitanavoley/" target="_blank" rel="noopener">Instagram</a></li>
                 </ul>
-            </div>
-
-            <div class="footer-sponsor">
-                <h4>Patrocinador</h4>
-                <div class="sponsor-plate">
-                    <img src="{% static 'core/img/molten.svg' %}" alt="Molten">
-                </div>
-                <small>Balón oficial Molten 5000</small>
             </div>
         </div>
 
@@ -574,6 +637,16 @@
 
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape') setMenu(false);
+            });
+
+            // Al ser un cuadro desplegable (no pantalla completa), tapear
+            // el resto de la página también debe cerrarlo. El clic sobre
+            // el propio botón queda excluido: ese ya alterna el estado
+            // por su cuenta arriba.
+            document.addEventListener('click', function (e) {
+                if (!nav.classList.contains('is-open')) return;
+                if (nav.contains(e.target) || toggle.contains(e.target)) return;
+                setMenu(false);
             });
 
             window.addEventListener('resize', function () {
