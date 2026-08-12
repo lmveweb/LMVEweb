@@ -15,19 +15,24 @@ Imagina que tu sitio web de la Liga está ahora en una casa local (tu computador
 
 ## ¿Cuánto va a costar?
 
-| Concepto | Costo | Frecuencia | Total Anual |
-|----------|-------|-----------|-------------|
-| **Dominio .cl** (lmve.cl) | $9.990 CLP | Una vez al año | $9.990 CLP |
-| **Servidor web** (donde vive el sitio) | ~$7 USD/mes | Mensual | ~$100 USD/año |
-| **Base de datos** (donde se guardan contactos) | ~$6 USD/mes | Mensual | ~$72 USD/año |
-| **Envío de correos** (contactos recibidos) | Gratis* | Mensual | $0 |
-| **Certificado de seguridad (HTTPS)** | Gratis | Automático | $0 |
-| **Protección contra ataques** | Gratis | Automático | $0 |
-| | | | |
-| **TOTAL ANUAL** | | | **~$13 USD + $9.990 CLP** |
-| | | | **~$215 USD total** |
+**En pesos chilenos, mes a mes:**
 
-*El servicio de correos es gratis hasta 3.000 envíos/mes. Si recibes más de 100 propuestas de auspicio por día, pasamos a plan pago ($20 USD/mes).
+| Concepto | Costo mensual aproximado | Qué es |
+|----------|--------------------------|--------|
+| **Servidor web** (donde vive el sitio) | ~$6.500 CLP | Lo mantiene encendido 24/7 |
+| **Base de datos** (donde se guardan los contactos) | ~$5.500 CLP | Guarda los mensajes de patrocinio |
+| **Dominio .cl** (lmve.cl) | ~$830 CLP* | *Se paga una vez al año ($9.990 CLP); acá dividido en 12 solo para comparar |
+| **Envío de correos** (aviso de contactos) | Gratis** | Hasta 3.000 envíos al mes |
+| **Certificado de seguridad (HTTPS)** | Gratis | Automático |
+| **Protección contra ataques** | Gratis | Automático |
+| | | |
+| **TOTAL** | **~$12.800 CLP al mes** | ~$154.000 CLP al año |
+
+Como referencia, es menos de lo que cuesta un plan de streaming — y cubre tener el sitio siempre disponible, protegido y con backups automáticos.
+
+**\*El dominio no se cobra mes a mes**, es un pago único de $9.990 CLP una vez al año; se muestra dividido en 12 solo para que el total mensual sea comparable con el resto.
+
+**\*\*El correo es gratis hasta 3.000 envíos al mes.** Si llegan más de 100 propuestas de auspicio por día (poco probable), pasamos a un plan pago de ~$18.000 CLP/mes.
 
 ---
 
