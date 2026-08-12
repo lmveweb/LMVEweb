@@ -97,6 +97,33 @@ TEMPLATES = [
 WSGI_APPLICATION = 'LMVEweb.wsgi.application'
 
 
+# Correo saliente (formulario de Contacto)
+# https://docs.djangoproject.com/en/6.0/topics/email/
+#
+# Gmail con contraseña de aplicación: en myaccount.google.com/apppasswords
+# (requiere verificación en dos pasos activada) se genera una clave de 16
+# caracteres para usar acá en vez de la contraseña real de la cuenta.
+#
+# Sin EMAIL_HOST_USER/EMAIL_HOST_PASSWORD (desarrollo local), los correos
+# no se envían de verdad: solo se imprimen en la terminal.
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'webmaster@localhost'
+
+# A qué correo llega cada envío del formulario de Contacto. Por defecto,
+# el mismo que envía (útil si todavía no hay una casilla dedicada).
+CONTACTO_DESTINATARIO = os.environ.get('CONTACTO_DESTINATARIO', EMAIL_HOST_USER)
+
+
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
