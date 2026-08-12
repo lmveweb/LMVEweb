@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [development, master]
+  pull_request:
+    branches: [development, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Tests
+        run: python manage.py test
+        env:
+          DJANGO_ALLOWED_HOSTS: testserver
+
+      - name: Chequeo de despliegue (settings de produccion)
+        run: python manage.py check --deploy
+        env:
+          DJANGO_DEBUG: "False"
+          DJANGO_SECRET_KEY: ci-only-secret-key-not-for-production-use-0000000000
+          DJANGO_ALLOWED_HOSTS: lmve.cl
