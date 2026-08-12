@@ -12,6 +12,15 @@ from .models import MensajePatrocinio
 
 logger = logging.getLogger(__name__)
 
+# Mismos límites que el modelo (ver core/models.py): se validan acá
+# también porque hoy solo los aplica el "maxlength" del HTML, y un POST
+# directo (sin pasar por el formulario) los ignora sin esfuerzo. Con
+# SQLite ese límite ni se aplica a nivel de motor; con Postgres en
+# producción, un valor más largo tiraría un DataError no controlado.
+MAX_EMPRESA = MensajePatrocinio._meta.get_field('empresa').max_length
+MAX_CONTACTO = MensajePatrocinio._meta.get_field('contacto').max_length
+MAX_EMAIL = MensajePatrocinio._meta.get_field('email').max_length
+
 
 def home(request):
     return render(request, 'core/home.html')
@@ -79,10 +88,16 @@ def contacto(request):
         errores = []
         if not empresa:
             errores.append('Falta el nombre de la empresa o marca.')
+        elif len(empresa) > MAX_EMPRESA:
+            errores.append(f'El nombre de la empresa o marca no puede superar los {MAX_EMPRESA} caracteres.')
         if not contacto_nombre:
             errores.append('Falta la persona de contacto.')
+        elif len(contacto_nombre) > MAX_CONTACTO:
+            errores.append(f'El nombre de la persona de contacto no puede superar los {MAX_CONTACTO} caracteres.')
         if not email:
             errores.append('Falta el correo electrónico.')
+        elif len(email) > MAX_EMAIL:
+            errores.append(f'El correo electrónico no puede superar los {MAX_EMAIL} caracteres.')
         else:
             try:
                 validate_email(email)
