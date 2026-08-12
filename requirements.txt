@@ -5,3 +5,4 @@ python-dotenv==1.2.2
 gunicorn==26.0.0
 psycopg2-binary==2.9.12
 django-ratelimit==4.1.0
+django-csp==4.0

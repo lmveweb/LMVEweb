@@ -8,7 +8,7 @@
 
     {% block head_extra %}{% endblock %}
 
-    <style>
+    <style nonce="{{ request.csp_nonce }}">
         /* =========================================================
            PALETA LMVE
 
@@ -600,7 +600,7 @@
     </footer>
 
     <!-- Sombra del encabezado al hacer scroll -->
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         (function () {
             var header = document.getElementById('siteHeader');
             function update() {
@@ -612,7 +612,7 @@
     </script>
 
     <!-- Menú móvil -->
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         (function () {
             var toggle = document.getElementById('menuToggle');
             var nav = document.getElementById('mobileNav');

@@ -4,7 +4,7 @@
 {% block title %}Multimedia | LMVE{% endblock %}
 
 {% block content %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
     .multimedia {
         max-width: var(--page-max);
         margin: 0 auto;
@@ -192,7 +192,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function () {
     var figuras = Array.prototype.slice.call(document.querySelectorAll('.foto'));
     if (!figuras.length) return;

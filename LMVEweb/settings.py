@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from csp.constants import NONCE, NONE, SELF
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
@@ -84,6 +85,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'csp.middleware.CSPMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -237,3 +239,27 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000  # 1 año
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+
+# Content-Security-Policy (django-csp)
+# https://django-csp.readthedocs.io/
+#
+# Estricta: sin 'unsafe-inline'. Cada <style>/<script> inline de las
+# plantillas lleva nonce="{{ request.csp_nonce }}" (django-csp genera uno
+# distinto por request). Dominios externos permitidos explícitamente:
+# - cdnjs.cloudflare.com: three.js (proyecto.html/sobre.html)
+# - www.instagram.com: embed.js + el iframe que inyecta para los posts
+#   embebidos en home.html (script-src para el script, frame-src para el
+#   iframe, connect-src porque el widget pide datos del post por XHR)
+CONTENT_SECURITY_POLICY = {
+    'DIRECTIVES': {
+        'default-src': [SELF],
+        'script-src': [SELF, NONCE, 'cdnjs.cloudflare.com', 'www.instagram.com'],
+        'style-src': [SELF, NONCE],
+        'img-src': [SELF, 'data:'],
+        'connect-src': [SELF, 'www.instagram.com'],
+        'frame-src': ['www.instagram.com'],
+        'base-uri': [SELF],
+        'frame-ancestors': [NONE],
+    },
+}

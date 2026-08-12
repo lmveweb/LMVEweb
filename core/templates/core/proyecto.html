@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
     /* =========================================================
        ENCABEZADO DE LA VISTA
        ========================================================= */
@@ -301,13 +301,13 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function () {
     var mount = document.getElementById('historiaBall');
     if (mount && window.crearPelotaLMVE) crearPelotaLMVE(mount);
 })();
 </script>
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function () {
     var tabs = Array.prototype.slice.call(document.querySelectorAll('.epoca-tab'));
     if (!tabs.length) return;

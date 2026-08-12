@@ -4,7 +4,12 @@
 {% block title %}Impacto | LMVE{% endblock %}
 
 {% block content %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
+    /* La CSP con nonce no cubre atributos style="" sueltos (solo
+       <style>/<script> completos), así que este par de secciones que
+       antes llevaban style="padding-top: 0;" usa esta clase en su lugar. */
+    .sin-padding-top { padding-top: 0; }
+
     /* =========================================================
        HERO
        ========================================================= */
@@ -222,7 +227,7 @@ comparte por enlace directo con una marca interesada.
 </section>
 
 <!-- CIFRAS -->
-<section class="page-wrap" style="padding-top: 0;">
+<section class="page-wrap sin-padding-top">
     <div class="cifras-grid">
         <div class="cifra-card span-2">
             <h4>Atletas participantes</h4>
@@ -318,7 +323,7 @@ comparte por enlace directo con una marca interesada.
 </section>
 
 <!-- EVIDENCIA -->
-<section class="page-wrap" style="padding-top: 0;">
+<section class="page-wrap sin-padding-top">
     <div class="section-label">// Esto ya está pasando</div>
     <div class="evidencia-grid">
         <figure class="evidencia-card">

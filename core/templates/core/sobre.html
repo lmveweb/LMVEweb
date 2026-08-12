@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
     /* =========================================================
        ENCABEZADO: imagen al costado y título, como el modelo
        ========================================================= */
@@ -318,7 +318,7 @@ sostiene y expande su proyecto institucional, no la oferta a marcas.
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function () {
     if (!window.crearPelotaLMVE) return;
     var vision = document.getElementById('ballVision');

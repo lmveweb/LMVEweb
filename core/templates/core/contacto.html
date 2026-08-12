@@ -4,7 +4,7 @@
 {% block title %}Contacto | LMVE{% endblock %}
 
 {% block content %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
     /* =========================================================
        CONTACTO SOBRE FOTOGRAFÍA, COMO EL MODELO
        ========================================================= */
@@ -279,7 +279,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     // Envía el formulario a la vista de Django por fetch() (sin recargar
     // la página) y solo muestra el éxito cuando el servidor confirmó que
     // guardó el mensaje. Si algo falla (falta un campo, error de red), se
