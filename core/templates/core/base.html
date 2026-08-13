@@ -191,13 +191,13 @@
             text-decoration: none;
             flex-shrink: 0;
         }
+        /* Sin placa blanca detrás: el logo va directo sobre el azul.
+           La versión logo-sobre-oscuro.png ya trae el contorno blanco
+           que recorta la silueta contra el fondo. */
         .brand-plate {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #ffffff;
-            padding: 8px 12px;
-            border-radius: 4px;
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .brand-plate img {
@@ -491,9 +491,6 @@
         }
         .footer-logo-plate {
             display: inline-block;
-            background: #ffffff;
-            border-radius: 4px;
-            padding: 10px 14px;
             margin-bottom: 20px;
         }
         .footer-logo-plate img { height: 62px; width: auto; }
@@ -572,7 +569,6 @@
         @media (max-width: 940px) {
             :root { --header-h: 82px; --page-pad: 20px; }
             .brand-plate img { height: 52px; }
-            .brand-plate { padding: 6px 9px; }
             .site-nav { display: none; }
             .header-inner .btn-cta { display: none; }
             .menu-toggle { display: flex; }
@@ -589,7 +585,7 @@
         <div class="header-inner">
             <a href="{% url 'home' %}" class="brand-lockup">
                 <span class="brand-plate">
-                    <img src="{% static 'core/img/logo-borde-compacto.png' %}"
+                    <img src="{% static 'core/img/logo-sobre-oscuro.png' %}"
                          alt="LMVE — Liga Metropolitana de Voleibol Escolar">
                 </span>
                 <span class="brand-nombre">Liga Metropolitana de Voleibol Escolar</span>
@@ -641,7 +637,7 @@
         <div class="footer-grid">
             <div class="footer-brand">
                 <span class="footer-logo-plate">
-                    <img src="{% static 'core/img/logo-borde-compacto.png' %}" alt="LMVE">
+                    <img src="{% static 'core/img/logo-sobre-oscuro.png' %}" alt="LMVE">
                 </span>
                 <div class="footer-lema">"Educar a Través del Deporte"</div>
                 <p>
