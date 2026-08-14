@@ -230,8 +230,20 @@
         // Grano fino del cuero y manchones de uso. El grano se calcula a
         // resolución media y se interpola; los manchones son de baja
         // frecuencia, así que con una grilla chica alcanza y sobra.
+        //
+        // La frecuencia del grano NO se puede subir libremente: el ruido
+        // se muestrea recorriendo la esfera, y sobre el ecuador la
+        // dirección traza un círculo de radio igual a la frecuencia, o
+        // sea 2π·frecuencia celdas de ruido repartidas en GRANO_W
+        // muestras. Con 190 daban 1194 celdas sobre 1024 muestras: menos
+        // de una muestra por celda, menos de la mitad de lo que exige
+        // Nyquist. El grano suave que se buscaba salía submuestreado y
+        // colapsaba en moteado aleatorio píxel a píxel — de ahí que la
+        // pelota se leyera porosa, como hormigón, en vez de como cuero.
+        // Con 60 quedan ~2,7 muestras por celda y el grano vuelve a ser
+        // una ondulación continua.
         var GRANO_W = 1024, GRANO_H = 512;
-        var grano = grillaRuido(GRANO_W, GRANO_H, 190, 3.1);
+        var grano = grillaRuido(GRANO_W, GRANO_H, 60, 3.1);
         var MUGRE_W = 256, MUGRE_H = 128;
         var mugre = grillaRuido(MUGRE_W, MUGRE_H, 3.4, 11.7);
 
@@ -275,7 +287,9 @@
             var m = mugre[i];
             // Solo la mitad más "sucia" del ruido deja marca; el resto
             // queda blanco (o sea, no altera el color al multiplicar).
-            var v = m < 0.5 ? 255 - (0.5 - m) * 150 : 255;
+            // Suave: es un balón en uso, no uno abandonado a la
+            // intemperie, y el manchón fuerte sumaba al aire de cemento.
+            var v = m < 0.5 ? 255 - (0.5 - m) * 80 : 255;
             var idx = i * 4;
             imgMugre.data[idx] = v;
             imgMugre.data[idx + 1] = v;
@@ -285,7 +299,7 @@
         ctxMugre.putImageData(imgMugre, 0, 0);
         ctxColor.save();
         ctxColor.globalCompositeOperation = 'multiply';
-        ctxColor.globalAlpha = 0.55;
+        ctxColor.globalAlpha = 0.28;
         ctxColor.drawImage(cMugre, 0, 0, W, H);
         ctxColor.restore();
 
@@ -326,15 +340,21 @@
                 var gastado = mu < 0.5 ? (0.5 - mu) * 2 : 0;
 
                 // Relieve: panel a media altura con el grano encima, y la
-                // costura hundida de verdad. El grano va discreto a
-                // propósito: más amplitud y deja de leerse como cuero
-                // para parecer lija.
-                var altura = 0.66 + (gr - 0.5) * 0.15 - g * 0.66;
+                // costura hundida de verdad. El grano va MUY discreto a
+                // propósito. A la escala en que se ve la pelota en
+                // pantalla, el poro real de un balón mide menos de un
+                // píxel: lo que se percibe de cerca como textura, de
+                // lejos solo tiene que insinuar que la superficie no es
+                // un plástico perfecto. Con amplitud alta cada píxel se
+                // convierte en un cráter y aparece la lija.
+                var altura = 0.72 + (gr - 0.5) * 0.05 - g * 0.72;
                 var hv = Math.round(limitar(altura, 0, 1) * 255);
 
                 // Rugosidad: el surco y las zonas gastadas rebotan la luz
-                // más difusa que el panel limpio.
-                var rug = 0.44 + g * 0.34 + gastado * 0.20 + (gr - 0.5) * 0.10;
+                // más difusa que el panel limpio. La base baja respecto
+                // de antes: un balón de indoor es un sintético satinado,
+                // y un valor alto y parejo lo dejaba mate como cemento.
+                var rug = 0.33 + g * 0.34 + gastado * 0.10 + (gr - 0.5) * 0.04;
                 var rv = Math.round(limitar(rug, 0, 1) * 255);
 
                 var idx = i * 4;
@@ -403,16 +423,24 @@
             new THREE.MeshPhysicalMaterial({
                 map: textura(lienzos.color),
                 bumpMap: textura(lienzos.relieve),
-                bumpScale: 0.55,
+                // Baja respecto del 0.55 anterior: con el relieve alto,
+                // cada ondulación del grano proyectaba su propia
+                // sombrita y la superficie se llenaba de picadura. Sigue
+                // alcanzando para las costuras, que en el mapa son un
+                // escalón mucho más profundo que el grano.
+                bumpScale: 0.42,
                 roughnessMap: textura(lienzos.rugosidad),
                 // La rugosidad real la pone el mapa; acá va en 1 para no
                 // recortarlo (Three.js multiplica uno por otro).
                 roughness: 1.0,
                 metalness: 0.0,
-                // Barniz muy leve: un balón de indoor es semi-mate, no
-                // brillante como uno de plástico.
-                clearcoat: 0.16,
-                clearcoatRoughness: 0.8
+                // Barniz claramente presente: un balón de indoor es un
+                // sintético satinado y ese reflejo suave y ancho es
+                // justamente lo que lo delata como pelota. Casi sin
+                // barniz —como estaba— la superficie quedaba mate y
+                // pétrea, que era la otra mitad del efecto hormigón.
+                clearcoat: 0.55,
+                clearcoatRoughness: 0.26
             })
         );
 
