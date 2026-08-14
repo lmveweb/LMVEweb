@@ -206,10 +206,17 @@
         }
         .brand-lockup:hover .brand-plate { transform: scale(1.03); }
         .brand-lockup:active .brand-plate { transform: scale(0.98); }
+        /* Al pasar a la display (Barlow Condensed) quedó visualmente
+           más chico que el menú aunque compartían el mismo font-size:
+           una condensada ocupa menos ancho y pesa menos al ojo que una
+           fuente normal al mismo tamaño en píxeles. Sube el tamaño y
+           el peso, y suma tracking (una condensada muy junta se lee
+           apretada) para que sostenga el mismo peso visual que el nav. */
         .brand-nombre {
-            font-size: 15px;
-            font-weight: 700;
-            line-height: 1.3;
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            line-height: 1.25;
             color: var(--c-text);
             white-space: nowrap;
         }
