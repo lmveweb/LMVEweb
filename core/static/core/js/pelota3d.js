@@ -339,22 +339,31 @@
                 var mu = muestrear(mugre, MUGRE_W, MUGRE_H, u, v);
                 var gastado = mu < 0.5 ? (0.5 - mu) * 2 : 0;
 
-                // Relieve: panel a media altura con el grano encima, y la
-                // costura hundida de verdad. El grano va MUY discreto a
-                // propósito. A la escala en que se ve la pelota en
-                // pantalla, el poro real de un balón mide menos de un
-                // píxel: lo que se percibe de cerca como textura, de
-                // lejos solo tiene que insinuar que la superficie no es
-                // un plástico perfecto. Con amplitud alta cada píxel se
-                // convierte en un cráter y aparece la lija.
-                var altura = 0.72 + (gr - 0.5) * 0.05 - g * 0.72;
+                // Relieve: SOLO las costuras. El panel va perfectamente
+                // liso a propósito.
+                //
+                // Cualquier ruido en el relieve termina mal a esta
+                // escala, y en las dos direcciones: submuestreado da
+                // estática (la superficie porosa de cemento), y bien
+                // muestreado da bollos redondos regulares, que es
+                // exactamente el hoyuelo de una pelota de golf. En un
+                // balón de indoor real el grano del sintético es tan
+                // fino que a este tamaño no se ve como geometría: no
+                // deforma la silueta del reflejo, solo lo vuelve un
+                // poco más difuso. Por eso la variación de superficie
+                // se mueve entera al mapa de rugosidad, más abajo, que
+                // cambia cómo se dispersa la luz sin inventar relieve.
+                var altura = 0.72 - g * 0.72;
                 var hv = Math.round(limitar(altura, 0, 1) * 255);
 
-                // Rugosidad: el surco y las zonas gastadas rebotan la luz
-                // más difusa que el panel limpio. La base baja respecto
-                // de antes: un balón de indoor es un sintético satinado,
-                // y un valor alto y parejo lo dejaba mate como cemento.
-                var rug = 0.33 + g * 0.34 + gastado * 0.10 + (gr - 0.5) * 0.04;
+                // Rugosidad: el surco y las zonas gastadas rebotan la
+                // luz más difusa que el panel limpio. Acá sí entra el
+                // grano, porque en este mapa no crea geometría: solo
+                // hace que el brillo no sea uniforme como el de un
+                // plástico recién moldeado. La base baja de nuevo: el
+                // sintético de un balón de indoor es claramente
+                // satinado, con un reflejo suave y ancho.
+                var rug = 0.28 + g * 0.38 + gastado * 0.08 + (gr - 0.5) * 0.05;
                 var rv = Math.round(limitar(rug, 0, 1) * 255);
 
                 var idx = i * 4;
@@ -423,12 +432,10 @@
             new THREE.MeshPhysicalMaterial({
                 map: textura(lienzos.color),
                 bumpMap: textura(lienzos.relieve),
-                // Baja respecto del 0.55 anterior: con el relieve alto,
-                // cada ondulación del grano proyectaba su propia
-                // sombrita y la superficie se llenaba de picadura. Sigue
-                // alcanzando para las costuras, que en el mapa son un
-                // escalón mucho más profundo que el grano.
-                bumpScale: 0.42,
+                // El mapa de relieve ahora solo trae costuras, así que
+                // este valor únicamente define qué tan marcado es el
+                // surco: no hay grano al que amplificarle la sombra.
+                bumpScale: 0.5,
                 roughnessMap: textura(lienzos.rugosidad),
                 // La rugosidad real la pone el mapa; acá va en 1 para no
                 // recortarlo (Three.js multiplica uno por otro).
@@ -439,8 +446,10 @@
                 // justamente lo que lo delata como pelota. Casi sin
                 // barniz —como estaba— la superficie quedaba mate y
                 // pétrea, que era la otra mitad del efecto hormigón.
-                clearcoat: 0.55,
-                clearcoatRoughness: 0.26
+                // Con el panel ya liso, este reflejo pasa a ser la
+                // señal principal de que la superficie es sintética.
+                clearcoat: 0.6,
+                clearcoatRoughness: 0.18
             })
         );
 
