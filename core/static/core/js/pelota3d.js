@@ -181,38 +181,6 @@
         return ab + (cd - ab) * ty;
     }
 
-    /* Desenfoque separable por caja, repetido: dos pasadas aproximan
-       bastante bien un gaussiano y alcanzan de sobra para redondear el
-       abullonado de los paneles. Envuelve en horizontal, porque la
-       textura da la vuelta a la esfera, y recorta en vertical. */
-    function desenfocar(src, w, h, radio, pasadas) {
-        var a = Float32Array.from(src), b = new Float32Array(w * h);
-        var x, y, k, acc, n, p;
-        for (p = 0; p < pasadas; p++) {
-            for (y = 0; y < h; y++) {
-                for (x = 0; x < w; x++) {
-                    acc = 0;
-                    for (k = -radio; k <= radio; k++) {
-                        acc += a[y * w + (((x + k) % w) + w) % w];
-                    }
-                    b[y * w + x] = acc / (2 * radio + 1);
-                }
-            }
-            for (y = 0; y < h; y++) {
-                for (x = 0; x < w; x++) {
-                    acc = 0; n = 0;
-                    for (k = -radio; k <= radio; k++) {
-                        var yy = y + k;
-                        if (yy < 0 || yy >= h) continue;
-                        acc += b[yy * w + x]; n++;
-                    }
-                    a[y * w + x] = acc / n;
-                }
-            }
-        }
-        return a;
-    }
-
     function grillaRuido(gw, gh, frecuencia, semilla) {
         var g = new Float32Array(gw * gh);
         var t = tablasDireccion(gw, gh);
@@ -358,34 +326,6 @@
         var ctxRug = cRug.getContext('2d');
         var imgRug = ctxRug.createImageData(MW, MH);
 
-        /* Abullonado de los paneles.
-
-           Un balón cosido no es una esfera lisa: cada panel se infla
-           entre sus costuras y el material se recoge justo en el borde,
-           así que la superficie es una sucesión de almohadillas. Sin
-           esto los paneles quedan planos y la pelota se lee como una
-           pieza de plástico duro, con las costuras como simples líneas
-           grabadas encima.
-
-           Sale del mismo mapa de distancia que las costuras: 0 sobre la
-           costura y 1 hacia el centro del panel. Va desenfocado por una
-           razón concreta: una transformada de distancia tiene una
-           arista en el eje medio del panel —la línea donde se
-           encuentran las distancias de las dos costuras opuestas— y sin
-           suavizar esa arista se ve como un doblez de origami en vez de
-           una almohadilla. El desenfoque también redondea el arranque
-           contra la costura, que si no queda como un bisel maquinado. */
-        var RADIO_ABULLONADO = 30;   // en píxeles del mapa de relieve
-        var domo = new Float32Array(MW * MH);
-        for (var y = 0; y < MH; y++) {
-            for (var x = 0; x < MW; x++) {
-                var dd = dist[(y << 1) * W + (x << 1)] * 0.5;
-                var t = limitar(dd / RADIO_ABULLONADO, 0, 1);
-                domo[y * MW + x] = t * t * (3 - 2 * t);
-            }
-        }
-        domo = desenfocar(domo, MW, MH, 6, 2);
-
         for (var y = 0; y < MH; y++) {
             var v = (y + 0.5) / MH;
             for (var x = 0; x < MW; x++) {
@@ -399,33 +339,22 @@
                 var mu = muestrear(mugre, MUGRE_W, MUGRE_H, u, v);
                 var gastado = mu < 0.5 ? (0.5 - mu) * 2 : 0;
 
-                // Relieve: el abullonado del panel y las costuras. Nada
-                // de grano fino, a propósito.
-                //
-                // Cualquier ruido en el relieve termina mal a esta
-                // escala, y en las dos direcciones: submuestreado da
-                // estática (la superficie porosa de cemento), y bien
-                // muestreado da bollos redondos regulares, que es
-                // exactamente el hoyuelo de una pelota de golf. En un
-                // balón de indoor real el grano del sintético es tan
-                // fino que a este tamaño no se ve como geometría: no
-                // deforma la silueta del reflejo, solo lo vuelve un
-                // poco más difuso. Por eso la variación de superficie
-                // se mueve entera al mapa de rugosidad, más abajo, que
-                // cambia cómo se dispersa la luz sin inventar relieve.
-                // El volumen que sí corresponde es el de los paneles,
-                // que es de escala mucho mayor que cualquier grano.
-                var altura = 0.52 + domo[i] * 0.16 - g * 0.60;
+                // Relieve: panel a media altura con el grano encima, y la
+                // costura hundida de verdad. El grano va MUY discreto a
+                // propósito. A la escala en que se ve la pelota en
+                // pantalla, el poro real de un balón mide menos de un
+                // píxel: lo que se percibe de cerca como textura, de
+                // lejos solo tiene que insinuar que la superficie no es
+                // un plástico perfecto. Con amplitud alta cada píxel se
+                // convierte en un cráter y aparece la lija.
+                var altura = 0.72 + (gr - 0.5) * 0.05 - g * 0.72;
                 var hv = Math.round(limitar(altura, 0, 1) * 255);
 
-                // Rugosidad: el surco y las zonas gastadas rebotan la
-                // luz más difusa que el panel limpio. Acá sí entra el
-                // grano, porque en este mapa no crea geometría: solo
-                // hace que el brillo no sea uniforme como el de un
-                // plástico recién moldeado. La base baja de nuevo: el
-                // sintético de un balón de indoor es claramente
-                // satinado, con un reflejo suave y ancho.
-                var rug = 0.28 + g * 0.38 + gastado * 0.08 + (gr - 0.5) * 0.05;
+                // Rugosidad: el surco y las zonas gastadas rebotan la luz
+                // más difusa que el panel limpio. La base baja respecto
+                // de antes: un balón de indoor es un sintético satinado,
+                // y un valor alto y parejo lo dejaba mate como cemento.
+                var rug = 0.33 + g * 0.34 + gastado * 0.10 + (gr - 0.5) * 0.04;
                 var rv = Math.round(limitar(rug, 0, 1) * 255);
 
                 var idx = i * 4;
@@ -494,10 +423,12 @@
             new THREE.MeshPhysicalMaterial({
                 map: textura(lienzos.color),
                 bumpMap: textura(lienzos.relieve),
-                // El mapa de relieve ahora solo trae costuras, así que
-                // este valor únicamente define qué tan marcado es el
-                // surco: no hay grano al que amplificarle la sombra.
-                bumpScale: 0.5,
+                // Baja respecto del 0.55 anterior: con el relieve alto,
+                // cada ondulación del grano proyectaba su propia
+                // sombrita y la superficie se llenaba de picadura. Sigue
+                // alcanzando para las costuras, que en el mapa son un
+                // escalón mucho más profundo que el grano.
+                bumpScale: 0.42,
                 roughnessMap: textura(lienzos.rugosidad),
                 // La rugosidad real la pone el mapa; acá va en 1 para no
                 // recortarlo (Three.js multiplica uno por otro).
@@ -508,10 +439,8 @@
                 // justamente lo que lo delata como pelota. Casi sin
                 // barniz —como estaba— la superficie quedaba mate y
                 // pétrea, que era la otra mitad del efecto hormigón.
-                // Con el panel ya liso, este reflejo pasa a ser la
-                // señal principal de que la superficie es sintética.
-                clearcoat: 0.6,
-                clearcoatRoughness: 0.18
+                clearcoat: 0.55,
+                clearcoatRoughness: 0.26
             })
         );
 
