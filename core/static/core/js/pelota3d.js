@@ -181,6 +181,38 @@
         return ab + (cd - ab) * ty;
     }
 
+    /* Desenfoque separable por caja, repetido: dos pasadas aproximan
+       bastante bien un gaussiano y alcanzan de sobra para redondear el
+       abullonado de los paneles. Envuelve en horizontal, porque la
+       textura da la vuelta a la esfera, y recorta en vertical. */
+    function desenfocar(src, w, h, radio, pasadas) {
+        var a = Float32Array.from(src), b = new Float32Array(w * h);
+        var x, y, k, acc, n, p;
+        for (p = 0; p < pasadas; p++) {
+            for (y = 0; y < h; y++) {
+                for (x = 0; x < w; x++) {
+                    acc = 0;
+                    for (k = -radio; k <= radio; k++) {
+                        acc += a[y * w + (((x + k) % w) + w) % w];
+                    }
+                    b[y * w + x] = acc / (2 * radio + 1);
+                }
+            }
+            for (y = 0; y < h; y++) {
+                for (x = 0; x < w; x++) {
+                    acc = 0; n = 0;
+                    for (k = -radio; k <= radio; k++) {
+                        var yy = y + k;
+                        if (yy < 0 || yy >= h) continue;
+                        acc += b[yy * w + x]; n++;
+                    }
+                    a[y * w + x] = acc / n;
+                }
+            }
+        }
+        return a;
+    }
+
     function grillaRuido(gw, gh, frecuencia, semilla) {
         var g = new Float32Array(gw * gh);
         var t = tablasDireccion(gw, gh);
@@ -326,6 +358,34 @@
         var ctxRug = cRug.getContext('2d');
         var imgRug = ctxRug.createImageData(MW, MH);
 
+        /* Abullonado de los paneles.
+
+           Un balón cosido no es una esfera lisa: cada panel se infla
+           entre sus costuras y el material se recoge justo en el borde,
+           así que la superficie es una sucesión de almohadillas. Sin
+           esto los paneles quedan planos y la pelota se lee como una
+           pieza de plástico duro, con las costuras como simples líneas
+           grabadas encima.
+
+           Sale del mismo mapa de distancia que las costuras: 0 sobre la
+           costura y 1 hacia el centro del panel. Va desenfocado por una
+           razón concreta: una transformada de distancia tiene una
+           arista en el eje medio del panel —la línea donde se
+           encuentran las distancias de las dos costuras opuestas— y sin
+           suavizar esa arista se ve como un doblez de origami en vez de
+           una almohadilla. El desenfoque también redondea el arranque
+           contra la costura, que si no queda como un bisel maquinado. */
+        var RADIO_ABULLONADO = 30;   // en píxeles del mapa de relieve
+        var domo = new Float32Array(MW * MH);
+        for (var y = 0; y < MH; y++) {
+            for (var x = 0; x < MW; x++) {
+                var dd = dist[(y << 1) * W + (x << 1)] * 0.5;
+                var t = limitar(dd / RADIO_ABULLONADO, 0, 1);
+                domo[y * MW + x] = t * t * (3 - 2 * t);
+            }
+        }
+        domo = desenfocar(domo, MW, MH, 6, 2);
+
         for (var y = 0; y < MH; y++) {
             var v = (y + 0.5) / MH;
             for (var x = 0; x < MW; x++) {
@@ -339,8 +399,8 @@
                 var mu = muestrear(mugre, MUGRE_W, MUGRE_H, u, v);
                 var gastado = mu < 0.5 ? (0.5 - mu) * 2 : 0;
 
-                // Relieve: SOLO las costuras. El panel va perfectamente
-                // liso a propósito.
+                // Relieve: el abullonado del panel y las costuras. Nada
+                // de grano fino, a propósito.
                 //
                 // Cualquier ruido en el relieve termina mal a esta
                 // escala, y en las dos direcciones: submuestreado da
@@ -353,7 +413,9 @@
                 // poco más difuso. Por eso la variación de superficie
                 // se mueve entera al mapa de rugosidad, más abajo, que
                 // cambia cómo se dispersa la luz sin inventar relieve.
-                var altura = 0.72 - g * 0.72;
+                // El volumen que sí corresponde es el de los paneles,
+                // que es de escala mucho mayor que cualquier grano.
+                var altura = 0.52 + domo[i] * 0.16 - g * 0.60;
                 var hv = Math.round(limitar(altura, 0, 1) * 255);
 
                 // Rugosidad: el surco y las zonas gastadas rebotan la
