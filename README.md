@@ -94,6 +94,7 @@ El plan completo de despliegue (Render + PostgreSQL + dominio `.cl`) vive en dos
 
 - 📘 [`DEPLOY_PLAN_TECHNICAL.md`](./DEPLOY_PLAN_TECHNICAL.md) — versión técnica, paso a paso
 - 📗 [`DEPLOY_PLAN_PARA_DIRIGENTES.md`](./DEPLOY_PLAN_PARA_DIRIGENTES.md) — versión en lenguaje simple para la Junta Directiva, con costos y cronograma
+- 📙 [`CONTEXTO_PROYECTO.md`](./CONTEXTO_PROYECTO.md) — ficha técnica completa + estado y pendientes actuales, pensado para dar contexto en Claude Projects
 
 El build en Render corre `build.sh` (instala dependencias + `collectstatic`); el `Procfile` aplica migraciones y levanta Gunicorn.
 
