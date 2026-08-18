@@ -542,15 +542,43 @@
         }
         .site-footer a:hover { opacity: 0.75; text-decoration: underline; }
 
-        /* Patrocinador: solo el isotipo, sin card ni leyenda, cerrando
-           la columna de Navegación, como pidió Mauricio. */
-        .footer-sponsor-mark {
-            margin-top: 28px;
-        }
+        /* Patrocinador: solo el isotipo, sin card ni leyenda, en su
+           propia columna. El SVG viene recoloreado a blanco (ver
+           molten.svg): antes su negro por defecto quedaba invisible
+           sobre el verde del pie, y una placa blanca detrás —la salida
+           fácil— no es el look que se pidió para esta sección. */
         .footer-sponsor-mark img {
-            height: 30px;
+            height: 34px;
             width: auto;
         }
+
+        /* Nuestras Redes: iconos de línea propios del sitio (el mismo
+           trazo que ya usa el ícono de Instagram en Contacto), no los
+           logos de app de Instagram/Gmail a color — pegados tal cual
+           quedan genéricos y además no es un uso correcto de esas
+           marcas fuera de su contexto. El anillo compacto los presenta
+           como un mismo sistema de botones, no como dos stickers
+           sueltos, y el hover a ámbar seguí el mismo lenguaje que el
+           resto de los enlaces del sitio. */
+        .footer-redes-titulo { margin-top: 26px; }
+        .footer-redes {
+            display: flex;
+            gap: 12px;
+        }
+        .footer-red-icono {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.4);
+            color: #ffffff;
+            transition: border-color 0.25s ease, color 0.25s ease, transform 0.15s ease;
+        }
+        .footer-red-icono svg { width: 19px; height: 19px; }
+        .footer-red-icono:hover { border-color: var(--c-amber); color: var(--c-amber); }
+        .footer-red-icono:active { transform: scale(0.92); }
 
         .footer-bottom {
             max-width: var(--page-max);
@@ -663,18 +691,31 @@
                     <li><a href="{% url 'archivo' %}">Multimedia</a></li>
                     <li><a href="{% url 'contacto' %}">Contacto</a></li>
                 </ul>
-                <div class="footer-sponsor-mark">
-                    <img src="{% static 'core/img/molten.svg' %}" alt="Molten">
-                </div>
             </div>
 
             <div>
-                <h4>Contáctanos</h4>
-                <ul>
-                    <li>Región Metropolitana, Chile</li>
-                    <li>contacto@lmve.cl</li>
-                    <li><a href="https://www.instagram.com/ligametropolitanavoley/" target="_blank" rel="noopener">Instagram</a></li>
-                </ul>
+                <h4>Patrocinador</h4>
+                <div class="footer-sponsor-mark">
+                    <img src="{% static 'core/img/molten.svg' %}" alt="Molten">
+                </div>
+
+                <h4 class="footer-redes-titulo">Nuestras Redes</h4>
+                <div class="footer-redes">
+                    <a class="footer-red-icono" href="https://www.instagram.com/ligametropolitanavoley/"
+                       target="_blank" rel="noopener" aria-label="Instagram de la LMVE">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <rect x="2" y="2" width="20" height="20" rx="5"/>
+                            <circle cx="12" cy="12" r="4"/>
+                            <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/>
+                        </svg>
+                    </a>
+                    <a class="footer-red-icono" href="mailto:contacto@lmve.cl" aria-label="Escribir a contacto@lmve.cl">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <rect x="2" y="4.5" width="20" height="15" rx="2.5"/>
+                            <path d="M3 6.5l9 6.5 9-6.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                </div>
             </div>
         </div>
 
