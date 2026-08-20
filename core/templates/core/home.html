@@ -281,9 +281,10 @@
         line-height: 1.0;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        color: var(--c-green);
+        color: #ffffff;
         margin-bottom: 34px;
     }
+    .futuro h2 .acento { color: var(--c-orange); }
     .futuro-botones {
         display: flex;
         flex-wrap: wrap;
@@ -344,8 +345,10 @@
     <div class="hero-contenido">
         <h1>Educar a<br>Través del <span class="acento">Deporte</span></h1>
         <p>
-            Hoy en día, la LMVE es una de las ligas escolares más competitivas,
-            difundidas y con mayor convocatoria a nivel nacional.
+            Hoy, la LMVE se ha consolidado como una importante comunidad del voleibol escolar, 
+            reconocida por su crecimiento, su convocatoria y, 
+            sobre todo, por el compromiso de quienes año a año hacen posible que este 
+            proyecto siga creciendo.
         </p>
         <div class="hero-actions">
             <a href="{% url 'sobre' %}" class="btn-relleno">Sobre la LMVE</a>
@@ -366,8 +369,8 @@
             <div class="cifra-label">Deportistas por temporada</div>
         </div>
         <div class="cifra">
-            <div class="cifra-num">60</div>
-            <div class="cifra-label">Equipos en competencia</div>
+            <div class="cifra-num">+45</div>
+            <div class="cifra-label">Colegios compitiendo</div>
         </div>
         <div class="cifra">
             <div class="cifra-num">39</div>
@@ -393,7 +396,7 @@
             </div>
             <div class="ig-card">
                 <blockquote class="instagram-media"
-                    data-instgrm-permalink="https://www.instagram.com/p/DbhUi1YjOep/?utm_source=ig_embed"
+                    data-instgrm-permalink="https://www.instagram.com/p/DZeAWx5DOI3/?utm_source=ig_embed"
                     data-instgrm-version="14"></blockquote>
             </div>
         </div>
@@ -437,7 +440,7 @@
 <!-- EL FUTURO -->
 <section class="futuro">
     <div class="futuro-inner">
-        <h2>El futuro de la LMVE</h2>
+        <h2>El futuro de la <span class="acento">LMVE</span></h2>
         <div class="futuro-botones">
             <a href="{% url 'contacto' %}" class="futuro-boton">
                 Proyecto de Auspicio 2026

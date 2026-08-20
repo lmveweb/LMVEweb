@@ -19,6 +19,8 @@
         width: 100%;
         height: 300px;
         object-fit: cover;
+        /* Ajuste fino para que la medalla quede centrada en el recorte. */
+        object-position: center calc(50% - 40px);
     }
     .sobre-hero h1 {
         font-size: clamp(40px, 6vw, 76px);
@@ -75,6 +77,12 @@
         width: 100%;
         height: 340px;
         object-fit: cover;
+    }
+    /* Solo la foto de Visión: la jugada (manos y pelota) queda arriba
+       del encuadre original, así que ancla arriba en vez de al centro.
+       La de Misión no tiene ese problema y sigue centrada. */
+    .bloque:not(.invertido) figure img {
+        object-position: center top;
     }
     .bloque h2 {
         font-size: clamp(38px, 5vw, 64px);
@@ -244,8 +252,8 @@
 
 <!-- ENCABEZADO -->
 <section class="sobre-hero">
-    <img src="{% static 'core/img/fotos/archivo-hoy-5.jpg' %}"
-         alt="Remate frente al bloqueo durante un partido de la Liga">
+    <img src="{% static 'core/img/fotos/galeria-25.jpg' %}"
+         alt="Medalla de la Liga sobre la camiseta de un jugador">
     <h1>Nuestra <span class="v">Visión</span><br>y <span class="m">Misión</span></h1>
 </section>
 
@@ -253,8 +261,8 @@
 <section class="bloque">
     <div class="bloque-inner">
         <figure>
-            <img src="{% static 'core/img/fotos/archivo-hoy-2.jpg' %}"
-                 alt="Recepción de balón durante un partido de la Liga">
+            <img src="{% static 'core/img/fotos/galeria-22.jpg' %}"
+                 alt="Jugador armando en suspensión durante un partido de la Liga">
         </figure>
         <div class="bloque-texto">
             <h2><span class="acento">Visión</span></h2>
@@ -289,8 +297,8 @@
             </p>
         </div>
         <figure>
-            <img src="{% static 'core/img/fotos/galeria-2.jpg' %}"
-                 alt="Bloqueo en la red durante un partido de la Liga">
+            <img src="{% static 'core/img/fotos/galeria-17.jpg' %}"
+                 alt="Equipo reunido junto a su entrenador antes de un partido de la Liga">
         </figure>
     </div>
 </section>
