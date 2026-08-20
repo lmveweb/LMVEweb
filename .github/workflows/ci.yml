@@ -9,6 +9,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # DEBUG=True por defecto para todo el job: es lo que necesitan
+    # collectstatic y los tests (sin esto, DEBUG=False exige SECRET_KEY
+    # y activa SECURE_SSL_REDIRECT, que redirige con 301 cada request
+    # del test client y hace fallar cualquier test que espere 200/400).
+    # El paso de "check --deploy" abajo lo pisa a propósito con la
+    # config real de producción, que es justo lo que tiene que probar.
+    env:
+      DJANGO_DEBUG: "True"
 
     steps:
       - uses: actions/checkout@v4
@@ -22,10 +30,16 @@ jobs:
       - name: Instalar dependencias
         run: pip install -r requirements.txt
 
+      # Genera el manifest que necesita CompressedManifestStaticFilesStorage
+      # para resolver los {% static %} de los templates. Sin este paso,
+      # cualquier test que renderice una vista completa falla con
+      # "Missing staticfiles manifest entry" en un checkout limpio (no
+      # hay staticfiles/ commiteado, esta en .gitignore a propósito).
+      - name: Recolectar estaticos
+        run: python manage.py collectstatic --noinput
+
       - name: Tests
         run: python manage.py test
-        env:
-          DJANGO_ALLOWED_HOSTS: testserver
 
       - name: Chequeo de despliegue (settings de produccion)
         run: python manage.py check --deploy
