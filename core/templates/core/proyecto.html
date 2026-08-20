@@ -3,12 +3,6 @@
 
 {% block title %}Historia | LMVE{% endblock %}
 
-{# Esta vista monta la pelota 3D del encabezado. #}
-{% block head_extra %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="{% static 'core/js/pelota3d.js' %}?v=17"></script>
-{% endblock %}
-
 {% block content %}
 <style nonce="{{ request.csp_nonce }}">
     /* =========================================================
@@ -111,13 +105,70 @@
         overflow: hidden;
         background: var(--c-navy-deep);
     }
-    .epoca-marco img {
+
+    /* Carrusel de fotos por época: varias fotos por botón, navegables
+       con flechas, en vez de una sola imagen fija. Se cambia el src de
+       un único <img> en vez de montar N <img> a la vez, así solo se
+       descarga la foto que realmente se está viendo. */
+    .epoca-carrusel { position: relative; background: var(--c-navy-deep); }
+    /* object-fit: contain (no "cover") a propósito: la foto tiene que
+       verse completa, nunca recortada. El alto lo define cada foto según
+       su propio ancho/alto natural (hasta el tope de max-height); la
+       descripción vive abajo, en su propio bloque, así que no compite
+       por espacio con la foto. */
+    .epoca-carrusel .epoca-foto {
         width: 100%;
-        height: 430px;
-        object-fit: cover;
-        object-position: center top;
+        height: auto;
+        min-height: 260px;
+        max-height: 520px;
+        object-fit: contain;
         display: block;
+        margin: 0 auto;
     }
+    .epoca-flecha {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(var(--c-navy-deep-rgb), 0.60);
+        color: #ffffff;
+        border: 2px solid rgba(255, 255, 255, 0.75);
+        border-radius: 50%;
+        font-family: var(--font-display);
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease, transform 0.12s ease;
+    }
+    .epoca-flecha:hover { background: var(--c-orange); border-color: var(--c-orange); }
+    .epoca-flecha:active { transform: translateY(-50%) scale(0.92); }
+    .epoca-flecha:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
+    .epoca-flecha-izq { left: 14px; }
+    .epoca-flecha-der { right: 14px; }
+    .epoca-contador {
+        position: absolute;
+        right: 14px;
+        bottom: 14px;
+        background: rgba(var(--c-navy-deep-rgb), 0.72);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        padding: 4px 11px;
+        border-radius: 20px;
+        letter-spacing: 0.3px;
+    }
+    /* Con una sola foto no hay nada que recorrer: se ocultan los
+       controles y queda como una foto fija, igual que antes. */
+    .epoca-carrusel.epoca-carrusel--una .epoca-flecha,
+    .epoca-carrusel.epoca-carrusel--una .epoca-contador { display: none; }
+    /* Los datos de cada foto viven en el HTML (no en JSON embebido) para
+       que agregar o sacar una foto sea editar una línea en el template. */
+    .epoca-fotos-datos { display: none; }
     .epoca-pie {
         background: var(--c-orange);
         color: #ffffff;
@@ -182,7 +233,8 @@
             padding: 12px 18px;
             white-space: nowrap;
         }
-        .epoca-marco img { height: 260px; }
+        .epoca-carrusel .epoca-foto { min-height: 180px; max-height: 300px; }
+        .epoca-flecha { width: 36px; height: 36px; font-size: 19px; }
     }
 </style>
 
@@ -212,102 +264,88 @@
 <!-- ÉPOCAS -->
 <section class="epocas">
     {% comment %}
-    Los textos con hechos concretos salen de la Reseña Histórica 2026.
-    La década de 2010 es la excepción: el documento no cubre ese tramo
-    (salta de los 2000 al retorno post-pandemia), así que ese panel
-    lleva un texto general de continuidad, marcado con un aviso, a la
-    espera de que la organización aporte material específico.
+    Solo quedan las dos épocas con material propio (texto y fotos) que
+    la Liga efectivamente envió: 1987-1989 y la Década del 90. El resto
+    de las décadas se sacó del recorrido a propósito hasta que exista
+    contenido específico para ellas.
     {% endcomment %}
     <div class="epocas-tabs" role="tablist" aria-label="Épocas de la Liga">
         <button class="epoca-tab" role="tab" id="tab-1" aria-controls="panel-1" aria-selected="true">1987 – 1989</button>
         <button class="epoca-tab" role="tab" id="tab-2" aria-controls="panel-2" aria-selected="false" tabindex="-1">Década del 90</button>
-        <button class="epoca-tab" role="tab" id="tab-3" aria-controls="panel-3" aria-selected="false" tabindex="-1">Década del 2000</button>
-        <button class="epoca-tab" role="tab" id="tab-4" aria-controls="panel-4" aria-selected="false" tabindex="-1">Década del 2010</button>
-        <button class="epoca-tab" role="tab" id="tab-5" aria-controls="panel-5" aria-selected="false" tabindex="-1">2020 a la fecha</button>
     </div>
 
     <div class="epocas-paneles">
         <div class="epoca-panel" role="tabpanel" id="panel-1" aria-labelledby="tab-1" tabindex="0">
             <div class="epoca-marco">
-                <img src="{% static 'core/img/fotos/historia-1987.jpg' %}"
-                     alt="Equipo de la Liga a fines de los años 80">
+                <div class="epoca-carrusel">
+                    <button type="button" class="epoca-flecha epoca-flecha-izq" aria-label="Foto anterior">‹</button>
+                    <img class="epoca-foto" src="{% static 'core/img/fotos/historia-1987.jpg' %}"
+                         alt="Equipo de la Liga a fines de los años 80">
+                    <button type="button" class="epoca-flecha epoca-flecha-der" aria-label="Foto siguiente">›</button>
+                    <div class="epoca-contador" aria-hidden="true"></div>
+                    <ul class="epoca-fotos-datos">
+                        <li data-src="{% static 'core/img/fotos/historia-1987.jpg' %}" data-alt="Equipo de la Liga a fines de los años 80"></li>
+                        <li data-src="{% static 'core/img/fotos/archivo-80s-2.jpg' %}" data-alt="Equipo junto a su profesor, década de 1980"></li>
+                        <li data-src="{% static 'core/img/fotos/historia-80s-equipo-a.jpg' %}" data-alt="Equipo de la Liga en sus primeros años"></li>
+                        <li data-src="{% static 'core/img/fotos/historia-80s-equipo-c.jpg' %}" data-alt="Equipo de la Liga en sus primeros años"></li>
+                        <li data-src="{% static 'core/img/fotos/historia-80s-campeones.jpg' %}" data-alt="Equipo celebrando un título en los primeros años de la Liga"></li>
+                        <li data-src="{% static 'core/img/fotos/historia-80s-fmiranda.jpg' %}" data-alt="Equipo del Colegio Francisco de Miranda en el 1er Torneo Internacional de Voleibol Escolar"></li>
+                    </ul>
+                </div>
                 <div class="epoca-pie">
                     <b>1987 – 1989 · Inicios</b>
-                    La Liga comenzó con cerca de 16 colegios compitiendo en divisiones
-                    de Damas y Varones a través de los torneos Apertura u Oficial,
-                    disputados los sábados por la mañana.
+                    Fundada por el profesor Fernando Espinosa bajo el nombre de Liga
+                    Teresiana de Voleibol, con sede en el Colegio Teresiano Enrique de
+                    Ossó. La directiva la completaban Mario Busch (Secretario) y
+                    Roberto Flores (Tesorero). Los partidos se jugaban los sábados en
+                    la mañana, en divisiones de Damas y Varones, con colegios como
+                    Francisco de Miranda, Alianza Francesa, Santiago College, Carmen
+                    Teresiano y Villa María Academy, entre otros.
                 </div>
             </div>
         </div>
 
         <div class="epoca-panel" role="tabpanel" id="panel-2" aria-labelledby="tab-2" tabindex="0" hidden>
             <div class="epoca-marco">
-                <img src="{% static 'core/img/fotos/historia-1996.jpg' %}"
-                     alt="Selección de la Liga en la década de 1990">
+                <div class="epoca-carrusel">
+                    <button type="button" class="epoca-flecha epoca-flecha-izq" aria-label="Foto anterior">‹</button>
+                    <img class="epoca-foto" src="{% static 'core/img/fotos/historia-1996.jpg' %}"
+                         alt="Selección de la Liga en la década de 1990">
+                    <button type="button" class="epoca-flecha epoca-flecha-der" aria-label="Foto siguiente">›</button>
+                    <div class="epoca-contador" aria-hidden="true"></div>
+                    <ul class="epoca-fotos-datos">
+                        <li data-src="{% static 'core/img/fotos/historia-1996.jpg' %}" data-alt="Selección de la Liga en la década de 1990"></li>
+                        <li data-src="{% static 'core/img/fotos/archivo-90s-seleccion.jpg' %}" data-alt="Selección de la Liga, 1990"></li>
+                        <li data-src="{% static 'core/img/fotos/historia-90s-equipo.jpg' %}" data-alt="Equipo de la Liga durante la década de 1990"></li>
+                        <li data-src="{% static 'core/img/fotos/historia-90s-tocopilla-1993.jpg' %}" data-alt="16° Campeonato Nacional Escolar de Voleibol, categoría intermedia, Tocopilla, octubre de 1993"></li>
+                    </ul>
+                </div>
                 <div class="epoca-pie">
                     <b>Década de 1990 · Consolidación y cobertura</b>
-                    La participación creció a 25 colegios. Se incorporaron los
-                    encuentros de Mini Voleibol (4° a 6° Básico) y se logró una
-                    importante difusión en medios, destacando el patrocinio del diario
-                    La Nación con la "Copa Diario La Nación".
+                    La participación creció a 25 colegios, con la incorporación de
+                    establecimientos como el Colegio Claretiano, Liceo Manuel de
+                    Salas, Sek Chile, Salesiano Alameda y Liceo Carmela Carvajal,
+                    entre otros. Se sumaron los encuentros de Mini Voleibol (4° a 6°
+                    Básico) y una importante cobertura de prensa, de la mano del
+                    patrocinio del diario La Nación con la "Copa Diario La Nación"
+                    — impulsada por el periodista Florindo Maulén, recordado con
+                    cariño por su aporte desinteresado al deporte escolar.
                 </div>
             </div>
         </div>
 
-        <div class="epoca-panel" role="tabpanel" id="panel-3" aria-labelledby="tab-3" tabindex="0" hidden>
-            <div class="epoca-marco">
-                <img src="{% static 'core/img/fotos/archivo-jornada-1.jpg' %}"
-                     alt="Deportistas reunidos en el gimnasio durante una jornada de la Liga">
-                <div class="epoca-pie">
-                    <b>Década del 2000 · Estructura y alianzas</b>
-                    Se consolidó la estructura directiva y administrativa
-                    (coordinadores, comisiones de disciplina y RR. PP., personalidad
-                    jurídica, sitio web y marca institucional). Se impulsaron
-                    capacitaciones para árbitros y seminarios para entrenadores, sumado
-                    a alianzas con Barlosport (Molten), Arte Bismarck y Productora
-                    Kraneo, con cobertura en El Mercurio y La Tercera.
-                </div>
-            </div>
-        </div>
-
-        <div class="epoca-panel" role="tabpanel" id="panel-4" aria-labelledby="tab-4" tabindex="0" hidden>
-            <div class="epoca-marco">
-                <img src="{% static 'core/img/fotos/archivo-jornada-2.jpg' %}"
-                     alt="Equipos formados en cancha durante una ceremonia de la Liga">
-                <div class="epoca-pie">
-                    <span class="epoca-aviso">⚠ Texto general, pendiente de validar con la organización</span>
-                    <b>Década del 2010 · Continuidad institucional</b>
-                    Este tramo aún no cuenta con material específico confirmado por la
-                    Liga. Mientras se recopila esa información, este texto describe de
-                    forma general la continuidad de la consolidación institucional
-                    lograda en la década anterior, y se reemplazará en cuanto se cuente
-                    con los datos y fotografías propias del período.
-                </div>
-            </div>
-        </div>
-
-        <div class="epoca-panel" role="tabpanel" id="panel-5" aria-labelledby="tab-5" tabindex="0" hidden>
-            <div class="epoca-marco">
-                <img src="{% static 'core/img/fotos/archivo-hoy-1.jpg' %}"
-                     alt="Trofeos y balones preparados para una premiación de la Liga">
-                <div class="epoca-pie">
-                    <b>2020 a la fecha · Retorno y Fundación</b>
-                    Tras la pausa obligada por la pandemia, la Liga reinició sus
-                    actividades en 2022 con renovado entusiasmo de los colegios
-                    asociados, expandiendo su alcance a comunas como Colina (Chicureo),
-                    Puente Alto, Calera de Tango, Pirque, La Pintana, Talagante, Maipú,
-                    Las Condes y Lo Barnechea. Desde 2025, la organización se constituye
-                    como la Fundación para el Desarrollo del Deporte Escolar,
-                    manteniendo a la Liga Metropolitana de Voleibol
-                    Escolar como su pilar central.
-                </div>
-            </div>
-        </div>
     </div>
 </section>
 {% endblock %}
 
 {% block scripts %}
+{% comment %}
+three.js y pelota3d.js van acá (no en head_extra) a propósito: al
+final del body no bloquean el parseo del HTML — antes vivían en el
+<head> y retrasaban la primera pintura de toda la página.
+{% endcomment %}
+<script src="{% static 'core/js/vendor/three.min.js' %}"></script>
+<script src="{% static 'core/js/pelota3d.js' %}?v=17"></script>
 <script nonce="{{ request.csp_nonce }}">
 (function () {
     var mount = document.getElementById('historiaBall');
@@ -344,6 +382,40 @@
                 e.preventDefault(); mostrar(tabs.length - 1, true);
             }
         });
+    });
+})();
+</script>
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+    // Carrusel de fotos por época: los datos de cada foto viven en el
+    // <ul class="epoca-fotos-datos"> de al lado (ver el HTML), así que
+    // agregar o sacar una foto es editar esa lista, sin tocar este script.
+    var carruseles = Array.prototype.slice.call(document.querySelectorAll('.epoca-carrusel'));
+    carruseles.forEach(function (carrusel) {
+        var datos = Array.prototype.slice.call(carrusel.querySelectorAll('.epoca-fotos-datos li'))
+            .map(function (li) { return { src: li.getAttribute('data-src'), alt: li.getAttribute('data-alt') }; });
+
+        // Con una sola foto no hay nada que recorrer: se ocultan flechas
+        // y contador (ver CSS, .epoca-carrusel--una) y queda fija.
+        if (datos.length <= 1) {
+            carrusel.classList.add('epoca-carrusel--una');
+            return;
+        }
+
+        var img = carrusel.querySelector('.epoca-foto');
+        var contador = carrusel.querySelector('.epoca-contador');
+        var indice = 0;
+
+        function mostrar(i) {
+            indice = (i + datos.length) % datos.length;
+            img.src = datos[indice].src;
+            img.alt = datos[indice].alt;
+            contador.textContent = (indice + 1) + ' / ' + datos.length;
+        }
+
+        carrusel.querySelector('.epoca-flecha-izq').addEventListener('click', function () { mostrar(indice - 1); });
+        carrusel.querySelector('.epoca-flecha-der').addEventListener('click', function () { mostrar(indice + 1); });
+        mostrar(0);
     });
 })();
 </script>

@@ -403,12 +403,17 @@
 <!-- INSTITUCIONES -->
 <section class="instituciones">
     <div class="instituciones-inner">
-        <h2 class="titulo-seccion">Instituciones que compiten en la LMVE</h2>
+        <h2 class="titulo-seccion">UNA COMUNIDAD QUE CRECE JUNTO AL VOLEIBOL</h2>
         <p>
-            Cada temporada, colegios de toda la Región Metropolitana llevan a sus
-            equipos a la cancha. Estos son los establecimientos que forman parte de
-            la Liga y que, fin de semana a fin de semana, hacen posible la
-            competencia.
+            Cada temporada, colegios de distintos lugares se reúnen en torno a una misma pasión: 
+            el voleibol. Cada equipo, cada profesor, cada estudiante 
+            y cada familia es parte de esta comunidad que, fin de semana a 
+            fin de semana, llena las canchas de encuentros, aprendizajes, esfuerzo 
+            y momentos que quedan en la memoria.
+        </p>
+        <p>    
+            Porque la LMVE no es solo una competencia: es una 
+            comunidad que crece, comparte y disfruta del voleibol.
         </p>
     </div>
 
@@ -419,11 +424,11 @@
     {% endcomment %}
     <div class="carrusel">
         <div class="carrusel-pista">
-            {% for i in "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" %}
-            <div class="logo-plate"><img src="{% static 'core/img/colegios/' %}{{ forloop.counter }}.png" alt="Colegio participante de la Liga"></div>
+            {% for colegio in colegios %}
+            <div class="logo-plate"><img src="{% static colegio.src %}" alt="{{ colegio.alt }}"></div>
             {% endfor %}
-            {% for i in "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" %}
-            <div class="logo-plate copia"><img src="{% static 'core/img/colegios/' %}{{ forloop.counter }}.png" alt=""></div>
+            {% for colegio in colegios %}
+            <div class="logo-plate copia"><img src="{% static colegio.src %}" alt="" aria-hidden="true"></div>
             {% endfor %}
         </div>
     </div>
