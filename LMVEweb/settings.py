@@ -246,15 +246,16 @@ if not DEBUG:
 #
 # Estricta: sin 'unsafe-inline'. Cada <style>/<script> inline de las
 # plantillas lleva nonce="{{ request.csp_nonce }}" (django-csp genera uno
-# distinto por request). Dominios externos permitidos explícitamente:
-# - cdnjs.cloudflare.com: three.js (proyecto.html/sobre.html)
+# distinto por request). Dominio externo permitido explícitamente:
 # - www.instagram.com: embed.js + el iframe que inyecta para los posts
 #   embebidos en home.html (script-src para el script, frame-src para el
 #   iframe, connect-src porque el widget pide datos del post por XHR)
+# three.js vive vendorizado en core/static/core/js/vendor/ (ya no hace
+# falta cdnjs.cloudflare.com acá).
 CONTENT_SECURITY_POLICY = {
     'DIRECTIVES': {
         'default-src': [SELF],
-        'script-src': [SELF, NONCE, 'cdnjs.cloudflare.com', 'www.instagram.com'],
+        'script-src': [SELF, NONCE, 'www.instagram.com'],
         'style-src': [SELF, NONCE],
         'img-src': [SELF, 'data:'],
         # Barlow Condensed se sirve desde el propio sitio (core/static/
