@@ -1,0 +1,137 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Staff | LMVE{% endblock %}
+
+{% block content %}
+<style nonce="{{ request.csp_nonce }}">
+    /* =========================================================
+       ENCABEZADO
+       ========================================================= */
+    .staff-hero { background: var(--c-blue-soft); }
+    .staff-hero-inner {
+        max-width: var(--page-max);
+        margin: 0 auto;
+        padding: 64px var(--page-pad) 56px var(--page-pad);
+    }
+    .staff-hero h1 {
+        font-size: clamp(46px, 6.4vw, 84px);
+        font-weight: 800;
+        text-transform: uppercase;
+        line-height: 0.95;
+        letter-spacing: 0.5px;
+        color: #ffffff;
+        margin-bottom: 14px;
+    }
+    .staff-hero p {
+        font-size: 17px;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* =========================================================
+       GRUPOS Y TARJETAS
+       ========================================================= */
+    .staff-grupo { margin-bottom: 56px; }
+    .staff-grupo:last-child { margin-bottom: 0; }
+    .staff-grupo h2 {
+        font-size: clamp(26px, 3.2vw, 38px);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--c-orange);
+        margin-bottom: 24px;
+    }
+    .staff-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+    }
+    /* Con una sola tarjeta, "1fr" la estira a todo el ancho de la
+       fila. Acá se limita su ancho y queda cargada a la izquierda
+       (comportamiento por defecto de grid, sin "1fr" de por medio). */
+    .staff-cards--compacto {
+        grid-template-columns: minmax(220px, 320px);
+    }
+    .staff-card {
+        border: 2px solid var(--c-orange);
+        border-radius: 8px;
+        padding: 20px 22px;
+        background: var(--c-surface);
+        transition: background 0.25s ease, transform 0.15s ease;
+    }
+    .staff-card:hover { background: rgba(var(--c-orange-rgb), 0.12); transform: translateY(-2px); }
+    .staff-card-rol {
+        display: block;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.4px;
+        color: var(--c-amber);
+        margin-bottom: 8px;
+    }
+    .staff-card-nombre {
+        font-size: 19px;
+        font-weight: 700;
+        line-height: 1.35;
+        color: #ffffff;
+        font-family: var(--font-body);
+    }
+</style>
+
+<!-- ENCABEZADO -->
+<section class="staff-hero">
+    <div class="staff-hero-inner">
+        <h1>Staff</h1>
+        <p>Miembros de la Liga Metropolitana de Voleibol Escolar.</p>
+    </div>
+</section>
+
+<!-- GRUPOS -->
+<section class="page-wrap">
+    <div class="staff-grupo">
+        <h2>Directiva</h2>
+        <div class="staff-cards">
+            <div class="staff-card">
+                <span class="staff-card-rol">Presidente</span>
+                <span class="staff-card-nombre">Mario Busch Daza</span>
+            </div>
+            <div class="staff-card">
+                <span class="staff-card-rol">Secretaria</span>
+                <span class="staff-card-nombre">Camila Busch Moreno</span>
+            </div>
+            <div class="staff-card">
+                <span class="staff-card-rol">Tesorero</span>
+                <span class="staff-card-nombre">Cristian Adriazola Carvajal</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="staff-grupo">
+        <h2>Coordinación</h2>
+        <div class="staff-cards">
+            <div class="staff-card">
+                <span class="staff-card-rol">Coordinador de Varones</span>
+                <span class="staff-card-nombre">Juan Carlos Mendoza García</span>
+            </div>
+            <div class="staff-card">
+                <span class="staff-card-rol">Coordinador Damas</span>
+                <span class="staff-card-nombre">Cristian Adriazola Carvajal</span>
+            </div>
+            <div class="staff-card">
+                <span class="staff-card-rol">Coordinador Arbitral</span>
+                <span class="staff-card-nombre">Marco Quiroz Salinas</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="staff-grupo">
+        <h2>Redes Sociales</h2>
+        <div class="staff-cards staff-cards--compacto">
+            <div class="staff-card">
+                <span class="staff-card-rol">Creador de Contenido</span>
+                <span class="staff-card-nombre">Gary Navarrete Saldivia</span>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -5,7 +5,7 @@ from .models import MensajePatrocinio
 
 @admin.register(MensajePatrocinio)
 class MensajePatrocinioAdmin(admin.ModelAdmin):
-    list_display = ('empresa', 'contacto', 'email', 'interes', 'creado')
-    list_filter = ('interes', 'creado')
-    search_fields = ('empresa', 'contacto', 'email')
+    list_display = ('nombre', 'institucion', 'email', 'creado')
+    list_filter = ('creado',)
+    search_fields = ('nombre', 'institucion', 'email')
     readonly_fields = ('creado',)

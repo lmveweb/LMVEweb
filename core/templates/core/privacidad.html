@@ -1,0 +1,224 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Política de Privacidad | LMVE{% endblock %}
+
+{% block content %}
+<style nonce="{{ request.csp_nonce }}">
+    /* =========================================================
+       ENCABEZADO
+       ========================================================= */
+    .privacidad-hero { background: var(--c-blue-soft); }
+    .privacidad-hero-inner {
+        max-width: var(--page-max);
+        margin: 0 auto;
+        padding: 64px var(--page-pad) 48px var(--page-pad);
+    }
+    .privacidad-hero h1 {
+        font-size: clamp(40px, 5.4vw, 64px);
+        font-weight: 800;
+        text-transform: uppercase;
+        line-height: 0.98;
+        letter-spacing: 0.5px;
+        color: #ffffff;
+        margin-bottom: 14px;
+    }
+    .privacidad-hero p {
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    /* =========================================================
+       CONTENIDO
+       ========================================================= */
+    .privacidad-body {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 64px var(--page-pad) 96px var(--page-pad);
+    }
+    .privacidad-body section { margin-bottom: 40px; }
+    .privacidad-body section:last-child { margin-bottom: 0; }
+    .privacidad-body h2 {
+        font-size: clamp(21px, 2.6vw, 26px);
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        color: var(--c-amber);
+        margin-bottom: 14px;
+    }
+    .privacidad-body p {
+        font-size: 16px;
+        line-height: 1.8;
+        color: var(--c-text-soft);
+        margin-bottom: 14px;
+    }
+    .privacidad-body p:last-child { margin-bottom: 0; }
+    .privacidad-body ul {
+        margin: 0 0 14px 0;
+        padding-left: 22px;
+        font-size: 16px;
+        line-height: 1.8;
+        color: var(--c-text-soft);
+    }
+    .privacidad-body ul:last-child { margin-bottom: 0; }
+    .privacidad-body li { margin-bottom: 6px; }
+    .privacidad-body strong { color: #ffffff; }
+    .privacidad-body a { color: var(--c-amber); }
+    .privacidad-body a:hover { text-decoration: none; }
+</style>
+
+<!-- ENCABEZADO -->
+<section class="privacidad-hero">
+    <div class="privacidad-hero-inner">
+        <h1>Política de Privacidad y Uso</h1>
+        <p>Última actualización: agosto de 2026.</p>
+    </div>
+</section>
+
+<!-- CONTENIDO -->
+<div class="privacidad-body">
+    <section>
+        <p>
+            La Liga Metropolitana de Voleibol Escolar (LMVE), operada por la
+            Fundación para el Desarrollo del Deporte Escolar, respeta la
+            privacidad de quienes visitan este sitio y de quienes se contactan
+            con nosotros a través de él. Este documento explica qué información
+            recopilamos, para qué la usamos y qué derechos tienes sobre ella.
+        </p>
+        <p>
+            Al marcar la casilla de aceptación en el formulario de Contacto,
+            confirmas que leíste y aceptas esta política.
+        </p>
+    </section>
+
+    <section>
+        <h2>Qué datos recopilamos</h2>
+        <p>
+            El único formulario del sitio es el de <strong>Contacto</strong>. Al
+            enviarlo, recopilamos exactamente los datos que ingresas en él:
+        </p>
+        <ul>
+            <li><strong>Nombre y apellido</strong> (obligatorio)</li>
+            <li><strong>Institución</strong> (opcional)</li>
+            <li><strong>Correo electrónico</strong> (obligatorio)</li>
+            <li><strong>Mensaje</strong> (obligatorio)</li>
+        </ul>
+        <p>
+            No recopilamos datos de navegación con fines publicitarios, no
+            usamos herramientas de analítica ni de rastreo, y el sitio no tiene
+            sistema de registro de usuarios ni perfiles públicos.
+        </p>
+    </section>
+
+    <section>
+        <h2>Para qué usamos tus datos</h2>
+        <p>
+            Usamos la información del formulario únicamente para responder tu
+            consulta o propuesta: evaluar solicitudes de auspicio, coordinar
+            alianzas institucionales, o contestar preguntas generales sobre la
+            Liga. No usamos tus datos para enviarte publicidad ni los
+            utilizamos con fines distintos a los que motivaron tu contacto.
+        </p>
+    </section>
+
+    <section>
+        <h2>Dónde se almacenan y quién accede</h2>
+        <p>
+            Los mensajes quedan guardados en la base de datos del sitio, con
+            acceso restringido a los administradores de la Liga a cargo del
+            panel de gestión. Además, se envía una copia por correo electrónico
+            a la casilla de contacto institucional para dar seguimiento a tu
+            solicitud.
+        </p>
+        <p>
+            No vendemos, arrendamos ni compartimos tus datos con terceros con
+            fines comerciales. Solo los compartiríamos si una autoridad
+            competente nos lo requiriera conforme a la ley.
+        </p>
+    </section>
+
+    <section>
+        <h2>Cuánto tiempo los conservamos</h2>
+        <p>
+            Conservamos los mensajes mientras sean necesarios para dar
+            seguimiento a tu consulta o mientras exista una relación vigente
+            con tu institución. Puedes solicitar la eliminación de tus datos en
+            cualquier momento; ver "Tus derechos" más abajo.
+        </p>
+    </section>
+
+    <section>
+        <h2>Tus derechos</h2>
+        <p>
+            Conforme a la normativa chilena de protección de datos personales
+            (Ley N.º 19.628 y sus modificaciones), puedes solicitarnos en
+            cualquier momento:
+        </p>
+        <ul>
+            <li><strong>Acceso:</strong> saber qué datos tuyos tenemos.</li>
+            <li><strong>Rectificación:</strong> corregir datos inexactos o desactualizados.</li>
+            <li><strong>Cancelación:</strong> eliminar tus datos de nuestros registros.</li>
+            <li><strong>Oposición:</strong> oponerte a un uso específico de tus datos.</li>
+        </ul>
+        <p>
+            Para ejercer cualquiera de estos derechos, escríbenos a
+            <a href="mailto:contacto@lmve.cl">contacto@lmve.cl</a>.
+        </p>
+    </section>
+
+    <section>
+        <h2>Menores de edad</h2>
+        <p>
+            El formulario de Contacto está pensado para adultos —
+            representantes de instituciones, apoderados, marcas y medios—, no
+            para que lo completen niños, niñas o adolescentes. Si eres el
+            padre, madre o tutor de un deportista de la Liga y quieres
+            consultarnos algo sobre datos relacionados a un menor a tu cargo,
+            contáctanos directamente a
+            <a href="mailto:contacto@lmve.cl">contacto@lmve.cl</a>.
+        </p>
+    </section>
+
+    <section>
+        <h2>Contenido de terceros e Instagram</h2>
+        <p>
+            La página de Inicio muestra publicaciones embebidas directamente
+            desde Instagram. Al cargarse, ese contenido puede establecer sus
+            propias cookies o recopilar datos de navegación conforme a la
+            política de privacidad de Meta/Instagram, ajena a este sitio y
+            fuera de nuestro control. Fuera de eso, este sitio no utiliza
+            cookies de rastreo ni de publicidad — solo las técnicas
+            indispensables para que el sitio funcione (sesión y protección
+            contra envíos fraudulentos del formulario).
+        </p>
+    </section>
+
+    <section>
+        <h2>Seguridad</h2>
+        <p>
+            El sitio se sirve exclusivamente por HTTPS y aplica medidas
+            razonables para proteger la información que nos envías. Ningún
+            sistema es 100% infalible, pero tomamos precauciones acordes al
+            volumen y sensibilidad de los datos que manejamos.
+        </p>
+    </section>
+
+    <section>
+        <h2>Cambios a esta política</h2>
+        <p>
+            Podemos actualizar este documento si cambia la forma en que
+            recopilamos o usamos datos. La fecha de la última actualización
+            siempre aparece al inicio de esta página.
+        </p>
+    </section>
+
+    <section>
+        <h2>Contacto</h2>
+        <p>
+            Si tienes dudas sobre esta política o sobre el tratamiento de tus
+            datos, escríbenos a
+            <a href="mailto:contacto@lmve.cl">contacto@lmve.cl</a> o a través
+            de nuestro <a href="https://www.instagram.com/ligametropolitanavoley/" target="_blank" rel="noopener">Instagram</a>.
+        </p>
+    </section>
+</div>
+{% endblock %}

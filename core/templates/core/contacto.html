@@ -108,8 +108,13 @@
     /* La paleta no tiene rojo: el obligatorio se marca en naranja, que
        cumple el mismo papel de atención dentro del sistema. */
     .required-mark { color: var(--c-orange); }
+    .optional-mark {
+        color: rgba(255, 255, 255, 0.6);
+        font-weight: 500;
+        text-transform: none;
+    }
 
-    .field-input, .field-select, .field-textarea {
+    .field-input, .field-textarea {
         width: 100%;
         background: #ffffff;
         border: 2px solid var(--c-orange);
@@ -122,11 +127,34 @@
         outline: none;
     }
     .field-textarea { resize: vertical; min-height: 130px; }
-    .field-input:focus, .field-select:focus, .field-textarea:focus {
+    .field-input:focus, .field-textarea:focus {
         box-shadow: 0 0 0 3px rgba(var(--c-amber-rgb), 0.55);
     }
+
+    .form-group-checkbox { margin-top: 4px; }
+    .field-checkbox-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.9);
+    }
+    .field-checkbox {
+        flex-shrink: 0;
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        accent-color: var(--c-orange);
+        cursor: pointer;
+    }
+    .field-checkbox-label a {
+        color: var(--c-amber);
+        text-decoration: underline;
+    }
+    .field-checkbox-label a:hover { color: #ffffff; }
     .field-input::placeholder, .field-textarea::placeholder { color: #8a8a8a; }
-    .field-select option { background: #ffffff; color: #1a1a1a; }
 
     /* Botón de envío y sus estados */
     .submit-btn {
@@ -213,7 +241,7 @@
 </style>
 
 <section class="contacto-seccion">
-    <img class="contacto-fondo" src="{% static 'core/img/fotos/galeria-2.jpg' %}"
+    <img class="contacto-fondo" src="{% static 'core/img/fotos/galeria-11.jpg' %}"
          alt="" aria-hidden="true">
     <div class="contacto-lavado"></div>
     <div class="contacto-desvanecido" aria-hidden="true"></div>
@@ -242,13 +270,13 @@
             <form action="{% url 'contacto' %}" method="POST" id="contactForm">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label class="field-label">Empresa o Marca <span class="required-mark">*</span></label>
-                    <input type="text" name="empresa" class="field-input" placeholder="Ingresa el nombre de tu empresa" required>
+                    <label class="field-label">Nombre y Apellido <span class="required-mark">*</span></label>
+                    <input type="text" name="nombre" class="field-input" placeholder="Ingresa tu nombre y apellido" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="field-label">Nombre y Cargo <span class="required-mark">*</span></label>
-                    <input type="text" name="contacto" class="field-input" placeholder="Ingresa tu nombre" required>
+                    <label class="field-label">Institución <span class="optional-mark">(opcional)</span></label>
+                    <input type="text" name="institucion" class="field-input" placeholder="Ingresa el nombre de tu institución">
                 </div>
 
                 <div class="form-group">
@@ -257,19 +285,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="field-label">Nivel de Interés <span class="required-mark">*</span></label>
-                    <select name="interes" class="field-select" required>
-                        <option value="" disabled selected>Selecciona una opción...</option>
-                        <option value="naming">Main Sponsor (Naming Rights)</option>
-                        <option value="apparel">Indumentaria y Equipamiento</option>
-                        <option value="digital">Digital &amp; Streaming Partner</option>
-                        <option value="other">Activaciones en recinto</option>
-                    </select>
+                    <label class="field-label">Mensaje <span class="required-mark">*</span></label>
+                    <textarea name="mensaje" class="field-textarea" placeholder="Mensaje" required></textarea>
                 </div>
 
-                <div class="form-group">
-                    <label class="field-label">Mensaje</label>
-                    <textarea name="mensaje" class="field-textarea" placeholder="Mensaje"></textarea>
+                <div class="form-group form-group-checkbox">
+                    <label class="field-checkbox-label">
+                        <input type="checkbox" name="acepta_politica" class="field-checkbox" required>
+                        <span>
+                            He leído y acepto la
+                            <a href="{% url 'privacidad' %}" target="_blank" rel="noopener">Política de Privacidad y Uso</a>
+                            <span class="required-mark">*</span>
+                        </span>
+                    </label>
                 </div>
 
                 <button type="submit" class="submit-btn" id="contactSubmitBtn">

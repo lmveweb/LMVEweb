@@ -1,18 +1,18 @@
 from django.core import mail
 from django.core.cache import cache
 from django.test import TestCase
-from django.urls import reverse
+from django.urls import NoReverseMatch, reverse
 
 from .models import MensajePatrocinio
 
 
 def datos_validos(**overrides):
     datos = {
-        'empresa': 'Acme SpA',
-        'contacto': 'Juana Pérez',
+        'nombre': 'Juana Pérez',
+        'institucion': 'Colegio Acme',
         'email': 'juana@acme.cl',
-        'interes': 'naming',
         'mensaje': 'Nos interesa auspiciar la temporada 2026.',
+        'acepta_politica': 'on',
     }
     datos.update(overrides)
     return datos
@@ -25,7 +25,7 @@ class ContactoTests(TestCase):
         cache.clear()
 
     def test_falta_campo_obligatorio(self):
-        respuesta = self.client.post(reverse('contacto'), datos_validos(empresa=''))
+        respuesta = self.client.post(reverse('contacto'), datos_validos(nombre=''))
         self.assertEqual(respuesta.status_code, 400)
         self.assertFalse(respuesta.json()['ok'])
         self.assertEqual(MensajePatrocinio.objects.count(), 0)
@@ -36,18 +36,30 @@ class ContactoTests(TestCase):
         self.assertFalse(respuesta.json()['ok'])
         self.assertEqual(MensajePatrocinio.objects.count(), 0)
 
-    def test_interes_invalido(self):
-        respuesta = self.client.post(reverse('contacto'), datos_validos(interes='no-existe'))
+    def test_falta_mensaje(self):
+        respuesta = self.client.post(reverse('contacto'), datos_validos(mensaje=''))
         self.assertEqual(respuesta.status_code, 400)
         self.assertFalse(respuesta.json()['ok'])
         self.assertEqual(MensajePatrocinio.objects.count(), 0)
 
     def test_campo_excede_el_maximo_de_caracteres(self):
-        empresa_muy_larga = 'A' * 201  # el modelo permite hasta 200
-        respuesta = self.client.post(reverse('contacto'), datos_validos(empresa=empresa_muy_larga))
+        nombre_muy_largo = 'A' * 201  # el modelo permite hasta 200
+        respuesta = self.client.post(reverse('contacto'), datos_validos(nombre=nombre_muy_largo))
         self.assertEqual(respuesta.status_code, 400)
         self.assertFalse(respuesta.json()['ok'])
         self.assertEqual(MensajePatrocinio.objects.count(), 0)
+
+    def test_falta_aceptar_politica(self):
+        respuesta = self.client.post(reverse('contacto'), datos_validos(acepta_politica=''))
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertFalse(respuesta.json()['ok'])
+        self.assertEqual(MensajePatrocinio.objects.count(), 0)
+
+    def test_institucion_es_opcional(self):
+        respuesta = self.client.post(reverse('contacto'), datos_validos(institucion=''))
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertTrue(respuesta.json()['ok'])
+        self.assertEqual(MensajePatrocinio.objects.count(), 1)
 
     def test_envio_exitoso(self):
         respuesta = self.client.post(reverse('contacto'), datos_validos())
@@ -56,10 +68,23 @@ class ContactoTests(TestCase):
 
         self.assertEqual(MensajePatrocinio.objects.count(), 1)
         mensaje = MensajePatrocinio.objects.get()
-        self.assertEqual(mensaje.empresa, 'Acme SpA')
+        self.assertEqual(mensaje.nombre, 'Juana Pérez')
+        self.assertEqual(mensaje.institucion, 'Colegio Acme')
         self.assertEqual(mensaje.email, 'juana@acme.cl')
 
         # Sin CONTACTO_DESTINATARIO configurado en el entorno de test, no
         # se intenta mandar correo (y el guardado del mensaje no depende
         # de que el envío funcione).
         self.assertEqual(len(mail.outbox), 0)
+
+
+class RutasTests(TestCase):
+    def test_staff_disponible(self):
+        self.assertEqual(self.client.get(reverse('staff')).status_code, 200)
+
+    def test_privacidad_disponible(self):
+        self.assertEqual(self.client.get(reverse('privacidad')).status_code, 200)
+
+    def test_impacto_ya_no_existe(self):
+        with self.assertRaises(NoReverseMatch):
+            reverse('impacto')
