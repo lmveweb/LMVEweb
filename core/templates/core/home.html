@@ -152,17 +152,17 @@
         align-items: start;
         margin-top: 30px;
     }
-    /* Cada publicación trae su propio alto (según la foto y si el
-       widget de Instagram terminó de cargar el encabezado con avatar).
-       Antes se forzaba un alto fijo recortando el sobrante por arriba,
-       pero eso a veces cortaba justo el encabezado de la publicación
-       más alta, dejándola con una pinta distinta a las otras dos — el
-       "bug" reportado. Mejor dejar que cada tarjeta crezca a su alto
-       natural: nunca se esconde contenido, y las tres siempre se ven
-       completas y consistentes entre sí, aunque el borde inferior no
-       quede perfectamente a la misma altura.
-    */
+    /* embed.js de Instagram intenta reajustarse el alto a sí mismo con
+       un estilo inline, y la CSP estricta del sitio (sin
+       'unsafe-inline') se lo bloquea a propósito — no vamos a aflojar
+       la CSP solo por esto. El resultado es que el ajuste automático
+       de alto de Instagram no es confiable: unas publicaciones quedan
+       más altas que otras y desalinean la fila. Por eso, en vez de
+       dejar que cada tarjeta crezca "a su alto natural", se les pone
+       un tope parejo con overflow:hidden — se ven las tres consistentes
+       aunque alguna publicación puntual quede con el pie recortado. */
     .ig-card {
+        max-height: 620px;
         border-radius: 10px;
         overflow: hidden;
         background: #ffffff;
