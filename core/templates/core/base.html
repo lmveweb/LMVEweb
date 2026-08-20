@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}LMVE | Liga Metropolitana de Voleibol Escolar{% endblock %}</title>
 
+    <link rel="icon" href="{% static 'core/favicon.ico' %}" sizes="any">
+    <link rel="icon" type="image/png" href="{% static 'core/favicon-32.png' %}" sizes="32x32">
+    <link rel="icon" type="image/png" href="{% static 'core/favicon-16.png' %}" sizes="16x16">
+    <link rel="apple-touch-icon" href="{% static 'core/apple-touch-icon.png' %}">
+
     {% block head_extra %}{% endblock %}
 
     <style nonce="{{ request.csp_nonce }}">
