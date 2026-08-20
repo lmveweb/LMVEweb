@@ -1,6 +1,6 @@
 from django.core import mail
 from django.core.cache import cache
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import NoReverseMatch, reverse
 
 from .models import MensajePatrocinio
@@ -61,6 +61,7 @@ class ContactoTests(TestCase):
         self.assertTrue(respuesta.json()['ok'])
         self.assertEqual(MensajePatrocinio.objects.count(), 1)
 
+    @override_settings(CONTACTO_DESTINATARIO='')
     def test_envio_exitoso(self):
         respuesta = self.client.post(reverse('contacto'), datos_validos())
         self.assertEqual(respuesta.status_code, 200)
@@ -72,10 +73,23 @@ class ContactoTests(TestCase):
         self.assertEqual(mensaje.institucion, 'Colegio Acme')
         self.assertEqual(mensaje.email, 'juana@acme.cl')
 
-        # Sin CONTACTO_DESTINATARIO configurado en el entorno de test, no
-        # se intenta mandar correo (y el guardado del mensaje no depende
-        # de que el envío funcione).
+        # Sin CONTACTO_DESTINATARIO configurado, no se intenta mandar
+        # correo (y el guardado del mensaje no depende de que el envío
+        # funcione). Se fuerza explícito con override_settings en vez de
+        # confiar en que el .env local no lo tenga configurado.
         self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(CONTACTO_DESTINATARIO='destino@lmve.cl')
+    def test_envio_exitoso_manda_correo_de_aviso(self):
+        respuesta = self.client.post(reverse('contacto'), datos_validos())
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertTrue(respuesta.json()['ok'])
+
+        self.assertEqual(len(mail.outbox), 1)
+        correo = mail.outbox[0]
+        self.assertEqual(correo.to, ['destino@lmve.cl'])
+        self.assertIn('Juana Pérez', correo.subject)
+        self.assertIn('Colegio Acme', correo.body)
 
 
 class RutasTests(TestCase):
