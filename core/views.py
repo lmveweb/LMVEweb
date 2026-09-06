@@ -82,8 +82,8 @@ def home(request):
 def proyecto(request):
     return render(request, 'core/proyecto.html')
 
-def staff(request):
-    return render(request, 'core/staff.html')
+def equipo(request):
+    return render(request, 'core/equipo.html')
 
 def privacidad(request):
     return render(request, 'core/privacidad.html')

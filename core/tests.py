@@ -93,8 +93,8 @@ class ContactoTests(TestCase):
 
 
 class RutasTests(TestCase):
-    def test_staff_disponible(self):
-        self.assertEqual(self.client.get(reverse('staff')).status_code, 200)
+    def test_equipo_disponible(self):
+        self.assertEqual(self.client.get(reverse('equipo')).status_code, 200)
 
     def test_privacidad_disponible(self):
         self.assertEqual(self.client.get(reverse('privacidad')).status_code, 200)

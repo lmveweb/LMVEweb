@@ -217,12 +217,17 @@
            fuente normal al mismo tamaño en píxeles. Sube el tamaño y
            el peso, y suma tracking (una condensada muy junta se lee
            apretada) para que sostenga el mismo peso visual que el nav. */
+        /* Los dos <span> de adentro van en una sola linea mientras haya
+           ancho: al ser inline, el salto del HTML entre ellos colapsa a
+           un espacio y se lee "Liga Metropolitana de Voleibol Escolar"
+           de corrido. Abajo de 1140px pasan a apilarse (ver RESPONSIVE). */
         .brand-nombre {
             font-size: 19px;
             font-weight: 800;
             letter-spacing: 0.3px;
             line-height: 1.25;
             color: var(--c-text);
+            text-decoration: none;
             white-space: nowrap;
         }
 
@@ -606,12 +611,66 @@
            RESPONSIVE
            ========================================================= */
         @media (max-width: 1140px) {
-            .brand-nombre { display: none; }
+            /* Antes aca el nombre se escondia con display:none, porque en
+               una sola linea de 19px ocupa ~300px y ya no cabia junto al
+               nav. En vez de perderlo se apila en sus dos mitades: baja a
+               ~120px de ancho, sostiene el alto del logo y queda como un
+               lockup deliberado en lugar de un texto que se corto solo.
+               El white-space: nowrap heredado mantiene entera cada linea,
+               asi el quiebre es siempre el mismo y no uno accidental. */
+            .brand-nombre {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                font-size: 17px;
+                /* Baja de 800 a 700 a proposito. En una condensada, el 800
+                   engorda los trazos hacia adentro y a 15-17px los contra-
+                   formas (el hueco de la "a", de la "e") se cierran y las
+                   letras se empastan. El 700 mantiene el peso de titular
+                   pero deja respirar la forma; el tracking mas suelto
+                   termina de separarlas. */
+                font-weight: 700;
+                line-height: 1.2;
+                letter-spacing: 0.6px;
+            }
+            /* Mas aire contra el logo: ahora es un bloque de dos lineas, no
+               una linea corrida, y necesita mas separacion para leerse como
+               un elemento aparte y no como parte del isotipo. Al ser
+               hermanos, quien manda la distancia es el gap del header. */
+            .header-inner { gap: 20px; }
             .site-nav a { padding: 4px 12px; font-size: 14px; }
         }
         @media (max-width: 940px) {
             :root { --header-h: 82px; --page-pad: 20px; }
             .brand-plate img { height: 52px; }
+            /* Con el menu hamburguesa en pantalla el header queda en tres
+               partes: logo a la izquierda, nombre al medio, hamburguesa a
+               la derecha.
+
+               El centrado lo hace "margin: 0 auto" sobre el nombre: en un
+               contenedor flex, los margenes automaticos se comen TODO el
+               espacio libre y lo reparten en partes iguales a cada lado.
+               O sea, los dos huecos (logo-nombre y nombre-hamburguesa)
+               crecen y se achican solos y siempre miden lo mismo, sin
+               media queries intermedias ni numeros fijos por dispositivo.
+
+               Para que el reparto sea parejo de verdad, el gap del header
+               baja a 0 (si no, el hueco de la derecha quedaria un gap mas
+               ancho que el de la izquierda) y el spacer sale de la ecuacion,
+               porque tambien reclamaba espacio libre. El padding lateral es
+               el piso: aunque la pantalla se angoste hasta no dejar sobra,
+               nunca quedan pegados.
+
+               Medido: a 320px sobran ~26px de margen automatico por lado
+               (34px de hueco visible); a 768px, ~234px. */
+            .brand-nombre {
+                font-size: clamp(13px, 3.8vw, 17px);
+                margin: 0 auto;
+                padding: 0 8px;
+            }
+            .header-spacer { display: none; }
+            .header-inner { gap: 0; }
             .site-nav { display: none; }
             .header-inner .btn-cta { display: none; }
             .menu-toggle { display: flex; }
@@ -631,7 +690,24 @@
                     <img src="{% static 'core/img/logo-sobre-oscuro.png' %}"
                          alt="LMVE — Liga Metropolitana de Voleibol Escolar">
                 </span>
-                <span class="brand-nombre">Liga Metropolitana de Voleibol Escolar</span>
+            </a>
+
+            {% comment %}
+            El nombre es hermano del logo, no hijo. Abajo de 940px tiene que
+            poder despegarse del logo y centrarse entre este y la hamburguesa,
+            y para eso los tres necesitan ser items del mismo contenedor flex
+            (.header-inner). Mientras vivio adentro del <a>, el nombre quedaba
+            amarrado al logo y no habia forma de separarlos.
+
+            Sigue siendo un link al Inicio, como antes. Va con aria-hidden y
+            tabindex="-1" porque el alt del logo ya dice el nombre completo:
+            asi el lector de pantalla no lo repite dos veces, pero con el
+            mouse o el dedo se comporta igual que siempre.
+            {% endcomment %}
+            <a href="{% url 'home' %}" class="brand-nombre"
+               aria-hidden="true" tabindex="-1">
+                <span>Liga Metropolitana</span>
+                <span>de Voleibol Escolar</span>
             </a>
 
             <div class="header-spacer"></div>
@@ -642,7 +718,7 @@
                     <li><a href="{% url 'proyecto' %}">Historia</a></li>
                     <li><a href="{% url 'sobre' %}">Sobre la LMVE</a></li>
                     <li><a href="{% url 'archivo' %}">Multimedia</a></li>
-                    <li><a href="{% url 'staff' %}">Staff</a></li>
+                    <li><a href="{% url 'equipo' %}">Equipo</a></li>
                 </ul>
             </nav>
 
@@ -659,7 +735,7 @@
         <a href="{% url 'home' %}">Inicio</a>
         <a href="{% url 'proyecto' %}">Historia</a>
         <a href="{% url 'sobre' %}">Sobre la LMVE</a>
-        <a href="{% url 'staff' %}">Staff</a>
+        <a href="{% url 'equipo' %}">Equipo</a>
         <a href="{% url 'archivo' %}">Multimedia</a>
         <span class="mobile-lema">"Educar a Través del Deporte"</span>
         <a href="{% url 'contacto' %}" class="mobile-cta">Contacto</a>
@@ -698,7 +774,7 @@
                     <li><a href="{% url 'home' %}">Inicio</a></li>
                     <li><a href="{% url 'proyecto' %}">Historia</a></li>
                     <li><a href="{% url 'sobre' %}">Sobre la LMVE</a></li>
-                    <li><a href="{% url 'staff' %}">Staff</a></li>
+                    <li><a href="{% url 'equipo' %}">Equipo</a></li>
                     <li><a href="{% url 'archivo' %}">Multimedia</a></li>
                     <li><a href="{% url 'contacto' %}">Contacto</a></li>
                 </ul>
