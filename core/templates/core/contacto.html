@@ -227,6 +227,18 @@
     }
     .form-error-msg.is-visible { display: block; }
 
+    /* Honeypot: invisible para una persona (fuera de la pantalla, no
+       display:none/visibility:hidden, que algunos bots sí chequean antes
+       de rellenar) pero presente en el DOM para que un bot genérico, que
+       rellena todo campo de <form> que encuentra, caiga en la trampa. */
+    .hp-field {
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+    }
+
+    .cf-turnstile { margin-top: 16px; }
+
     /* =========================================================
        RESPONSIVE
        ========================================================= */
@@ -269,6 +281,15 @@
 
             <form action="{% url 'contacto' %}" method="POST" id="contactForm">
                 {% csrf_token %}
+                <input type="hidden" name="marca_tiempo" value="{{ marca_tiempo }}">
+
+                <!-- Honeypot: campo trampa para bots, invisible para personas (ver .hp-field). -->
+                <div class="hp-field" aria-hidden="true">
+                    <label for="id_telefono_contacto">Dejar en blanco</label>
+                    <input type="text" id="id_telefono_contacto" name="telefono_contacto"
+                           tabindex="-1" autocomplete="off">
+                </div>
+
                 <div class="form-group">
                     <label class="field-label">Nombre y Apellido <span class="required-mark">*</span></label>
                     <input type="text" name="nombre" class="field-input" placeholder="Ingresa tu nombre y apellido" required>
@@ -300,6 +321,10 @@
                     </label>
                 </div>
 
+                {% if turnstile_site_key %}
+                <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" data-theme="dark"></div>
+                {% endif %}
+
                 <button type="submit" class="submit-btn" id="contactSubmitBtn">
                     <span class="submit-btn-label" id="contactSubmitLabel">Enviar</span>
                     <span class="submit-btn-spinner"></span>
@@ -312,6 +337,12 @@
 {% endblock %}
 
 {% block scripts %}
+{% if turnstile_site_key %}
+<!-- api.js busca los .cf-turnstile del DOM y los renderiza solo, sin
+     llamada explícita. El script en sí no necesita nonce porque no
+     ejecuta código inline: solo inserta el iframe del desafío. -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endif %}
 <script nonce="{{ request.csp_nonce }}">
     // Envía el formulario a la vista de Django por fetch() (sin recargar
     // la página) y solo muestra el éxito cuando el servidor confirmó que

@@ -36,6 +36,7 @@ El formulario de Contacto guarda cada propuesta de patrocinio en base de datos *
 - **Estáticos:** WhiteNoise (con hash de contenido para cache-busting)
 - **Base de datos:** SQLite en desarrollo · PostgreSQL en producción
 - **Seguridad:** Content-Security-Policy con nonces, HSTS, rate limiting (`django-ratelimit`)
+- **Anti-spam en Contacto:** honeypot + chequeo de tiempo de envío (siempre activos) + Cloudflare Turnstile (opcional, activa solo con `TURNSTILE_SECRET_KEY`)
 - **Correo:** SMTP (Gmail + contraseña de aplicación), con fallback a consola en local
 - **Monitoreo:** Sentry (opcional, activa solo con `SENTRY_DSN`)
 - **Despliegue objetivo:** Render + PostgreSQL administrado
@@ -83,6 +84,7 @@ python manage.py test
 | `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | Gmail + contraseña de aplicación | No — sin esto, el correo solo se imprime en consola |
 | `CONTACTO_DESTINATARIO` | A qué correo llega cada propuesta de auspicio | No |
 | `SENTRY_DSN` | Activa el monitoreo de errores | No |
+| `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | Verificación anti-spam (Cloudflare Turnstile) en Contacto | No — sin esto, esa capa no corre (quedan igual el honeypot y el chequeo de tiempo) |
 
 </details>
 

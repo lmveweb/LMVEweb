@@ -8,6 +8,12 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django_ratelimit.decorators import ratelimit
 
+from .antispam import (
+    HONEYPOT_FIELD,
+    es_envio_humano_por_tiempo,
+    generar_marca_tiempo,
+    verificar_turnstile,
+)
 from .models import MensajePatrocinio
 
 logger = logging.getLogger(__name__)
@@ -136,6 +142,48 @@ def contacto(request):
                 status=429,
             )
 
+        # --- Capas anti-spam, antes de gastar tiempo validando campos ---
+        #
+        # Honeypot y tiempo: a un bot que las dispara se le finge un éxito
+        # (200 "ok") en vez de un error. Un error le confirmaría que hay
+        # algo que evadir y lo empujaría a intentarlo de nuevo distinto;
+        # un falso éxito lo deja creyendo que ya funcionó. Ninguna persona
+        # real cae en ninguna de las dos: el campo es invisible y 3
+        # segundos es menos de lo que toma leer el primer campo del
+        # formulario.
+        if request.POST.get(HONEYPOT_FIELD, '').strip():
+            logger.warning('Contacto bloqueado por honeypot (IP %s)', request.META.get('REMOTE_ADDR'))
+            return JsonResponse({'ok': True})
+
+        marca_tiempo = request.POST.get('marca_tiempo', '')
+        segun_tiempo = es_envio_humano_por_tiempo(marca_tiempo)
+        if segun_tiempo is None:
+            # Formulario abierto hace más de una hora (o marca adulterada):
+            # a diferencia de arriba, esto sí le puede pasar a una persona
+            # real que dejó la pestaña abierta, así que se le pide recargar
+            # en vez de tratarla como bot.
+            return JsonResponse(
+                {'ok': False, 'errores': ['El formulario expiró. Recarga la página e intenta de nuevo.']},
+                status=400,
+            )
+        if not segun_tiempo:
+            logger.warning('Contacto bloqueado por envío demasiado rápido (IP %s)', request.META.get('REMOTE_ADDR'))
+            return JsonResponse({'ok': True})
+
+        # Turnstile: a diferencia de las dos capas de arriba, un fallo acá
+        # sí puede tocarle a una persona real (JS bloqueado, extensión de
+        # privacidad, adblocker) y no tiene el mismo valor de "confundir al
+        # bot", así que se le devuelve un error real invitándola a
+        # reintentar. Sin TURNSTILE_SECRET_KEY configurada, esta capa
+        # simplemente no corre (igual que Sentry sin SENTRY_DSN).
+        if settings.TURNSTILE_SECRET_KEY:
+            token_turnstile = request.POST.get('cf-turnstile-response', '')
+            if not verificar_turnstile(token_turnstile, request.META.get('REMOTE_ADDR'), settings.TURNSTILE_SECRET_KEY):
+                return JsonResponse(
+                    {'ok': False, 'errores': ['No pudimos verificar que eres una persona. Recarga la página e intenta de nuevo.']},
+                    status=400,
+                )
+
         nombre = request.POST.get('nombre', '').strip()
         institucion = request.POST.get('institucion', '').strip()
         email = request.POST.get('email', '').strip()
@@ -197,4 +245,7 @@ def contacto(request):
 
         return JsonResponse({'ok': True})
 
-    return render(request, 'core/contacto.html')
+    return render(request, 'core/contacto.html', {
+        'marca_tiempo': generar_marca_tiempo(),
+        'turnstile_site_key': settings.TURNSTILE_SITE_KEY,
+    })

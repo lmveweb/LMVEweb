@@ -141,6 +141,13 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'webmaster@localhost'
 # el mismo que envía (útil si todavía no hay una casilla dedicada).
 CONTACTO_DESTINATARIO = os.environ.get('CONTACTO_DESTINATARIO', EMAIL_HOST_USER)
 
+# Cloudflare Turnstile en el formulario de Contacto (capa anti-spam extra,
+# ver core/antispam.py). Sin TURNSTILE_SECRET_KEY, esta capa simplemente
+# no corre — igual que Sentry sin SENTRY_DSN. La site key es pública (va
+# en el HTML del formulario); la secret key no debe salir del servidor.
+TURNSTILE_SITE_KEY = os.environ.get('TURNSTILE_SITE_KEY', '')
+TURNSTILE_SECRET_KEY = os.environ.get('TURNSTILE_SECRET_KEY', '')
+
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -250,19 +257,23 @@ if not DEBUG:
 # - www.instagram.com: embed.js + el iframe que inyecta para los posts
 #   embebidos en home.html (script-src para el script, frame-src para el
 #   iframe, connect-src porque el widget pide datos del post por XHR)
+# - challenges.cloudflare.com: widget de Turnstile en Contacto (mismo
+#   patrón que Instagram — script propio, iframe del desafío, XHR de
+#   verificación). Los tres permisos son los que exige la documentación
+#   oficial de Turnstile.
 # three.js vive vendorizado en core/static/core/js/vendor/ (ya no hace
 # falta cdnjs.cloudflare.com acá).
 CONTENT_SECURITY_POLICY = {
     'DIRECTIVES': {
         'default-src': [SELF],
-        'script-src': [SELF, NONCE, 'www.instagram.com'],
+        'script-src': [SELF, NONCE, 'www.instagram.com', 'challenges.cloudflare.com'],
         'style-src': [SELF, NONCE],
         'img-src': [SELF, 'data:'],
         # Barlow Condensed se sirve desde el propio sitio (core/static/
         # core/fonts/), no desde un CDN.
         'font-src': [SELF],
-        'connect-src': [SELF, 'www.instagram.com'],
-        'frame-src': ['www.instagram.com'],
+        'connect-src': [SELF, 'www.instagram.com', 'challenges.cloudflare.com'],
+        'frame-src': ['www.instagram.com', 'challenges.cloudflare.com'],
         'base-uri': [SELF],
         'frame-ancestors': [NONE],
     },
