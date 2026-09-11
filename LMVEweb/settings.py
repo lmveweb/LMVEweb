@@ -80,6 +80,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
+    'django.contrib.humanize',  # lo usa otp_email para "hace 30 segundos" en el cooldown
+    'django_otp',
+    'django_otp.plugins.otp_email',
     'django_ratelimit',
     'core',
 ]
@@ -92,6 +95,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Va justo despues de AuthenticationMiddleware, igual que ese: hace lo
+    # mismo con la verificacion 2FA que AuthenticationMiddleware hace con
+    # el login (popula request.user.otp_device / is_verified()).
+    'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -142,6 +149,18 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'webmaster@localhost'
 # A qué correo llega cada envío del formulario de Contacto. Por defecto,
 # el mismo que envía (útil si todavía no hay una casilla dedicada).
 CONTACTO_DESTINATARIO = os.environ.get('CONTACTO_DESTINATARIO', EMAIL_HOST_USER)
+
+# 2FA del admin (django-otp + otp_email, ver core/admin.py). El código
+# sale por el mismo SMTP de arriba: sin EMAIL_HOST_USER/PASSWORD, en local
+# se imprime en consola como cualquier otro correo del proyecto.
+# OTP_EMAIL_SENDER no se define a propósito: al quedar en None, Django usa
+# DEFAULT_FROM_EMAIL (ya definido arriba) como remitente.
+OTP_EMAIL_SUBJECT = 'Código de acceso — Admin LMVE'
+OTP_EMAIL_BODY_TEMPLATE = (
+    'Tu código de acceso al panel de administración de LMVE es:\n\n'
+    '{{ token }}\n\n'
+    'Vence en 5 minutos. Si no intentaste iniciar sesión, ignora este correo.\n'
+)
 
 # Origen canónico del sitio, sin barra final. Todas las URLs absolutas de
 # SEO (canonical, og:url, og:image, sitemap.xml, robots.txt) salen de
