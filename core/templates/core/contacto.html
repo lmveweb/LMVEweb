@@ -1,8 +1,6 @@
 {% extends "core/base.html" %}
 {% load static %}
 
-{% block title %}Contacto | LMVE{% endblock %}
-
 {% block content %}
 <style nonce="{{ request.csp_nonce }}">
     /* =========================================================
@@ -88,7 +86,7 @@
     .ig-enlace:active { transform: scale(0.96); }
 
     /* Columna derecha: formulario */
-    .contacto-form h2 {
+    .contacto-form h1 {
         font-size: clamp(32px, 4vw, 50px);
         font-weight: 800;
         line-height: 1.0;
@@ -277,7 +275,7 @@
         </div>
 
         <div class="contacto-form">
-            <h2>Comunícate con nosotros</h2>
+            <h1>Comunícate con nosotros</h1>
 
             <form action="{% url 'contacto' %}" method="POST" id="contactForm">
                 {% csrf_token %}

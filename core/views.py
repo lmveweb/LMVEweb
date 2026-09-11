@@ -4,8 +4,10 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import validate_email
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.views.decorators.cache import cache_control
+from django.views.decorators.http import require_GET
 from django_ratelimit.decorators import ratelimit
 
 from .antispam import (
@@ -15,6 +17,7 @@ from .antispam import (
     verificar_turnstile,
 )
 from .models import MensajePatrocinio
+from .seo import jsonld_home
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +86,19 @@ COLEGIOS = [
 
 
 def home(request):
-    return render(request, 'core/home.html', {'colegios': COLEGIOS})
+    return render(request, 'core/home.html', {'colegios': COLEGIOS, 'jsonld': jsonld_home()})
+
+
+@require_GET
+@cache_control(max_age=60 * 60 * 24, public=True)
+def robots_txt(request):
+    lineas = [
+        'User-agent: *',
+        'Allow: /',
+        '',
+        f'Sitemap: {settings.SITE_URL}/sitemap.xml',
+    ]
+    return HttpResponse('\n'.join(lineas) + '\n', content_type='text/plain; charset=utf-8')
 
 def proyecto(request):
     return render(request, 'core/proyecto.html')

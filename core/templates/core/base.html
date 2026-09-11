@@ -1,10 +1,31 @@
-{% load static %}
+{% load static seo %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-CL">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}LMVE | Liga Metropolitana de Voleibol Escolar{% endblock %}</title>
+    <title>{{ seo.title }}</title>
+    <meta name="description" content="{{ seo.description }}">
+    {% if seo.indexable %}
+    <link rel="canonical" href="{{ canonical_url }}">
+    {% else %}
+    <meta name="robots" content="noindex, follow">
+    {% endif %}
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="LMVE">
+    <meta property="og:locale" content="es_CL">
+    <meta property="og:title" content="{{ seo.title }}">
+    <meta property="og:description" content="{{ seo.description }}">
+    <meta property="og:url" content="{{ canonical_url }}">
+    <meta property="og:image" content="{{ og_image_url }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+
+    {% if jsonld %}
+    <script type="application/ld+json" nonce="{{ request.csp_nonce }}">{{ jsonld|jsonld }}</script>
+    {% endif %}
 
     <link rel="icon" href="{% static 'core/favicon.ico' %}" sizes="any">
     <link rel="icon" type="image/png" href="{% static 'core/favicon-32.png' %}" sizes="32x32">

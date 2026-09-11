@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'django_ratelimit',
     'core',
 ]
@@ -107,6 +108,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.seo.contexto_seo',
             ],
         },
     },
@@ -140,6 +142,13 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'webmaster@localhost'
 # A qué correo llega cada envío del formulario de Contacto. Por defecto,
 # el mismo que envía (útil si todavía no hay una casilla dedicada).
 CONTACTO_DESTINATARIO = os.environ.get('CONTACTO_DESTINATARIO', EMAIL_HOST_USER)
+
+# Origen canónico del sitio, sin barra final. Todas las URLs absolutas de
+# SEO (canonical, og:url, og:image, sitemap.xml, robots.txt) salen de
+# acá, no del header Host de la petición — así no dependen de que el
+# proxy de Render avise correctamente que la conexión original era
+# https. En Render: variable de entorno SITE_URL=https://ligamve.cl.
+SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000').rstrip('/')
 
 # Cloudflare Turnstile en el formulario de Contacto (capa anti-spam extra,
 # ver core/antispam.py). Sin TURNSTILE_SECRET_KEY, esta capa simplemente

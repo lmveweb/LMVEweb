@@ -1,7 +1,9 @@
+from django.contrib.sitemaps.views import sitemap
 from django.urls import path
 from django.views.generic import RedirectView
 
 from . import views
+from .sitemaps import VistasEstaticas
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -11,6 +13,10 @@ urlpatterns = [
     path('multimedia/', views.archivo, name='archivo'),
     path('contacto/', views.contacto, name='contacto'),
     path('privacidad/', views.privacidad, name='privacidad'),
+
+    path('robots.txt', views.robots_txt, name='robots_txt'),
+    path('sitemap.xml', sitemap, {'sitemaps': {'estaticas': VistasEstaticas}},
+         name='django.contrib.sitemaps.views.sitemap'),
 
     # La vista se llamaba "Staff" y vivia en /staff/ hasta el cambio de
     # nombre. El sitio ya esta publicado, asi que cualquier link a la URL

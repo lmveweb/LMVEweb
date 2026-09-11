@@ -1,3 +1,5 @@
+import json
+import re
 import time
 from unittest.mock import patch
 
@@ -9,6 +11,10 @@ from django.urls import NoReverseMatch, reverse
 
 from .antispam import SALT_MARCA_TIEMPO, SEGUNDOS_MINIMOS
 from .models import MensajePatrocinio
+
+# Las 7 vistas públicas, tal como deben aparecer en el sitemap y llevar
+# meta de SEO. Ni /staff/ (redirect) ni el admin.
+VISTAS_PUBLICAS = ['home', 'proyecto', 'sobre', 'equipo', 'archivo', 'contacto', 'privacidad']
 
 
 def marca_tiempo_hace(segundos):
@@ -183,3 +189,57 @@ class RutasTests(TestCase):
     def test_impacto_ya_no_existe(self):
         with self.assertRaises(NoReverseMatch):
             reverse('impacto')
+
+
+@override_settings(SITE_URL='https://ligamve.cl')
+class SeoTests(TestCase):
+    def test_robots(self):
+        r = self.client.get('/robots.txt')
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r['Content-Type'].startswith('text/plain'))
+        self.assertContains(r, 'Sitemap: https://ligamve.cl/sitemap.xml')
+
+    def test_sitemap_lista_las_publicas_con_dominio_canonico(self):
+        r = self.client.get('/sitemap.xml')
+        self.assertEqual(r.status_code, 200)
+        for nombre in VISTAS_PUBLICAS:
+            self.assertContains(r, f'<loc>https://ligamve.cl{reverse(nombre)}</loc>')
+
+    def test_sitemap_no_lista_staff_ni_admin(self):
+        r = self.client.get('/sitemap.xml').content.decode()
+        self.assertNotIn('/staff/', r)
+        self.assertNotIn('/panel-lmve/', r)
+
+    def test_cada_vista_publica_tiene_title_description_y_canonical(self):
+        for nombre in VISTAS_PUBLICAS:
+            with self.subTest(vista=nombre):
+                r = self.client.get(reverse(nombre))
+                self.assertContains(r, '<meta name="description"')
+                self.assertContains(
+                    r, f'<link rel="canonical" href="https://ligamve.cl{reverse(nombre)}">')
+                self.assertContains(r, 'property="og:image" content="https://ligamve.cl/')
+                self.assertContains(r, '<meta name="twitter:card" content="summary_large_image">')
+
+    def test_titles_son_unicos(self):
+        titles = []
+        for nombre in VISTAS_PUBLICAS:
+            r = self.client.get(reverse(nombre))
+            m = re.search(r'<title>(.*?)</title>', r.content.decode())
+            titles.append(m.group(1))
+        self.assertEqual(len(titles), len(set(titles)), f'titles repetidos: {titles}')
+
+    def test_jsonld_de_la_home_parsea_y_declara_la_sigla(self):
+        r = self.client.get(reverse('home'))
+        bloque = re.search(
+            r'<script type="application/ld\+json"[^>]*>(.*?)</script>', r.content.decode(), re.S)
+        self.assertIsNotNone(bloque)
+        datos = json.loads(bloque.group(1))
+        nodos = {n['@type']: n for n in datos['@graph']}
+        self.assertIn('WebSite', nodos)
+        self.assertIn('LMVE', nodos['WebSite']['alternateName'])
+        self.assertIn('SportsOrganization', nodos)
+        self.assertEqual(nodos['SportsOrganization']['alternateName'], 'LMVE')
+
+    def test_otras_vistas_no_llevan_jsonld(self):
+        r = self.client.get(reverse('proyecto'))
+        self.assertNotContains(r, 'application/ld+json')
