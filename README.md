@@ -57,8 +57,9 @@ venv\Scripts\Activate.ps1        # Windows (PowerShell)
 
 pip install -r requirements.txt
 
-copy .env.example .env           # Windows
-# cp .env.example .env           # macOS / Linux
+# Crea un archivo .env en la raíz con, al menos, esta línea (ver la
+# tabla de variables más abajo para el resto, todas opcionales en local):
+# DJANGO_DEBUG=True
 
 python manage.py migrate
 python manage.py createcachetable   # tabla de cache para el rate limiting
@@ -74,7 +75,7 @@ python manage.py test
 ```
 
 <details>
-<summary><strong>Variables de entorno</strong> (ver <code>.env.example</code> para la lista completa)</summary>
+<summary><strong>Variables de entorno</strong></summary>
 
 | Variable | Para qué sirve | Obligatoria |
 |---|---|---|

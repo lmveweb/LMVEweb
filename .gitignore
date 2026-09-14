@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 db.sqlite3
 .env
+.env.example
 staticfiles/
-.claude/scheduled_tasks.lock
+.claude/
 imagenes_sin_uso/
