@@ -288,24 +288,33 @@
                            tabindex="-1" autocomplete="off">
                 </div>
 
+                {% comment %}
+                Cada label apunta a su campo con for/id (sin eso, un lector de
+                pantalla no anuncia qué es cada casilla y tocar el texto no
+                enfoca el campo). Los maxlength salen del formulario, que a
+                su vez los toma del modelo: un solo lugar donde cambiarlos.
+                {% endcomment %}
                 <div class="form-group">
-                    <label class="field-label">Nombre y Apellido <span class="required-mark">*</span></label>
-                    <input type="text" name="nombre" class="field-input" placeholder="Ingresa tu nombre y apellido" required>
+                    <label class="field-label" for="id_nombre">Nombre y Apellido <span class="required-mark">*</span></label>
+                    <input type="text" name="nombre" id="id_nombre" class="field-input" placeholder="Ingresa tu nombre y apellido"
+                           maxlength="{{ form.fields.nombre.max_length }}" autocomplete="name" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="field-label">Institución <span class="optional-mark">(opcional)</span></label>
-                    <input type="text" name="institucion" class="field-input" placeholder="Ingresa el nombre de tu institución">
+                    <label class="field-label" for="id_institucion">Institución <span class="optional-mark">(opcional)</span></label>
+                    <input type="text" name="institucion" id="id_institucion" class="field-input" placeholder="Ingresa el nombre de tu institución"
+                           maxlength="{{ form.fields.institucion.max_length }}" autocomplete="organization">
                 </div>
 
                 <div class="form-group">
-                    <label class="field-label">Correo Electrónico <span class="required-mark">*</span></label>
-                    <input type="email" name="email" class="field-input" placeholder="Ingresa tu correo" required>
+                    <label class="field-label" for="id_email">Correo Electrónico <span class="required-mark">*</span></label>
+                    <input type="email" name="email" id="id_email" class="field-input" placeholder="Ingresa tu correo"
+                           maxlength="{{ form.fields.email.max_length }}" autocomplete="email" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="field-label">Mensaje <span class="required-mark">*</span></label>
-                    <textarea name="mensaje" class="field-textarea" placeholder="Mensaje" required></textarea>
+                    <label class="field-label" for="id_mensaje">Mensaje <span class="required-mark">*</span></label>
+                    <textarea name="mensaje" id="id_mensaje" class="field-textarea" placeholder="Mensaje" required></textarea>
                 </div>
 
                 <div class="form-group form-group-checkbox">
@@ -353,6 +362,18 @@
         var errorMsg = document.getElementById('contactErrorMsg');
         if (!form || !btn || !label || !errorMsg) return;
 
+        function mostrarError(mensajes) {
+            btn.classList.remove('is-loading');
+            btn.classList.add('is-error');
+            btn.disabled = false;
+            label.textContent = 'Revisa los datos';
+            errorMsg.textContent = mensajes.join(' ');
+            errorMsg.classList.add('is-visible');
+            // Cada token de Turnstile sirve para una sola verificación:
+            // se pide uno nuevo para que el reintento no falle por eso.
+            if (window.turnstile) window.turnstile.reset();
+        }
+
         form.addEventListener('submit', function (e) {
             e.preventDefault();
             if (btn.disabled) return;
@@ -371,7 +392,10 @@
                 method: 'POST',
                 body: new FormData(form),
             }).then(function (response) {
-                return response.json().then(function (data) {
+                // Una respuesta que no es JSON (403 de CSRF, 500 del
+                // servidor) cae al mensaje genérico de abajo, no al de
+                // "no se pudo conectar", que sería falso.
+                return response.json().catch(function () { return {}; }).then(function (data) {
                     return { ok: response.ok, data: data };
                 });
             });
@@ -379,27 +403,17 @@
             Promise.all([envio, tiempoMinimo])
                 .then(function (values) {
                     var result = values[0];
-                    btn.classList.remove('is-loading');
                     if (result.ok && result.data.ok) {
+                        btn.classList.remove('is-loading');
                         btn.classList.add('is-done');
                         label.textContent = '¡Mensaje enviado!';
                         form.reset();
                     } else {
-                        btn.classList.add('is-error');
-                        btn.disabled = false;
-                        label.textContent = 'Revisa los datos';
-                        var mensajes = (result.data && result.data.errores) || ['No se pudo enviar el mensaje. Intenta de nuevo.'];
-                        errorMsg.textContent = mensajes.join(' ');
-                        errorMsg.classList.add('is-visible');
+                        mostrarError(result.data.errores || ['No se pudo enviar el mensaje. Intenta de nuevo.']);
                     }
                 })
                 .catch(function () {
-                    btn.classList.remove('is-loading');
-                    btn.classList.add('is-error');
-                    btn.disabled = false;
-                    label.textContent = 'Revisa los datos';
-                    errorMsg.textContent = 'No se pudo conectar con el servidor. Intenta de nuevo.';
-                    errorMsg.classList.add('is-visible');
+                    mostrarError(['No se pudo conectar con el servidor. Intenta de nuevo.']);
                 });
         });
     })();

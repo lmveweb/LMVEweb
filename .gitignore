@@ -5,3 +5,4 @@ db.sqlite3
 .env
 staticfiles/
 .claude/scheduled_tasks.lock
+imagenes_sin_uso/

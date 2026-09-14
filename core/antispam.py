@@ -17,7 +17,6 @@ no llegó a cargar.
 import json
 import logging
 import time
-import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -88,7 +87,9 @@ def verificar_turnstile(token, ip, secret_key, timeout=5):
     try:
         with urllib.request.urlopen(TURNSTILE_VERIFY_URL, data=datos, timeout=timeout) as resp:
             resultado = json.loads(resp.read().decode('utf-8'))
-    except (urllib.error.URLError, TimeoutError, ValueError, OSError):
+    # OSError ya cubre URLError/HTTPError y TimeoutError; ValueError, un
+    # JSON inválido en la respuesta.
+    except (OSError, ValueError):
         logger.exception('No se pudo verificar Turnstile; se deja pasar el mensaje')
         return True
 

@@ -67,10 +67,6 @@
         outline-offset: 2px;
     }
 
-    .grid-sentinel {
-        height: 4px;
-    }
-
     /* =========================================================
        LIGHTBOX — carrusel a pantalla completa
        ========================================================= */
@@ -180,7 +176,6 @@
         </button>
         {% endfor %}
     </div>
-    <div id="gridSentinel" class="grid-sentinel" aria-hidden="true"></div>
 </section>
 {% endblock %}
 
@@ -237,6 +232,7 @@
     var btnNext = document.getElementById('lightboxNext');
     var indiceActual = 0;
     var elementoAntesDeAbrir = null;
+    var temporizadorCierre = null;
 
     function mostrarFoto(indice) {
         indiceActual = (indice + fotos.length) % fotos.length;
@@ -247,6 +243,9 @@
     }
 
     function abrirLightbox(indice) {
+        // Si se reabre durante el fundido de cierre, ese cierre pendiente
+        // no debe ocultar el lightbox recién abierto (quedaría sin teclado).
+        clearTimeout(temporizadorCierre);
         elementoAntesDeAbrir = document.activeElement;
         mostrarFoto(indice);
         lightbox.hidden = false;
@@ -258,7 +257,7 @@
     function cerrarLightbox() {
         lightbox.classList.remove('is-open');
         document.body.style.overflow = '';
-        setTimeout(function () { lightbox.hidden = true; }, 250);
+        temporizadorCierre = setTimeout(function () { lightbox.hidden = true; }, 250);
         if (elementoAntesDeAbrir) elementoAntesDeAbrir.focus();
     }
 

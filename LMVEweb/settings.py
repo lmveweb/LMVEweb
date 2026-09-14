@@ -26,8 +26,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
+# Checklist de despliegue:
+# https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # Seguro por defecto: si se olvida definir la variable en el hosting, la
 # app arranca en modo producción (sin páginas de error con el stack trace
@@ -240,13 +240,11 @@ STORAGES = {
 }
 
 
-# Seguridad para HTTPS (producción)
-# https://docs.djangoproject.com/en/6.0/topics/security/
+# Cache
+# https://docs.djangoproject.com/en/6.0/topics/cache/
 #
-# Envuelto en "if not DEBUG" para no forzar HTTPS en desarrollo local
-# (runserver sirve por http:// sin certificado).
-# Cache en base de datos: la usa el rate limiting del formulario de
-# Contacto (django-ratelimit). Tiene que ser compartida entre los workers
+# En base de datos: la usa el rate limiting del formulario de
+# Contacto y del login del admin (django-ratelimit). Tiene que ser compartida entre los workers
 # de Gunicorn en producción, por eso no alcanza con la caché en memoria
 # por defecto (cada worker tendría su propio conteo). La tabla la crea
 # "python manage.py createcachetable" (ver Procfile, release phase).
@@ -267,6 +265,12 @@ CACHES = {
 # silencia solo el error puntual de "no atómico" (E003), no todo el check.
 SILENCED_SYSTEM_CHECKS = ['django_ratelimit.E003']
 
+
+# Seguridad para HTTPS (producción)
+# https://docs.djangoproject.com/en/6.0/topics/security/
+#
+# Envuelto en "if not DEBUG" para no forzar HTTPS en desarrollo local
+# (runserver sirve por http:// sin certificado).
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True

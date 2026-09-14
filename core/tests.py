@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core import mail
 from django.core.cache import cache
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.core.signing import Signer
 from django.test import TestCase, override_settings
 from django.urls import NoReverseMatch, reverse
@@ -14,6 +15,7 @@ from django_otp.plugins.otp_email.models import EmailDevice
 
 from .antispam import SALT_MARCA_TIEMPO, SEGUNDOS_MINIMOS
 from .models import MensajePatrocinio
+from .seo import PAGINAS
 from LMVEweb.urls import ADMIN_URL
 
 # Las 7 vistas públicas, tal como deben aparecer en el sitemap y llevar
@@ -74,6 +76,34 @@ class ContactoTests(TestCase):
         self.assertEqual(respuesta.status_code, 400)
         self.assertFalse(respuesta.json()['ok'])
         self.assertEqual(MensajePatrocinio.objects.count(), 0)
+
+    def test_errores_en_orden_del_formulario_y_con_texto_propio(self):
+        respuesta = self.client.post(
+            reverse('contacto'),
+            datos_validos(nombre='  ', institucion='B' * 201, email='', mensaje='', acepta_politica=''),
+        )
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertEqual(respuesta.json()['errores'], [
+            'Falta el nombre y apellido.',
+            'El nombre de la institución no puede superar los 200 caracteres.',
+            'Falta el correo electrónico.',
+            'Falta el mensaje.',
+            'Debes aceptar la Política de Privacidad para continuar.',
+        ])
+
+    def test_guarda_los_campos_sin_espacios_de_sobra(self):
+        self.client.post(reverse('contacto'), datos_validos(nombre='  Juana Pérez  ', email=' juana@acme.cl '))
+        mensaje = MensajePatrocinio.objects.get()
+        self.assertEqual(mensaje.nombre, 'Juana Pérez')
+        self.assertEqual(mensaje.email, 'juana@acme.cl')
+
+    @override_settings(CONTACTO_DESTINATARIO='destino@lmve.cl')
+    def test_si_falla_el_correo_el_mensaje_igual_queda_guardado(self):
+        with patch('core.views.EmailMessage.send', side_effect=OSError('SMTP caído')), \
+                self.assertLogs('core.views', level='ERROR'):
+            respuesta = self.client.post(reverse('contacto'), datos_validos())
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(MensajePatrocinio.objects.count(), 1)
 
     def test_falta_aceptar_politica(self):
         respuesta = self.client.post(reverse('contacto'), datos_validos(acepta_politica=''))
@@ -182,6 +212,17 @@ class AntiSpamTests(TestCase):
         self.assertTrue(respuesta.json()['ok'])
         self.assertEqual(MensajePatrocinio.objects.count(), 1)
 
+    @override_settings(TURNSTILE_SECRET_KEY='clave-secreta-de-prueba')
+    def test_turnstile_no_gasta_el_token_si_hay_errores_en_los_campos(self):
+        # Cada token de Turnstile sirve una sola vez: si se verificara
+        # antes de validar, corregir un correo mal escrito y reenviar
+        # fallaría siempre por el token ya consumido.
+        with patch('core.views.verificar_turnstile', return_value=True) as mock_verificar:
+            respuesta = self.client.post(reverse('contacto'), datos_validos(email='mal'))
+        mock_verificar.assert_not_called()
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertEqual(respuesta.json()['errores'], ['El correo electrónico no es válido.'])
+
 
 class RutasTests(TestCase):
     def test_equipo_disponible(self):
@@ -193,6 +234,47 @@ class RutasTests(TestCase):
     def test_impacto_ya_no_existe(self):
         with self.assertRaises(NoReverseMatch):
             reverse('impacto')
+
+    def test_staff_redirige_permanente_a_equipo(self):
+        r = self.client.get('/staff/')
+        self.assertEqual(r.status_code, 301)
+        self.assertEqual(r['Location'], reverse('equipo'))
+
+    def test_vistas_publicas_responden_get_y_head(self):
+        for nombre in VISTAS_PUBLICAS:
+            with self.subTest(vista=nombre):
+                self.assertEqual(self.client.get(reverse(nombre)).status_code, 200)
+                self.assertEqual(self.client.head(reverse(nombre)).status_code, 200)
+
+    def test_vistas_de_solo_lectura_rechazan_post(self):
+        for nombre in ['home', 'proyecto', 'sobre', 'equipo', 'archivo', 'privacidad']:
+            with self.subTest(vista=nombre):
+                self.assertEqual(self.client.post(reverse(nombre)).status_code, 405)
+
+    def test_contacto_rechaza_otros_metodos(self):
+        self.assertEqual(self.client.put(reverse('contacto')).status_code, 405)
+
+    def test_robots_acepta_head(self):
+        self.assertEqual(self.client.head('/robots.txt').status_code, 200)
+
+
+class PlantillasTests(TestCase):
+    def test_contacto_asocia_cada_label_a_su_campo_con_el_largo_del_modelo(self):
+        r = self.client.get(reverse('contacto'))
+        for campo, largo in [('nombre', 200), ('institucion', 200), ('email', 254)]:
+            with self.subTest(campo=campo):
+                self.assertContains(r, f'for="id_{campo}"')
+                self.assertRegex(r.content.decode(), rf'id="id_{campo}"[^>]*maxlength="{largo}"')
+        self.assertContains(r, 'for="id_mensaje"')
+        self.assertContains(r, 'id="id_mensaje"')
+
+    def test_los_dos_menus_tienen_nombre_accesible(self):
+        r = self.client.get(reverse('home'))
+        self.assertContains(r, '<nav class="site-nav" aria-label="Principal">')
+        self.assertContains(r, 'aria-label="Menú móvil"')
+
+    def test_scripts_externos_por_https_explicito(self):
+        self.assertNotContains(self.client.get(reverse('home')), 'src="//')
 
 
 @override_settings(SITE_URL='https://ligamve.cl')
@@ -212,7 +294,19 @@ class SeoTests(TestCase):
     def test_sitemap_no_lista_staff_ni_admin(self):
         r = self.client.get('/sitemap.xml').content.decode()
         self.assertNotIn('/staff/', r)
-        self.assertNotIn('/panel-lmve/', r)
+        self.assertNotIn(f'/{ADMIN_URL}', r)
+
+    def test_sitemap_y_seo_cubren_las_mismas_vistas(self):
+        # El sitemap sale de core.seo.PAGINAS: si alguien suma una vista
+        # a una lista y no a la otra, esto lo delata.
+        self.assertEqual(list(PAGINAS), VISTAS_PUBLICAS)
+
+    def test_og_image_declara_las_medidas_de_su_propia_imagen(self):
+        r = self.client.get(reverse('archivo'))
+        self.assertContains(r, 'property="og:image:width" content="1400"')
+        self.assertContains(r, 'property="og:image:height" content="1016"')
+        r = self.client.get(reverse('home'))
+        self.assertContains(r, 'property="og:image:height" content="688"')
 
     def test_cada_vista_publica_tiene_title_description_y_canonical(self):
         for nombre in VISTAS_PUBLICAS:
@@ -363,6 +457,5 @@ class Habilitar2faCommandTests(TestCase):
         self.assertEqual(device.email, 'lmveweb@gmail.com')
 
     def test_usuario_inexistente_falla_con_mensaje_claro(self):
-        from django.core.management.base import CommandError
         with self.assertRaises(CommandError):
             call_command('habilitar_2fa', 'no-existe')

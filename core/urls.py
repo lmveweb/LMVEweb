@@ -1,18 +1,18 @@
 from django.contrib.sitemaps.views import sitemap
 from django.urls import path
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, TemplateView
 
 from . import views
 from .sitemaps import VistasEstaticas
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('historia/', views.proyecto, name='proyecto'),
-    path('sobre/', views.sobre, name='sobre'),
-    path('equipo/', views.equipo, name='equipo'),
+    path('historia/', TemplateView.as_view(template_name='core/proyecto.html'), name='proyecto'),
+    path('sobre/', TemplateView.as_view(template_name='core/sobre.html'), name='sobre'),
+    path('equipo/', TemplateView.as_view(template_name='core/equipo.html'), name='equipo'),
     path('multimedia/', views.archivo, name='archivo'),
     path('contacto/', views.contacto, name='contacto'),
-    path('privacidad/', views.privacidad, name='privacidad'),
+    path('privacidad/', TemplateView.as_view(template_name='core/privacidad.html'), name='privacidad'),
 
     path('robots.txt', views.robots_txt, name='robots_txt'),
     path('sitemap.xml', sitemap, {'sitemaps': {'estaticas': VistasEstaticas}},

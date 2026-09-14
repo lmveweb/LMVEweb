@@ -19,8 +19,8 @@
     <meta property="og:description" content="{{ seo.description }}">
     <meta property="og:url" content="{{ canonical_url }}">
     <meta property="og:image" content="{{ og_image_url }}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
+    <meta property="og:image:width" content="{{ seo.og_image_width }}">
+    <meta property="og:image:height" content="{{ seo.og_image_height }}">
     <meta name="twitter:card" content="summary_large_image">
 
     {% if jsonld %}
@@ -31,8 +31,6 @@
     <link rel="icon" type="image/png" href="{% static 'core/favicon-32.png' %}" sizes="32x32">
     <link rel="icon" type="image/png" href="{% static 'core/favicon-16.png' %}" sizes="16x16">
     <link rel="apple-touch-icon" href="{% static 'core/apple-touch-icon.png' %}">
-
-    {% block head_extra %}{% endblock %}
 
     <style nonce="{{ request.csp_nonce }}">
         /* =========================================================
@@ -106,6 +104,7 @@
             --c-green-deep: #3A6E2D; --c-green-deep-rgb: 58, 110, 45;
             --c-amber:     #F2A413;  --c-amber-rgb:    242, 164, 19;
             --c-orange:    #F2620F;  --c-orange-rgb:   242, 98, 15;
+            --c-orange-hover: #d4520a;
             /* Rojo de las llamas del isotipo: no estaba en la paleta,
                se toma directo del logo (muestreado del PNG). */
             --c-red:       #D70A18;  --c-red-rgb:      215, 10, 24;
@@ -289,7 +288,7 @@
             margin-left: 16px;
             transition: background 0.25s ease, transform 0.12s ease;
         }
-        .btn-cta:hover { background: #d4520a; }
+        .btn-cta:hover { background: var(--c-orange-hover); }
         .btn-cta:active { transform: scale(0.96); }
 
         /* =========================================================
@@ -702,7 +701,7 @@
         }
     </style>
 </head>
-<body class="{% block body_class %}{% endblock %}">
+<body>
 
     <header class="site-header" id="siteHeader">
         <div class="header-inner">
@@ -733,7 +732,7 @@
 
             <div class="header-spacer"></div>
 
-            <nav class="site-nav">
+            <nav class="site-nav" aria-label="Principal">
                 <ul>
                     <li><a href="{% url 'home' %}">Inicio</a></li>
                     <li><a href="{% url 'proyecto' %}">Historia</a></li>
@@ -752,12 +751,12 @@
         </div>
     </header>
 
-    <nav class="mobile-nav" id="mobileNav">
+    <nav class="mobile-nav" id="mobileNav" aria-label="Menú móvil">
         <a href="{% url 'home' %}">Inicio</a>
         <a href="{% url 'proyecto' %}">Historia</a>
         <a href="{% url 'sobre' %}">Sobre la LMVE</a>
-        <a href="{% url 'equipo' %}">Equipo</a>
         <a href="{% url 'archivo' %}">Multimedia</a>
+        <a href="{% url 'equipo' %}">Equipo</a>
         <span class="mobile-lema">"Educar a Través del Deporte"</span>
         <a href="{% url 'contacto' %}" class="mobile-cta">Contacto</a>
     </nav>
@@ -795,8 +794,8 @@
                     <li><a href="{% url 'home' %}">Inicio</a></li>
                     <li><a href="{% url 'proyecto' %}">Historia</a></li>
                     <li><a href="{% url 'sobre' %}">Sobre la LMVE</a></li>
-                    <li><a href="{% url 'equipo' %}">Equipo</a></li>
                     <li><a href="{% url 'archivo' %}">Multimedia</a></li>
+                    <li><a href="{% url 'equipo' %}">Equipo</a></li>
                     <li><a href="{% url 'contacto' %}">Contacto</a></li>
                 </ul>
             </div>

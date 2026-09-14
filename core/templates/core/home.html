@@ -88,7 +88,7 @@
         text-decoration: none;
         transition: background 0.25s ease, transform 0.12s ease;
     }
-    .btn-relleno:hover { background: #d4520a; }
+    .btn-relleno:hover { background: var(--c-orange-hover); }
     .btn-relleno:active { transform: scale(0.96); }
     .btn-contorno {
         display: inline-block;
@@ -311,7 +311,7 @@
         margin-top: 8px;
         color: rgba(255, 255, 255, 0.9);
     }
-    .futuro-boton:hover { background: #d4520a; transform: translateY(-3px); }
+    .futuro-boton:hover { background: var(--c-orange-hover); transform: translateY(-3px); }
     .futuro-boton:active { transform: scale(0.97); }
 
     /* =========================================================
@@ -454,7 +454,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script async src="//www.instagram.com/embed.js"></script>
+<script async src="https://www.instagram.com/embed.js"></script>
 
 <!-- VIDEO DEL HERO -->
 <script nonce="{{ request.csp_nonce }}">

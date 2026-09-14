@@ -4,6 +4,8 @@ from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 
+from .seo import PAGINAS
+
 
 class VistasEstaticas(Sitemap):
     # Dominio y esquema desde SITE_URL, no desde el Host de la petición
@@ -19,9 +21,10 @@ class VistasEstaticas(Sitemap):
         return urlsplit(settings.SITE_URL).netloc
 
     def items(self):
-        # Las 7 vistas públicas. Nada de /staff/ (redirect, no una URL
-        # final) ni del admin.
-        return ['home', 'proyecto', 'sobre', 'equipo', 'archivo', 'contacto', 'privacidad']
+        # Las mismas vistas que tienen metadatos de SEO en core/seo.py:
+        # así una página nueva no puede quedar en el sitemap sin title ni
+        # description (ni al revés). Nada de /staff/ (redirect) ni del admin.
+        return list(PAGINAS)
 
     def location(self, item):
         return reverse(item)

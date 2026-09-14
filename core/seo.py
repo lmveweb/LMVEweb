@@ -17,7 +17,11 @@ POR_DEFECTO = {
         'Liga Metropolitana de Voleibol Escolar (LMVE), fundada en 1987: historia, colegios '
         'participantes y multimedia de la competencia escolar de voleibol en Santiago.'
     ),
+    # El ancho y alto van junto a la imagen porque son del archivo, no
+    # de la plantilla: si se cambia la foto, se actualizan acá mismo.
     'og_image': 'core/img/fotos/impacto-banner-sponsor.jpg',
+    'og_image_width': 1400,
+    'og_image_height': 688,
     'indexable': True,
 }
 
@@ -54,6 +58,8 @@ PAGINAS = {
             'jornadas y momentos de la competencia escolar de voleibol.'
         ),
         'og_image': 'core/img/fotos/galeria-4.jpg',
+        'og_image_width': 1400,
+        'og_image_height': 1016,
     },
     'contacto': {
         'title': 'Contacto | LMVE',
