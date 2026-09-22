@@ -14,7 +14,7 @@ from .antispam import (
     generar_marca_tiempo,
     verificar_turnstile,
 )
-from .contenido import COLEGIOS, FOTOS_MULTIMEDIA
+from .contenido import COLEGIOS, FOTOS_MULTIMEDIA, evento_vigente
 from .forms import ContactoForm
 from .seo import jsonld_home
 
@@ -26,7 +26,12 @@ logger = logging.getLogger(__name__)
 
 @require_safe
 def home(request):
-    return render(request, 'core/home.html', {'colegios': COLEGIOS, 'jsonld': jsonld_home()})
+    evento = evento_vigente()
+    return render(request, 'core/home.html', {
+        'colegios': COLEGIOS,
+        'evento': evento,
+        'jsonld': jsonld_home(evento),
+    })
 
 
 @require_safe

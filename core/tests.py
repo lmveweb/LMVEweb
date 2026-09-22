@@ -1,6 +1,7 @@
 import json
 import re
 import time
+from datetime import date
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
@@ -14,6 +15,7 @@ from django.urls import NoReverseMatch, reverse
 from django_otp.plugins.otp_email.models import EmailDevice
 
 from .antispam import SALT_MARCA_TIEMPO, SEGUNDOS_MINIMOS
+from .contenido import evento_vigente
 from .models import MensajePatrocinio
 from .seo import PAGINAS
 from LMVEweb.urls import ADMIN_URL
@@ -459,3 +461,100 @@ class Habilitar2faCommandTests(TestCase):
     def test_usuario_inexistente_falla_con_mensaje_claro(self):
         with self.assertRaises(CommandError):
             call_command('habilitar_2fa', 'no-existe')
+
+
+# Evento inventado a propósito, con fechas fijas: si los tests usaran el
+# evento real de core/contenido.py, empezarían a fallar solos el día
+# después de que ese evento termine.
+EVENTO_DE_PRUEBA = {
+    'nombre': 'Copa de Prueba 2026',
+    'inicio': date(2026, 11, 20),
+    'fin': date(2026, 11, 22),
+    'dias': '20, 21 y 22 de noviembre',
+    'dias_numeros': '20 · 21 · 22',
+    'mes': 'Noviembre 2026',
+    'sede': 'Gimnasio de Prueba',
+    'direccion': 'Calle Inventada #123, Ñuñoa',
+    'comuna': 'Ñuñoa',
+    'mapa_query': 'Gimnasio de Prueba, Calle Inventada 123, Ñuñoa, Santiago, Chile',
+    # Rutas reales: {% static %} las resuelve contra el manifest y falla
+    # si el archivo no existe, así que un nombre inventado no sirve acá.
+    'afiche': 'core/img/eventos/copa-milled-2026.webp',
+    'afiche_completo': 'core/img/eventos/copa-milled-2026-completo.webp',
+    'afiche_alt': 'Afiche de prueba',
+    'damas': ['Colegio Damas Uno', 'Colegio Damas Dos'],
+    'varones': ['Colegio Varones Uno', 'Colegio Varones Dos'],
+    'etiqueta': 'Faltan 5 días',
+}
+
+
+@override_settings(SITE_URL='https://ligamve.cl')
+class EventoDestacadoTests(TestCase):
+    """El evento de la portada sale de core/contenido.py y se apaga solo
+    cuando pasa su fecha de cierre, sin que nadie edite el sitio."""
+
+    def test_la_portada_muestra_el_evento_con_sus_datos(self):
+        with patch('core.views.evento_vigente', return_value=EVENTO_DE_PRUEBA):
+            r = self.client.get(reverse('home'))
+        for dato in ['Copa de Prueba 2026', 'Faltan 5 días', '20 · 21 · 22',
+                     'Gimnasio de Prueba', 'Calle Inventada #123, Ñuñoa',
+                     'Colegio Damas Dos', 'Colegio Varones Uno']:
+            with self.subTest(dato=dato):
+                self.assertContains(r, dato)
+
+    def test_el_afiche_abre_un_visor_propio_no_un_link_a_la_imagen(self):
+        with patch('core.views.evento_vigente', return_value=EVENTO_DE_PRUEBA):
+            r = self.client.get(reverse('home'))
+        contenido = r.content.decode()
+        # El botón lleva la ruta de la versión completa como dato, no
+        # como destino de navegación (nada de <a href a la imagen).
+        self.assertContains(r, 'id="eventoAfichebtn"')
+        self.assertContains(r, 'data-src-completo=')
+        self.assertContains(r, 'id="eventoLightbox"')
+        self.assertNotRegex(contenido, r'<a[^>]+href="[^"]*copa-milled-2026-completo\.webp')
+
+    def test_la_sede_enlaza_a_google_maps_con_la_direccion(self):
+        with patch('core.views.evento_vigente', return_value=EVENTO_DE_PRUEBA):
+            r = self.client.get(reverse('home'))
+        self.assertContains(r, 'https://www.google.com/maps/search/?api=1&amp;query=')
+        # La dirección viaja codificada para URL (espacios y comas), no
+        # tal cual: si se rompe el urlencode, el enlace queda cortado.
+        self.assertContains(r, 'Gimnasio%20de%20Prueba%2C%20Calle%20Inventada%20123')
+
+    def test_sin_evento_vigente_la_seccion_no_aparece(self):
+        with patch('core.views.evento_vigente', return_value=None):
+            r = self.client.get(reverse('home'))
+        # Ni la sección, ni el visor del afiche, ni el dato estructurado.
+        self.assertNotContains(r, 'id="eventoTitulo"')
+        self.assertNotContains(r, 'Próximo evento')
+        self.assertNotContains(r, '.evento-titulo')
+        self.assertNotContains(r, 'id="eventoLightbox"')
+        self.assertNotContains(r, 'SportsEvent')
+
+    def test_el_jsonld_declara_el_evento_con_fecha_y_lugar(self):
+        with patch('core.views.evento_vigente', return_value=EVENTO_DE_PRUEBA):
+            r = self.client.get(reverse('home'))
+        bloque = re.search(
+            r'<script type="application/ld\+json"[^>]*>(.*?)</script>', r.content.decode(), re.S)
+        nodos = {n['@type']: n for n in json.loads(bloque.group(1))['@graph']}
+        evento = nodos['SportsEvent']
+        self.assertEqual(evento['name'], 'Copa de Prueba 2026')
+        self.assertEqual(evento['startDate'], '2026-11-20')
+        self.assertEqual(evento['endDate'], '2026-11-22')
+        self.assertEqual(evento['location']['name'], 'Gimnasio de Prueba')
+
+    def test_la_cuenta_regresiva_cambia_segun_el_dia(self):
+        casos = [
+            (date(2026, 9, 21), 'Faltan 4 días'),
+            (date(2026, 9, 24), 'Falta 1 día'),
+            (date(2026, 9, 25), '¡Es hoy!'),
+            (date(2026, 9, 26), '¡En curso!'),
+            (date(2026, 9, 27), '¡En curso!'),  # el último día sigue vigente
+        ]
+        for hoy, etiqueta in casos:
+            with self.subTest(hoy=hoy):
+                self.assertEqual(evento_vigente(hoy)['etiqueta'], etiqueta)
+
+    def test_el_evento_desaparece_al_dia_siguiente_del_cierre(self):
+        self.assertIsNone(evento_vigente(date(2026, 9, 28)))
+        self.assertIsNone(evento_vigente(date(2027, 1, 1)))

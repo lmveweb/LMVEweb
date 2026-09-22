@@ -1,8 +1,111 @@
 """Contenido editable del sitio que no vive en la base de datos.
 
 Listas en Python (no en las plantillas) para que sumar o sacar un
-colegio o una foto sea editar una línea acá, sin tocar HTML.
+colegio, una foto o un evento sea editar una línea acá, sin tocar HTML.
 """
+
+from datetime import date
+
+from django.utils import timezone
+
+# Evento destacado de la portada.
+#
+# Se muestra solo hasta el día de cierre inclusive: pasada esa fecha
+# desaparece solo, sin que nadie tenga que acordarse de sacarlo del
+# sitio (ver evento_vigente). Para bajarlo antes de tiempo, basta con
+# dejar EVENTO_DESTACADO = None; para el próximo torneo, reemplazar los
+# datos de acá.
+#
+# Los nombres de los colegios van tal como los publicó la Liga en el
+# flyer oficial, sin completarlos ni corregirlos.
+EVENTO_DESTACADO = {
+    'nombre': 'Copa Milled 2026',
+    'inicio': date(2026, 9, 25),
+    'fin': date(2026, 9, 27),
+    # Texto para mostrar; los números van aparte para el bloque grande
+    # de la fecha, que los luce como en el flyer.
+    'dias': '25, 26 y 27 de septiembre',
+    'dias_numeros': '25 · 26 · 27',
+    'mes': 'Septiembre 2026',
+    'sede': 'British Royal School',
+    'direccion': 'Las Perdices #263, La Reina',
+    'comuna': 'La Reina',
+    # Lo que se le manda a Google Maps al tocar la dirección. Va aparte
+    # de 'direccion' a propósito: sin el "#" (Maps ubica mejor "263" que
+    # "#263") y con ciudad y país, para que no confunda la calle con una
+    # de otra comuna o de otro país.
+    'mapa_query': 'British Royal School, Las Perdices 263, La Reina, Santiago, Chile',
+    # Afiche oficial. La versión de la página está achicada a 760 px de
+    # ancho (96 KB en WebP); la completa es el original, y se abre solo
+    # si alguien hace clic para leer la letra chica.
+    'afiche': 'core/img/eventos/copa-milled-2026.webp',
+    'afiche_completo': 'core/img/eventos/copa-milled-2026-completo.webp',
+    'afiche_alt': (
+        'Afiche de la Copa Milled 2026: 25, 26 y 27 de septiembre en el '
+        'British Royal School, Las Perdices #263, La Reina.'
+    ),
+    # "Colegio" antepuesto a cada nombre (el flyer lo omite porque ya
+    # viene bajo el subtítulo "Colegios en competencia"), salvo los que
+    # ya llevan su propio tipo de institución (Liceo, Instituto, School).
+    # Manuel de Salas y Alianza Francesa Viña del Mar quedan como Liceo
+    # (no Colegio) porque así están registrados en COLEGIOS más arriba
+    # para ese mismo tipo de institución.
+    'damas': [
+        'Colegio Suizo',
+        'Colegio Andrée',
+        'Colegio Thomas Morus',
+        'British Royal School',
+        'Colegio Alemán de Santiago',
+        'Colegio Pedro de Valdivia Peñalolén',
+        'Liceo Alianza Francesa Viña del Mar',
+        'Colegio San Luis de Alba (Valdivia)',
+        'Colegio Sagrado Corazón de Talagante',
+        'Liceo Manuel de Salas',
+    ],
+    'varones': [
+        'Colegio Suizo',
+        'Liceo Nacional de Maipú',
+        'Colegio Thomas Morus',
+        'Instituto Alonso de Ercilla',
+        'Colegio Don Orione Maipú',
+        'Colegio Pedro de Valdivia Peñalolén',
+        'Colegio Mary Graham (Villa Alemana)',
+        'Colegio Andrés Bello Pampa (La Serena)',
+        'Colegio SSCC Viña del Mar',
+        'Colegio Santa María de Lo Cañas',
+    ],
+}
+
+
+def evento_vigente(hoy=None):
+    """El evento destacado mientras no haya terminado, con la etiqueta de
+    cuenta regresiva ya resuelta. None si ya pasó (o si no hay evento).
+
+    La fecha se calcula en la zona horaria del proyecto (America/Santiago),
+    no en UTC: si no, entre las 21:00 y la medianoche de Chile el sitio
+    ya estaría contando un día de más.
+
+    `hoy` existe para que los tests puedan pararse en cualquier fecha sin
+    depender del reloj real ni de una dependencia extra.
+    """
+    if not EVENTO_DESTACADO:
+        return None
+
+    hoy = hoy or timezone.localdate()
+    if hoy > EVENTO_DESTACADO['fin']:
+        return None
+
+    faltan = (EVENTO_DESTACADO['inicio'] - hoy).days
+    if faltan > 1:
+        etiqueta = f'Faltan {faltan} días'
+    elif faltan == 1:
+        etiqueta = 'Falta 1 día'
+    elif faltan == 0:
+        etiqueta = '¡Es hoy!'
+    else:
+        etiqueta = '¡En curso!'
+
+    return {**EVENTO_DESTACADO, 'etiqueta': etiqueta}
 
 
 # Colegios que compiten en la Liga, para el carrusel de Inicio.

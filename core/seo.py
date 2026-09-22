@@ -93,14 +93,21 @@ def contexto_seo(request):
     }
 
 
-def jsonld_home():
+def jsonld_home(evento=None):
     """WebSite + SportsOrganization de la home, con alternateName: es lo
     que Google usa para el nombre del sitio en los resultados, y ataca
     directo el problema de que "LMVE" compita con la liga de béisbol
-    mexicana (LMBE) en la búsqueda."""
+    mexicana (LMBE) en la búsqueda.
+
+    Si hay un evento vigente se suma como SportsEvent: es lo que le
+    permite a Google mostrarlo con fecha y lugar en los resultados. Al
+    terminar el evento, la vista deja de pasarlo (ver
+    core.contenido.evento_vigente) y el nodo desaparece solo — marcar
+    eventos ya pasados como si vinieran es justamente lo que no hay que
+    hacer."""
     url = settings.SITE_URL + '/'
     org_id = url + '#organizacion'
-    return {
+    datos = {
         '@context': 'https://schema.org',
         '@graph': [
             {
@@ -140,3 +147,31 @@ def jsonld_home():
             },
         ],
     }
+
+    if evento:
+        datos['@graph'].append({
+            '@type': 'SportsEvent',
+            '@id': url + '#evento',
+            'name': evento['nombre'],
+            'startDate': evento['inicio'].isoformat(),
+            'endDate': evento['fin'].isoformat(),
+            'eventStatus': 'https://schema.org/EventScheduled',
+            'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
+            'sport': 'Voleibol',
+            'url': url,
+            'image': settings.SITE_URL + static(POR_DEFECTO['og_image']),
+            'organizer': {'@id': org_id},
+            'location': {
+                '@type': 'Place',
+                'name': evento['sede'],
+                'address': {
+                    '@type': 'PostalAddress',
+                    'streetAddress': evento['direccion'],
+                    'addressLocality': evento['comuna'],
+                    'addressRegion': 'Región Metropolitana',
+                    'addressCountry': 'CL',
+                },
+            },
+        })
+
+    return datos

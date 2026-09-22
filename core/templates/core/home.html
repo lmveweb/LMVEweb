@@ -314,6 +314,326 @@
     .futuro-boton:hover { background: var(--c-orange-hover); transform: translateY(-3px); }
     .futuro-boton:active { transform: scale(0.97); }
 
+    {% if evento %}
+    /* =========================================================
+       EVENTO DESTACADO
+
+       Todo este bloque se manda solo cuando hay un evento vigente:
+       cuando el evento termina, la sección desaparece y estos estilos
+       dejan de viajar en la página, en vez de quedar de relleno.
+
+       Franja en ámbar con las diagonales del afiche oficial. Es el
+       único bloque promocional del sitio y tiene que cortar la lectura,
+       no integrarse: quien vio el flyer en redes tiene que reconocer al
+       toque que es lo mismo, por eso van los colores del afiche (ámbar
+       de fondo, azul profundo para el texto) y no la paleta habitual de
+       las secciones.
+
+       Todo es HTML y CSS, no una imagen del afiche: no suma peso a la
+       portada, se lee en un lector de pantalla, Google puede indexar
+       los nombres de los colegios y el texto no se pixela en pantallas
+       grandes.
+
+       Contraste: el azul profundo sobre el ámbar da 5,9:1 (AA de
+       sobra). El naranjo solo aparece en adornos, nunca bajo texto.
+       ========================================================= */
+    .evento {
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+        background: var(--c-amber);
+        color: var(--c-navy-deep);
+    }
+    /* Las diagonales son dos capas con distinta separación y opacidad:
+       una sola tanda de líneas parejas se lee como un patrón de fondo,
+       dos cruzadas se leen como velocidad, que es el gesto del afiche. */
+    .evento::before,
+    .evento::after {
+        content: '';
+        position: absolute;
+        inset: -20% -10%;
+        pointer-events: none;
+    }
+    .evento::before {
+        background: repeating-linear-gradient(
+            -22deg,
+            rgba(255, 255, 255, 0.22) 0 10px,
+            rgba(255, 255, 255, 0) 10px 46px);
+    }
+    .evento::after {
+        background: repeating-linear-gradient(
+            -22deg,
+            rgba(var(--c-orange-rgb), 0.28) 0 6px,
+            rgba(var(--c-orange-rgb), 0) 6px 120px);
+    }
+    .evento-inner {
+        position: relative;
+        z-index: 1;
+        max-width: var(--page-max);
+        margin: 0 auto;
+        padding: 64px var(--page-pad) 68px var(--page-pad);
+    }
+
+    /* El afiche manda: se lleva casi la mitad del ancho y el texto lo
+       acompaña al lado, sin competirle. */
+    .evento-grid {
+        display: grid;
+        grid-template-columns: minmax(300px, 0.92fr) 1.08fr;
+        gap: 44px;
+        align-items: start;
+    }
+    /* Va apenas inclinado, como un afiche pegado en el diario mural:
+       derecho se veía como un banner más del sitio, y lo que se buscaba
+       era justamente que se sienta material impreso de la Liga. El
+       marco blanco cumple el mismo papel. Al pasar el mouse se endereza. */
+    .evento-afiche {
+        margin: 0;
+        transform: rotate(-1.4deg);
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .evento-afiche:hover { transform: rotate(0deg) scale(1.01); }
+    .evento-afiche button {
+        display: block;
+        width: 100%;
+        background: #ffffff;
+        border: 0;
+        padding: 10px;
+        border-radius: 6px;
+        box-shadow: 0 18px 44px rgba(var(--c-navy-deep-rgb), 0.35);
+        cursor: pointer;
+    }
+    .evento-afiche button:focus-visible {
+        outline: 3px solid var(--c-navy-deep);
+        outline-offset: 5px;
+    }
+    .evento-afiche img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 3px;
+    }
+    .evento-afiche figcaption {
+        margin-top: 14px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        color: rgba(var(--c-navy-deep-rgb), 0.75);
+    }
+
+    .evento-etiquetas {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+    .evento-badge {
+        background: #ffffff;
+        color: var(--c-navy-deep);
+        font-family: var(--font-display);
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        padding: 7px 16px;
+        border-radius: 50px;
+    }
+    /* Cuenta regresiva en azul con texto blanco (12:1). En naranjo con
+       blanco caía a 3,2:1, que a este tamaño no pasa el mínimo. */
+    .evento-cuenta {
+        background: var(--c-navy-deep);
+        color: #ffffff;
+        font-family: var(--font-display);
+        font-size: 14px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.4px;
+        padding: 7px 16px;
+        border-radius: 50px;
+    }
+
+    .evento-titulo {
+        font-size: clamp(38px, 4.6vw, 64px);
+        font-weight: 800;
+        font-style: italic;
+        line-height: 0.92;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: var(--c-navy-deep);
+        margin-bottom: 14px;
+        text-wrap: balance;
+    }
+    .evento-bajada {
+        font-size: 16px;
+        line-height: 1.6;
+        font-weight: 500;
+        color: rgba(var(--c-navy-deep-rgb), 0.88);
+        margin-bottom: 26px;
+    }
+
+    .evento-datos {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        margin-bottom: 34px;
+    }
+    .evento-fecha {
+        background: var(--c-navy-deep);
+        color: #ffffff;
+        border-radius: 10px;
+        padding: 18px 28px;
+        text-align: center;
+    }
+    .evento-fecha-dias {
+        display: block;
+        font-family: var(--font-display);
+        font-size: clamp(30px, 4vw, 42px);
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: 1px;
+        font-variant-numeric: tabular-nums;
+    }
+    .evento-fecha-mes {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-top: 7px;
+        color: rgba(255, 255, 255, 0.88);
+    }
+    /* La sede es un enlace a Google Maps: el borde se marca y sube un
+       poco al pasar el mouse, igual que las tarjetas de Equipo, para
+       que se note que es tocable y no un dato suelto más. */
+    .evento-sede {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: rgba(255, 255, 255, 0.45);
+        border: 2px solid rgba(var(--c-navy-deep-rgb), 0.18);
+        border-radius: 10px;
+        padding: 18px 26px;
+        color: var(--c-navy-deep);
+        text-decoration: none;
+        transition: background 0.25s ease, border-color 0.25s ease, transform 0.15s ease;
+    }
+    .evento-sede:hover {
+        background: rgba(255, 255, 255, 0.72);
+        border-color: var(--c-navy-deep);
+        transform: translateY(-2px);
+    }
+    .evento-sede:active { transform: scale(0.99); }
+    .evento-sede:focus-visible {
+        outline: 3px solid var(--c-navy-deep);
+        outline-offset: 3px;
+    }
+    .evento-sede svg { width: 26px; height: 26px; flex-shrink: 0; }
+    .evento-sede strong {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 21px;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        line-height: 1.25;
+    }
+    .evento-sede span {
+        font-size: 15px;
+        font-weight: 500;
+        color: rgba(var(--c-navy-deep-rgb), 0.85);
+    }
+
+    .evento-colegios {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    .evento-columna {
+        background: rgba(255, 255, 255, 0.42);
+        border-radius: 10px;
+        padding: 22px 26px 24px 26px;
+    }
+    .evento-columna h3 {
+        font-size: 15px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2.4px;
+        color: var(--c-navy-deep);
+        padding-bottom: 12px;
+        margin-bottom: 14px;
+        border-bottom: 2px solid rgba(var(--c-navy-deep-rgb), 0.22);
+    }
+    .evento-columna ol {
+        margin: 0;
+        padding-left: 20px;
+        font-size: 14.5px;
+        line-height: 1.75;
+        font-weight: 600;
+        color: var(--c-navy-deep);
+    }
+
+    .evento-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 30px;
+        background: var(--c-navy-deep);
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        padding: 13px 28px;
+        border-radius: 50px;
+        transition: background 0.25s ease, transform 0.12s ease;
+    }
+    .evento-cta:hover { background: var(--c-navy); }
+    .evento-cta:active { transform: scale(0.96); }
+    .evento-cta svg { width: 19px; height: 19px; flex-shrink: 0; }
+
+    /* Visor del afiche: mismo patrón que el lightbox de Multimedia, pero
+       para una sola imagen (sin flechas ni contador). Va en el bloque
+       modals, no en .evento, para no quedar atrapado bajo el z-index
+       del header sticky (ver el comentario de modals en base.html). */
+    .evento-lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 300;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(6, 16, 31, 0.94);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease, visibility 0.25s;
+    }
+    .evento-lightbox.is-open { opacity: 1; visibility: visible; }
+    .evento-lightbox-img {
+        max-width: min(88vw, 1100px);
+        max-height: 84vh;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 4px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    .evento-lightbox-cerrar {
+        position: absolute;
+        top: 18px;
+        right: 22px;
+        background: transparent;
+        border: 0;
+        color: #ffffff;
+        font-size: 34px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 8px;
+        opacity: 0.85;
+        transition: opacity 0.2s ease, transform 0.15s ease;
+    }
+    .evento-lightbox-cerrar:hover { opacity: 1; }
+    .evento-lightbox-cerrar:active { transform: scale(0.9); }
+    {% endif %}
+
     /* =========================================================
        RESPONSIVE
        ========================================================= */
@@ -326,6 +646,24 @@
         .ig-fila { grid-template-columns: 1fr; gap: 20px; }
         .logo-plate { width: 120px; height: 92px; }
         .futuro-boton { min-width: 0; width: 100%; }
+        {% if evento %}
+        .evento-inner { padding: 44px var(--page-pad) 50px var(--page-pad); }
+        /* El afiche pasa arriba, centrado y derecho: en una sola columna
+           la inclinación deja de leerse como gracia y solo descuadra. */
+        .evento-grid { grid-template-columns: 1fr; gap: 30px; }
+        .evento-afiche {
+            transform: none;
+            max-width: 380px;
+            margin: 0 auto;
+        }
+        .evento-datos { gap: 12px; }
+        /* La fecha y la sede pasan a ancho completo, una sobre otra: en
+           dos columnas angostas el nombre del colegio se parte en tres
+           líneas. */
+        .evento-fecha, .evento-sede { width: 100%; }
+        .evento-colegios { grid-template-columns: 1fr; gap: 14px; }
+        .evento-cta { width: 100%; justify-content: center; }
+        {% endif %}
     }
 </style>
 
@@ -376,6 +714,105 @@
         </div>
     </div>
 </section>
+
+{% comment %}
+EVENTO DESTACADO — va entre las cifras y las redes sociales a propósito:
+es información con fecha de vencimiento, así que tiene que aparecer antes
+que el contenido permanente, apenas el visitante termina de leer el hero.
+
+La sección entera aparece y desaparece sola según las fechas del evento
+(ver core/contenido.py): el día después del cierre ya no se muestra, sin
+que nadie tenga que entrar a editar el sitio.
+{% endcomment %}
+{% if evento %}
+<section class="evento" id="evento" aria-labelledby="eventoTitulo">
+    <div class="evento-inner">
+      <div class="evento-grid">
+
+        {% comment %}
+        El afiche es el protagonista, pero los mismos datos van también
+        como texto al lado: una imagen no la lee un lector de pantalla,
+        no la indexa Google y no se puede copiar y pegar. Las dos cosas
+        se complementan, no se repiten por descuido.
+
+        El botón abre el visor propio (ver bloque modals más abajo) con
+        la versión completa del afiche, en vez de navegar a la imagen
+        sola como antes: mismo patrón que la galería de Multimedia.
+        {% endcomment %}
+        <figure class="evento-afiche">
+            <button type="button" id="eventoAfichebtn"
+                    data-src-completo="{% static evento.afiche_completo %}"
+                    data-alt="{{ evento.afiche_alt }}"
+                    aria-label="Ver afiche ampliado">
+                <img src="{% static evento.afiche %}" alt="{{ evento.afiche_alt }}"
+                     width="760" height="1075" loading="lazy" decoding="async">
+            </button>
+            <figcaption>Toca el afiche para verlo completo</figcaption>
+        </figure>
+
+      <div class="evento-info">
+        <div class="evento-etiquetas">
+            <span class="evento-badge">Próximo evento</span>
+            <span class="evento-cuenta">{{ evento.etiqueta }}</span>
+        </div>
+
+        <h2 class="evento-titulo" id="eventoTitulo">{{ evento.nombre }}</h2>
+        <p class="evento-bajada">
+            Tres días de competencia con 10 equipos de Damas y 10 equipos de
+            Varones, con colegios invitados desde La Serena, Viña del Mar,
+            Villa Alemana y Valdivia.
+        </p>
+
+        <div class="evento-datos">
+            <div class="evento-fecha">
+                <span class="evento-fecha-dias">{{ evento.dias_numeros }}</span>
+                <span class="evento-fecha-mes">{{ evento.mes }}</span>
+            </div>
+
+            <a class="evento-sede"
+               href="https://www.google.com/maps/search/?api=1&amp;query={{ evento.mapa_query|urlencode }}"
+               target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                    <path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11z" stroke-linejoin="round"/>
+                    <circle cx="12" cy="10" r="2.6"/>
+                </svg>
+                <div>
+                    <strong>{{ evento.sede }}</strong>
+                    <span>{{ evento.direccion }}</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="evento-colegios">
+            <div class="evento-columna">
+                <h3>Damas</h3>
+                <ol>
+                    {% for colegio in evento.damas %}<li>{{ colegio }}</li>{% endfor %}
+                </ol>
+            </div>
+            <div class="evento-columna">
+                <h3>Varones</h3>
+                <ol>
+                    {% for colegio in evento.varones %}<li>{{ colegio }}</li>{% endfor %}
+                </ol>
+            </div>
+        </div>
+
+        <a class="evento-cta" href="https://www.instagram.com/ligametropolitanavoley/"
+           target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <rect x="2" y="2" width="20" height="20" rx="5"/>
+                <circle cx="12" cy="12" r="4"/>
+                <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/>
+            </svg>
+            Sigue la cobertura en Instagram
+        </a>
+      </div>
+
+      </div>
+    </div>
+</section>
+{% endif %}
 
 <!-- REDES SOCIALES -->
 <section class="band-blue">
@@ -453,8 +890,71 @@
 </section>
 {% endblock %}
 
+{% comment %}
+El {% if evento %} va DENTRO del bloque, no alrededor: Django empalma un
+{% block %} de un template hijo por nombre, sin mirar qué lo rodeaba ahí
+—envolverlo por fuera no sirve para condicionarlo, hay que condicionar
+su contenido.
+{% endcomment %}
+{% block modals %}
+{% if evento %}
+<div class="evento-lightbox" id="eventoLightbox" role="dialog" aria-modal="true" aria-label="Afiche ampliado" hidden>
+    <button class="evento-lightbox-cerrar" id="eventoLightboxCerrar" type="button" aria-label="Cerrar">&times;</button>
+    <img class="evento-lightbox-img" id="eventoLightboxImg" src="" alt="">
+</div>
+{% endif %}
+{% endblock %}
+
 {% block scripts %}
 <script async src="https://www.instagram.com/embed.js"></script>
+
+{% if evento %}
+<!-- VISOR DEL AFICHE DEL EVENTO -->
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+    var boton = document.getElementById('eventoAfichebtn');
+    var lightbox = document.getElementById('eventoLightbox');
+    var img = document.getElementById('eventoLightboxImg');
+    var btnCerrar = document.getElementById('eventoLightboxCerrar');
+    if (!boton || !lightbox || !img || !btnCerrar) return;
+
+    var elementoAntesDeAbrir = null;
+    var temporizadorCierre = null;
+
+    function abrir() {
+        // Si se reabre durante el fundido de cierre, ese cierre pendiente
+        // no debe ocultar el visor recién abierto (quedaría sin teclado).
+        clearTimeout(temporizadorCierre);
+        elementoAntesDeAbrir = document.activeElement;
+        img.src = boton.getAttribute('data-src-completo');
+        img.alt = boton.getAttribute('data-alt');
+        lightbox.hidden = false;
+        requestAnimationFrame(function () { lightbox.classList.add('is-open'); });
+        document.body.style.overflow = 'hidden';
+        btnCerrar.focus();
+    }
+
+    function cerrar() {
+        lightbox.classList.remove('is-open');
+        document.body.style.overflow = '';
+        temporizadorCierre = setTimeout(function () { lightbox.hidden = true; }, 250);
+        if (elementoAntesDeAbrir) elementoAntesDeAbrir.focus();
+    }
+
+    boton.addEventListener('click', abrir);
+    btnCerrar.addEventListener('click', cerrar);
+
+    // Tapear el fondo oscuro (no la imagen ni el botón) cierra.
+    lightbox.addEventListener('click', function (e) {
+        if (e.target === lightbox) cerrar();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (!lightbox.hidden && e.key === 'Escape') cerrar();
+    });
+})();
+</script>
+{% endif %}
 
 <!-- VIDEO DEL HERO -->
 <script nonce="{{ request.csp_nonce }}">
