@@ -21,7 +21,8 @@
         overflow: hidden;
         background: var(--c-navy-deep);
     }
-    .hero-video {
+    .hero-video,
+    .hero-foto img {
         position: absolute;
         inset: 0;
         width: 100%;
@@ -236,10 +237,13 @@
         transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .logo-plate:hover { transform: translateY(-4px); }
+    /* width/height del HTML solo dan la proporción para reservar el
+       espacio; el tamaño real lo siguen poniendo los máximos de acá. */
     .logo-plate img {
         max-width: 100%;
         max-height: 100%;
         width: auto;
+        height: auto;
         object-fit: contain;
     }
     /* Con movimiento reducido el carrusel no se desplaza: se convierte
@@ -671,10 +675,20 @@
 
 <!-- HERO -->
 <section class="hero" id="hero">
+    {# Foto de fondo: el navegador baja solo una de las dos. En celular  #}
+    {# va una vertical, porque la horizontal quedaba muy recortada.      #}
+    <picture class="hero-foto">
+        <source media="(min-width: 941px)" srcset="{% static 'core/img/fotos/galeria-1.jpg' %}">
+        <img src="{% static 'core/img/fotos/galeria-11.jpg' %}" alt="" aria-hidden="true"
+             width="934" height="1400" fetchpriority="high">
+    </picture>
+
+    {# Sin src ni autoplay a propósito: con autoplay el navegador baja el  #}
+    {# video entero (4 MB) aunque diga preload="none". El script de abajo #}
+    {# le pone el src solo en escritorio; mientras carga, se ve la foto.  #}
     <video class="hero-video" id="heroVideo"
-           src="{% static 'core/video/hero-copa.mp4' %}"
-           poster="{% static 'core/img/fotos/galeria-1.jpg' %}"
-           autoplay muted playsinline loop preload="auto" aria-hidden="true"></video>
+           data-src="{% static 'core/video/hero-copa.mp4' %}"
+           muted playsinline loop preload="none" aria-hidden="true"></video>
 
     <div class="hero-lavado"></div>
 
@@ -863,10 +877,10 @@ que nadie tenga que entrar a editar el sitio.
     <div class="carrusel">
         <div class="carrusel-pista">
             {% for colegio in colegios %}
-            <div class="logo-plate"><img src="{% static colegio.src %}" alt="{{ colegio.alt }}"></div>
+            <div class="logo-plate"><img src="{% static colegio.src %}" alt="{{ colegio.alt }}" width="{{ colegio.ancho }}" height="{{ colegio.alto }}"></div>
             {% endfor %}
             {% for colegio in colegios %}
-            <div class="logo-plate copia"><img src="{% static colegio.src %}" alt="" aria-hidden="true"></div>
+            <div class="logo-plate copia"><img src="{% static colegio.src %}" alt="" aria-hidden="true" width="{{ colegio.ancho }}" height="{{ colegio.alto }}"></div>
             {% endfor %}
         </div>
     </div>
@@ -963,14 +977,18 @@ su contenido.
     var video = document.getElementById('heroVideo');
     if (!hero || !video) return;
 
-    // Si el visitante pidió reducir movimiento, el video no se
-    // reproduce y queda su fotograma de portada.
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        video.removeAttribute('autoplay');
-        video.pause();
+    // El video solo se descarga si vale la pena: en pantallas chicas
+    // (casi siempre celulares, muchas veces con datos móviles), con
+    // "reducir movimiento" o con el ahorro de datos activado, queda la
+    // foto de fondo y no se baja nada más.
+    var conexion = navigator.connection || {};
+    if (!window.matchMedia('(min-width: 941px)').matches ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+        conexion.saveData) {
         return;
     }
 
+    video.src = video.getAttribute('data-src');
     video.play().catch(function () {});
 
     // No tiene sentido decodificar video cuando el hero no está a la vista.

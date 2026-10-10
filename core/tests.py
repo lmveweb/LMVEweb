@@ -2,6 +2,7 @@ import json
 import re
 import time
 from datetime import date
+from io import StringIO
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
@@ -15,7 +16,8 @@ from django.urls import NoReverseMatch, reverse
 from django_otp.plugins.otp_email.models import EmailDevice
 
 from .antispam import SALT_MARCA_TIEMPO, SEGUNDOS_MINIMOS
-from .contenido import evento_vigente
+from .contenido import COLEGIOS, evento_vigente
+from .management.commands.medir_peso import clasificar_estaticos
 from .models import MensajePatrocinio
 from .seo import PAGINAS
 from LMVEweb.urls import ADMIN_URL
@@ -278,6 +280,32 @@ class PlantillasTests(TestCase):
     def test_scripts_externos_por_https_explicito(self):
         self.assertNotContains(self.client.get(reverse('home')), 'src="//')
 
+    def test_el_video_del_hero_no_se_descarga_de_entrada(self):
+        # Con autoplay o con src en el HTML, el navegador baja los 4 MB del
+        # video también en celulares. Lo asigna el JS, y solo en escritorio.
+        html = self.client.get(reverse('home')).content.decode()
+        video = re.search(r'<video\b[^>]*id="heroVideo"[^>]*>', html).group(0)
+        self.assertNotIn('autoplay', video)
+        self.assertNotRegex(video, r'\ssrc=')
+        self.assertIn('data-src="/static/core/video/', video)
+        # Sin poster: detrás del video hay un <picture> con una foto
+        # vertical para celular y la horizontal para escritorio.
+        self.assertNotRegex(video, r'\sposter=')
+        foto = re.search(r'<picture class="hero-foto">.*?</picture>', html, re.S).group(0)
+        self.assertRegex(foto, r'<source media="\(min-width: 941px\)" srcset="[^"]*galeria-1\.')
+        self.assertRegex(foto, r'<img src="[^"]*galeria-11\.')
+
+    def test_los_logos_del_carrusel_son_webp_con_medidas(self):
+        html = self.client.get(reverse('home')).content.decode()
+        logos = re.findall(r'<img src="[^"]*/colegios/[^>]*>', html)
+        self.assertEqual(len(logos), 2 * len(COLEGIOS))  # pista + copia
+        for logo in logos:
+            with self.subTest(logo=logo):
+                self.assertRegex(logo, r'\.webp"')
+                self.assertRegex(logo, r'width="\d+" height="\d+"')
+                # Nada de lazy: la pista se mueve y aparecerían placas en blanco.
+                self.assertNotIn('loading=', logo)
+
 
 @override_settings(SITE_URL='https://ligamve.cl')
 class SeoTests(TestCase):
@@ -461,6 +489,43 @@ class Habilitar2faCommandTests(TestCase):
     def test_usuario_inexistente_falla_con_mensaje_claro(self):
         with self.assertRaises(CommandError):
             call_command('habilitar_2fa', 'no-existe')
+
+
+class MedirPesoCommandTests(TestCase):
+    def test_separa_la_carga_inicial_de_lo_que_trae_el_javascript(self):
+        html = '''
+            <meta property="og:image" content="https://ligamve.cl/static/redes.jpg">
+            <script type="application/ld+json">{"logo": "https://ligamve.cl/static/logo-full.png"}</script>
+            <style>.hero { background: url('/static/fondo.webp?v=2'); }</style>
+            <img src="/static/logo.webp"><img src="/static/logo.webp">
+            <script src="/static/three.min.js"></script>
+            <script>video.src = '/static/video.mp4';</script>
+            <img data-src="/static/foto.webp">
+            <button data-src-completo="/static/afiche.webp"></button>
+            <video data-poster="/static/portada.jpg"></video>
+            <picture>
+                <source media="(min-width: 941px)" srcset="/static/hero-ancha.jpg">
+                <img src="/static/hero-vertical.jpg">
+            </picture>
+            <script>var otra = '/static/logo.webp';</script>
+        '''
+        iniciales, diferidos = clasificar_estaticos(html)
+        # Del <picture> cuenta la foto de celular, no la de escritorio.
+        self.assertEqual(iniciales, {'fondo.webp', 'logo.webp', 'three.min.js', 'hero-vertical.jpg'})
+        # logo.webp aparece también en un script, pero ya se bajó de entrada.
+        self.assertEqual(diferidos, {'video.mp4', 'foto.webp', 'afiche.webp', 'portada.jpg'})
+
+    def test_mide_todas_las_vistas_publicas(self):
+        salida, errores = StringIO(), StringIO()
+        call_command('medir_peso', stdout=salida, stderr=errores)
+        texto = salida.getvalue()
+        for nombre in PAGINAS:
+            with self.subTest(vista=nombre):
+                self.assertIn(f'({nombre})', texto)
+        self.assertIn('Carga inicial:', texto)
+        # Todo lo que referencian las páginas existe en STATIC_ROOT y
+        # todas respondieron 200.
+        self.assertEqual(errores.getvalue(), '')
 
 
 # Evento inventado a propósito, con fechas fijas: si los tests usaran el

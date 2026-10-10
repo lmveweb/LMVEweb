@@ -7,3 +7,4 @@ db.sqlite3
 staticfiles/
 .claude/
 imagenes_sin_uso/
+originales_imagenes/
