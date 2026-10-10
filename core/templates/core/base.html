@@ -186,6 +186,41 @@
         }
 
         /* =========================================================
+           TRANSICIONES
+           ========================================================= */
+        /* Entre páginas: View Transitions del navegador, sin JS. La
+           página nueva sube un poco mientras aparece; el encabezado
+           tiene su propio nombre, así que queda quieto y solo cambia
+           el contenido. Firefox (todavía) no las soporta: ahí la
+           navegación es la normal de siempre, sin romper nada. */
+        @view-transition { navigation: auto; }
+        .site-header { view-transition-name: encabezado; }
+        ::view-transition-old(root) {
+            animation: 180ms ease-out both pagina-sale;
+        }
+        ::view-transition-new(root) {
+            animation: 380ms cubic-bezier(0.16, 1, 0.3, 1) both pagina-entra;
+        }
+        @keyframes pagina-sale { to { opacity: 0; } }
+        @keyframes pagina-entra { from { opacity: 0; transform: translateY(24px); } }
+
+        /* Al bajar: las secciones que parten fuera de pantalla aparecen
+           al entrar en ella. La clase .aparecer la pone el script del
+           final, así que sin JS todo se ve desde el principio. */
+        .aparecer {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .aparecer.visible { opacity: 1; transform: none; }
+
+        /* La regla general de arriba no alcanza a los pseudoelementos
+           de la transición entre páginas: se apaga aparte. */
+        @media (prefers-reduced-motion: reduce) {
+            @view-transition { navigation: none; }
+        }
+
+        /* =========================================================
            ENCABEZADO
            ========================================================= */
         .site-header {
@@ -842,6 +877,30 @@
             }
             window.addEventListener('scroll', update, { passive: true });
             update();
+        })();
+    </script>
+
+    <!-- Secciones que aparecen al bajar -->
+    <script nonce="{{ request.csp_nonce }}">
+        (function () {
+            if (!('IntersectionObserver' in window) ||
+                window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            var observador = new IntersectionObserver(function (entradas) {
+                entradas.forEach(function (e) {
+                    if (!e.isIntersecting) return;
+                    e.target.classList.add('visible');
+                    observador.unobserve(e.target);
+                });
+            }, { rootMargin: '0px 0px -10% 0px' });
+
+            document.querySelectorAll('.site-main > section').forEach(function (seccion) {
+                // Lo que ya está en pantalla al cargar no se esconde: se
+                // vería un parpadeo y retrasaría lo primero que se lee.
+                if (seccion.getBoundingClientRect().top < window.innerHeight) return;
+                seccion.classList.add('aparecer');
+                observador.observe(seccion);
+            });
         })();
     </script>
 

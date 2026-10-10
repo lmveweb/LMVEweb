@@ -295,6 +295,26 @@ class PlantillasTests(TestCase):
         self.assertRegex(foto, r'<source media="\(min-width: 941px\)" srcset="[^"]*galeria-1\.')
         self.assertRegex(foto, r'<img src="[^"]*galeria-11\.')
 
+    def test_todas_las_vistas_tienen_transiciones_que_respetan_reducir_movimiento(self):
+        for nombre in PAGINAS:
+            with self.subTest(vista=nombre):
+                html = self.client.get(reverse(nombre)).content.decode()
+                self.assertIn('@view-transition { navigation: auto; }', html)
+                self.assertIn('view-transition-name: encabezado', html)
+                self.assertRegex(
+                    html, r'prefers-reduced-motion: reduce\)\s*\{\s*@view-transition \{ navigation: none; \}')
+                # El script de "aparecer al bajar" corre con nonce (CSP).
+                self.assertRegex(html, r'<script nonce="[^"]+">\s*\(function \(\) \{\s*'
+                                       r"if \(!\('IntersectionObserver' in window\)")
+
+    def test_ninguna_seccion_parte_escondida_en_el_html(self):
+        # .aparecer la pone el JS, solo a lo que está fuera de pantalla:
+        # sin JS (o para Google) todo el contenido tiene que verse.
+        for nombre in PAGINAS:
+            with self.subTest(vista=nombre):
+                self.assertNotRegex(self.client.get(reverse(nombre)).content.decode(),
+                                    r'class="[^"]*\baparecer\b')
+
     def test_los_logos_del_carrusel_son_webp_con_medidas(self):
         html = self.client.get(reverse('home')).content.decode()
         logos = re.findall(r'<img src="[^"]*/colegios/[^>]*>', html)
