@@ -6,5 +6,7 @@ db.sqlite3
 .env.example
 staticfiles/
 .claude/
+CONTEXTO_PROYECTO.md
+PLAN_DE_TRABAJO.md
 imagenes_sin_uso/
 originales_imagenes/
