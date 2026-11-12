@@ -643,3 +643,115 @@ class EventoDestacadoTests(TestCase):
     def test_el_evento_desaparece_al_dia_siguiente_del_cierre(self):
         self.assertIsNone(evento_vigente(date(2026, 9, 28)))
         self.assertIsNone(evento_vigente(date(2027, 1, 1)))
+
+
+class IpDelVisitanteTests(TestCase):
+    """Detrás del proxy del hosting, REMOTE_ADDR es la dirección del
+    proxy y no la del visitante: sin corregirlo, el límite de intentos
+    "por IP" es un solo cupo compartido por todo el mundo, y cualquiera
+    puede dejar el formulario sin funcionar para los demás con 6 POST por
+    minuto. La IP real llega en un encabezado que pone el proxy, y cuál
+    es se configura en IP_CLIENTE_ENCABEZADO (ver core/ip.py)."""
+
+    PROXY = '10.0.0.1'
+
+    def setUp(self):
+        cache.clear()
+        # Mismo motivo que en AdminSeguridadTests.test_rate_limit_en_login:
+        # sin el reloj fijo, un loop que cruza el borde de la ventana de
+        # 60 s ve el contador reiniciarse a mitad de camino.
+        reloj = patch('django_ratelimit.core.time.time', return_value=time.time())
+        reloj.start()
+        self.addCleanup(reloj.stop)
+
+    def _enviar(self, **meta):
+        return self.client.post(reverse('contacto'), datos_validos(), REMOTE_ADDR=self.PROXY, **meta)
+
+    def test_ip_cliente_sin_encabezado_configurado_usa_la_conexion(self):
+        from .ip import ip_cliente
+        request = self.client.get('/', REMOTE_ADDR='203.0.113.7', HTTP_CF_CONNECTING_IP='198.51.100.9').wsgi_request
+        self.assertEqual(ip_cliente(request), '203.0.113.7')
+
+    @override_settings(IP_CLIENTE_ENCABEZADO='CF-Connecting-IP')
+    def test_ip_cliente_lee_el_encabezado_configurado(self):
+        from .ip import ip_cliente
+        request = self.client.get('/', REMOTE_ADDR=self.PROXY, HTTP_CF_CONNECTING_IP=' 198.51.100.9 ').wsgi_request
+        self.assertEqual(ip_cliente(request), '198.51.100.9')
+
+    @override_settings(IP_CLIENTE_ENCABEZADO='CF-Connecting-IP')
+    def test_ip_cliente_ignora_un_encabezado_que_no_es_una_ip(self):
+        # Vacío, ausente, basura o una lista: nada de eso es "la IP del
+        # visitante", así que se vuelve a la de la conexión en vez de
+        # usar texto arbitrario como clave del límite.
+        from .ip import ip_cliente
+        for valor in ('', 'no-es-una-ip', '198.51.100.9, 10.0.0.1', '<script>'):
+            request = self.client.get('/', REMOTE_ADDR=self.PROXY, HTTP_CF_CONNECTING_IP=valor).wsgi_request
+            self.assertEqual(ip_cliente(request), self.PROXY, valor)
+        request = self.client.get('/', REMOTE_ADDR=self.PROXY).wsgi_request
+        self.assertEqual(ip_cliente(request), self.PROXY)
+
+    @override_settings(IP_CLIENTE_ENCABEZADO='CF-Connecting-IP', CONTACTO_DESTINATARIO='')
+    def test_visitantes_distintos_no_comparten_el_cupo_del_formulario(self):
+        for i in range(8):
+            respuesta = self._enviar(HTTP_CF_CONNECTING_IP=f'198.51.100.{i}')
+            self.assertEqual(respuesta.status_code, 200, f'visitante {i}')
+
+    @override_settings(IP_CLIENTE_ENCABEZADO='CF-Connecting-IP', CONTACTO_DESTINATARIO='')
+    def test_un_mismo_visitante_si_se_frena_y_no_arrastra_a_otro(self):
+        for _ in range(5):
+            self.assertEqual(self._enviar(HTTP_CF_CONNECTING_IP='198.51.100.50').status_code, 200)
+        self.assertEqual(self._enviar(HTTP_CF_CONNECTING_IP='198.51.100.50').status_code, 429)
+        self.assertEqual(self._enviar(HTTP_CF_CONNECTING_IP='198.51.100.51').status_code, 200)
+
+    @override_settings(CONTACTO_DESTINATARIO='')
+    def test_sin_configurar_el_encabezado_no_sirve_para_saltarse_el_limite(self):
+        # Fuera de un hosting que lo ponga, el encabezado lo puede
+        # escribir cualquiera: confiar en él por defecto regalaría una
+        # forma de evadir el límite cambiándolo en cada intento.
+        for i in range(5):
+            self.assertEqual(self._enviar(HTTP_CF_CONNECTING_IP=f'198.51.100.{i}').status_code, 200)
+        self.assertEqual(self._enviar(HTTP_CF_CONNECTING_IP='198.51.100.99').status_code, 429)
+
+    @override_settings(IP_CLIENTE_ENCABEZADO='CF-Connecting-IP', CONTACTO_DESTINATARIO='')
+    def test_ipv6_se_agrupa_por_bloque_64(self):
+        # A una casa u oficina se le asigna un bloque /64 completo: si se
+        # contara por dirección exacta, alcanzaría con cambiar los
+        # últimos dígitos en cada intento para no toparse nunca con el
+        # límite.
+        for i in range(5):
+            self.assertEqual(self._enviar(HTTP_CF_CONNECTING_IP=f'2001:db8:aa:bb::{i + 1}').status_code, 200)
+        self.assertEqual(self._enviar(HTTP_CF_CONNECTING_IP='2001:db8:aa:bb:1234::9').status_code, 429)
+        self.assertEqual(self._enviar(HTTP_CF_CONNECTING_IP='2001:db8:aa:cc::1').status_code, 200)
+
+    @override_settings(IP_CLIENTE_ENCABEZADO='CF-Connecting-IP')
+    def test_login_del_admin_limita_por_visitante_y_no_por_proxy(self):
+        def intento(ip):
+            return self.client.post(
+                LOGIN_URL, {'username': 'nadie', 'password': 'mala'},
+                REMOTE_ADDR=self.PROXY, HTTP_CF_CONNECTING_IP=ip,
+            ).status_code
+
+        for _ in range(10):
+            self.assertEqual(intento('198.51.100.60'), 200)
+        self.assertEqual(intento('198.51.100.60'), 403)
+        # Quien atacó quedó frenado; la persona que administra el sitio,
+        # desde otra IP, puede seguir entrando.
+        self.assertEqual(intento('198.51.100.61'), 200)
+
+    @override_settings(IP_CLIENTE_ENCABEZADO='CF-Connecting-IP', CONTACTO_DESTINATARIO='')
+    def test_el_log_registra_la_ip_del_visitante_y_la_de_la_conexion(self):
+        with self.assertLogs('core.views', level='INFO') as logs:
+            self._enviar(HTTP_CF_CONNECTING_IP='198.51.100.70')
+        self.assertTrue(
+            any('198.51.100.70' in linea and self.PROXY in linea for linea in logs.output),
+            logs.output,
+        )
+
+
+class SesionAdminTests(TestCase):
+    def test_la_sesion_dura_una_jornada_y_muere_con_el_navegador(self):
+        # Por defecto Django la deja abierta 14 días: demasiado si alguien
+        # entra al admin desde un computador compartido de un colegio.
+        from django.conf import settings
+        self.assertLessEqual(settings.SESSION_COOKIE_AGE, 12 * 60 * 60)
+        self.assertTrue(settings.SESSION_EXPIRE_AT_BROWSER_CLOSE)

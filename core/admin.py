@@ -5,6 +5,7 @@ from django.utils.decorators import method_decorator
 from django_otp.admin import OTPAdminSite
 from django_ratelimit.decorators import ratelimit
 
+from .ip import clave_ratelimit
 from .models import MensajePatrocinio
 
 
@@ -23,10 +24,13 @@ class LmveAdminSite(OTPAdminSite):
     Rate limiting en el login: por IP, no por usuario, porque antes
     del 2FA no sabemos si la contraseña es correcta — lo que hay que
     frenar es a quien está probando contraseñas o códigos seguidos,
-    no distinguir cuentas.
+    no distinguir cuentas. La IP es la del visitante, no la del proxy
+    del hosting (ver core/ip.py): con la del proxy, a cualquiera le
+    alcanzaría con 10 intentos por minuto para dejar fuera a quien
+    administra el sitio.
     """
 
-    @method_decorator(ratelimit(key='ip', rate='10/m', method='POST'))
+    @method_decorator(ratelimit(key=clave_ratelimit, rate='10/m', method='POST'))
     def login(self, request, extra_context=None):
         return super().login(request, extra_context)
 

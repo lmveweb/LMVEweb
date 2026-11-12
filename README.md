@@ -83,6 +83,7 @@ python manage.py test
 | `DJANGO_SECRET_KEY` | Clave de firma de Django | Sí, si `DJANGO_DEBUG=False` |
 | `DJANGO_ALLOWED_HOSTS` | Dominios permitidos, separados por coma | Sí, en producción |
 | `DJANGO_ADMIN_URL` | Ruta del panel de admin (default `admin/`) | No |
+| `DJANGO_CLIENT_IP_HEADER` | Encabezado en que el proxy del hosting entrega la IP real del visitante, para el límite de intentos (en Render: `CF-Connecting-IP`) | No — sin esto se usa la IP de la conexión, correcto en local |
 | `SITE_URL` | Origen canónico para sitemap, robots.txt y meta de SEO | No — default `http://127.0.0.1:8000` |
 | `DATABASE_URL` | Postgres en producción; sin definir usa SQLite local | No |
 | `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | Gmail + contraseña de aplicación | No — sin esto, el correo solo se imprime en consola |

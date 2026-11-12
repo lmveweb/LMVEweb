@@ -16,6 +16,7 @@ from .antispam import (
 )
 from .contenido import COLEGIOS, FOTOS_MULTIMEDIA, evento_vigente
 from .forms import ContactoForm
+from .ip import clave_ratelimit, ip_cliente
 from .seo import jsonld_home
 
 logger = logging.getLogger(__name__)
@@ -57,8 +58,12 @@ def _error(mensajes, status=400):
     return JsonResponse({'ok': False, 'errores': mensajes}, status=status)
 
 
-def _ip(request):
-    return request.META.get('REMOTE_ADDR')
+def _origen(request):
+    """Para los registros: la IP del visitante y, aparte, la de la
+    conexión. Si las dos coinciden y parecen internas (10.x), el
+    encabezado de DJANGO_CLIENT_IP_HEADER no está llegando: ver
+    core/ip.py."""
+    return f'IP {ip_cliente(request)}, conexión {request.META.get("REMOTE_ADDR")}'
 
 
 def _filtrar_bots(request):
@@ -73,7 +78,7 @@ def _filtrar_bots(request):
     lo que toma leer el primer campo del formulario.
     """
     if request.POST.get(HONEYPOT_FIELD, '').strip():
-        logger.warning('Contacto bloqueado por honeypot (IP %s)', _ip(request))
+        logger.warning('Contacto bloqueado por honeypot (%s)', _origen(request))
         return JsonResponse({'ok': True})
 
     segun_tiempo = es_envio_humano_por_tiempo(request.POST.get('marca_tiempo', ''))
@@ -84,7 +89,7 @@ def _filtrar_bots(request):
         # en vez de tratarla como bot.
         return _error(['El formulario expiró. Recarga la página e intenta de nuevo.'])
     if not segun_tiempo:
-        logger.warning('Contacto bloqueado por envío demasiado rápido (IP %s)', _ip(request))
+        logger.warning('Contacto bloqueado por envío demasiado rápido (%s)', _origen(request))
         return JsonResponse({'ok': True})
 
     return None
@@ -115,7 +120,7 @@ def _avisar_por_correo(mensaje):
 
 
 @require_http_methods(['GET', 'HEAD', 'POST'])
-@ratelimit(key='ip', rate='5/m', method='POST', block=False)
+@ratelimit(key=clave_ratelimit, rate='5/m', method='POST', block=False)
 def contacto(request):
     if request.method != 'POST':
         return render(request, 'core/contacto.html', {
@@ -125,6 +130,7 @@ def contacto(request):
         })
 
     if getattr(request, 'limited', False):
+        logger.warning('Contacto frenado por límite de intentos (%s)', _origen(request))
         return _error(['Demasiados intentos. Espera un minuto e intenta de nuevo.'], status=429)
 
     bloqueo = _filtrar_bots(request)
@@ -146,8 +152,9 @@ def contacto(request):
     # reintentar. Sin TURNSTILE_SECRET_KEY, esta capa no corre.
     if settings.TURNSTILE_SECRET_KEY:
         token = request.POST.get('cf-turnstile-response', '')
-        if not verificar_turnstile(token, _ip(request), settings.TURNSTILE_SECRET_KEY):
+        if not verificar_turnstile(token, ip_cliente(request), settings.TURNSTILE_SECRET_KEY):
             return _error(['No pudimos verificar que eres una persona. Recarga la página e intenta de nuevo.'])
 
     _avisar_por_correo(form.save())
+    logger.info('Contacto recibido (%s)', _origen(request))
     return JsonResponse({'ok': True})

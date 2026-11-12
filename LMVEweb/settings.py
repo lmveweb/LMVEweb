@@ -177,6 +177,28 @@ TURNSTILE_SITE_KEY = os.environ.get('TURNSTILE_SITE_KEY', '')
 TURNSTILE_SECRET_KEY = os.environ.get('TURNSTILE_SECRET_KEY', '')
 
 
+# Encabezado en el que el proxy del hosting entrega la IP real del
+# visitante (ver core/ip.py). Vacío por defecto: se usa la IP de la
+# conexión, que es lo correcto en local y en los tests. En Render:
+# variable de entorno DJANGO_CLIENT_IP_HEADER=CF-Connecting-IP.
+#
+# Solo hay que definirla con un encabezado que el proxy pise siempre: uno
+# que el visitante pueda escribir a su gusto serviría para saltarse el
+# límite de intentos.
+IP_CLIENTE_ENCABEZADO = os.environ.get('DJANGO_CLIENT_IP_HEADER', '').strip()
+
+
+# Sesiones (solo las usa el admin)
+#
+# Por defecto Django deja la sesión abierta 14 días, aunque se cierre el
+# navegador. Acá dura una jornada y muere al cerrarlo: quien entre al
+# admin desde un computador compartido de un colegio no deja la puerta
+# abierta por dos semanas. El costo es volver a pedir el código de
+# acceso en la siguiente visita.
+SESSION_COOKIE_AGE = 12 * 60 * 60
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
