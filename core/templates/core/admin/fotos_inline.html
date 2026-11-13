@@ -1,0 +1,29 @@
+{% comment %}
+La tabla de fotos de una noticia es la de siempre de Django; esto solo
+le agrega encima la explicación de cuál foto es la portada.
+{% endcomment %}
+<div class="guia guia-fotos">
+    <p class="guia-titulo">Fotos de la noticia</p>
+    <div class="guia-fotos-grid">
+        <div class="guia-fotos-esquema" aria-hidden="true">
+            <div class="guia-esq-portada">
+                <span class="foto-portada-marca">Portada</span>
+                <span class="guia-esq-titulo">Título de la noticia</span>
+            </div>
+            <div class="guia-esq-texto"></div>
+            <div class="guia-esq-texto guia-esq-texto--corto"></div>
+            <div class="guia-esq-galeria"><span></span><span></span><span></span></div>
+        </div>
+        <ul>
+            <li>
+                <strong>La foto marcada como «Portada»</strong> va grande arriba de la noticia, detrás del
+                título. También es la que sale en la tarjeta de la portada del sitio y al compartir el link por WhatsApp.
+            </li>
+            <li>Marca la casilla <strong>«Portada»</strong> en una sola foto. Si no marcas ninguna, se usa la primera.</li>
+            <li><strong>Las demás fotos</strong> van en una galería al final del texto, en el orden que les pongas en «Orden» (1, 2, 3…).</li>
+            <li>Al guardar, la foto que quedó de portada aparece con la etiqueta <span class="foto-portada-marca">Portada</span> en la columna «Vista».</li>
+            <li>Para la portada, mejor una foto horizontal: en el encabezado y en la tarjeta se recorta para llenar el espacio.</li>
+        </ul>
+    </div>
+</div>
+{% include "admin/edit_inline/tabular.html" %}

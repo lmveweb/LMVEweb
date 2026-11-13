@@ -75,7 +75,7 @@ class FotoNoticiaForm(forms.ModelForm):
 
     class Meta:
         model = FotoNoticia
-        fields = ['archivo', 'alt', 'orden']
+        fields = ['archivo', 'alt', 'es_portada', 'orden']
 
     def clean_archivo(self):
         archivo = self.cleaned_data.get('archivo')
@@ -99,12 +99,30 @@ class FotoNoticiaForm(forms.ModelForm):
         return foto
 
 
+class FotosFormSet(forms.BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        marcadas = [
+            f for f in self.forms
+            if getattr(f, 'cleaned_data', None)
+            and f.cleaned_data.get('es_portada') and not f.cleaned_data.get('DELETE')
+        ]
+        if len(marcadas) > 1:
+            raise forms.ValidationError(
+                'Marcaste más de una foto como portada. Deja marcada solo una.'
+            )
+
+
 class FotoNoticiaInline(admin.TabularInline):
     model = FotoNoticia
     form = FotoNoticiaForm
+    formset = FotosFormSet
+    # Agrega sobre la tabla una explicación de qué foto es la portada
+    # (ver la plantilla).
+    template = 'core/admin/fotos_inline.html'
     extra = 1
     max_num = FOTOS_POR_NOTICIA
-    fields = ['vista', 'archivo', 'alt', 'orden']
+    fields = ['vista', 'archivo', 'alt', 'es_portada', 'orden']
     readonly_fields = ['vista']
 
     @admin.display(description='Vista')
@@ -113,10 +131,15 @@ class FotoNoticiaInline(admin.TabularInline):
             return '—'
         # Con atributos width/height y no con style="": la política de
         # seguridad del sitio (CSP) bloquea los estilos en línea.
-        return format_html(
+        imagen = format_html(
             '<img src="{}" alt="" width="120" height="{}">',
             foto.url_miniatura, round(120 * foto.mini_alto / foto.mini_ancho),
         )
+        # La marca va en la que de verdad sale de portada, esté marcada
+        # o no (si no hay ninguna marcada, es la primera).
+        if foto.noticia.portada.pk == foto.pk:
+            return format_html('{}<span class="foto-portada-marca">Portada</span>', imagen)
+        return imagen
 
 
 @admin.register(Noticia, site=site)
@@ -129,6 +152,7 @@ class NoticiaAdmin(admin.ModelAdmin):
 
     class Media:
         css = {'all': ['core/css/admin-noticias.css']}
+        js = ['core/js/admin-noticias.js']
 
     def get_fieldsets(self, request, obj=None):
         # La guía de escritura va justo sobre las casillas que explica.

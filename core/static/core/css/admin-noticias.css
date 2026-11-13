@@ -176,6 +176,79 @@
     overflow-wrap: anywhere;
 }
 
+/* ---- Fotos: cuál es la portada ---- */
+.foto-portada-marca {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 50px;
+    background: #F2620F;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+td.field-vista .foto-portada-marca {
+    display: block;
+    width: max-content;
+    margin-top: 6px;
+}
+.guia-fotos { margin-top: 18px; }
+.guia-fotos-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+.guia-fotos ul { margin: 0; padding-left: 18px; }
+.guia-fotos li { margin: 0 0 6px 0; padding: 0; list-style: disc; }
+/* Esquema de la página de una noticia: dónde va cada foto. */
+.guia-fotos-esquema {
+    padding: 8px;
+    border-radius: 8px;
+    background: #163E73;
+}
+.guia-esq-portada {
+    height: 74px;
+    border-radius: 6px;
+    background: linear-gradient(to top, #10365F 0%, #1B5490 100%);
+    border: 2px solid #F2620F;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.guia-esq-portada .foto-portada-marca { font-size: 9.5px; padding: 1px 7px; }
+.guia-esq-titulo {
+    font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #ffffff;
+}
+.guia-esq-texto {
+    height: 6px;
+    margin-top: 9px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.35);
+}
+.guia-esq-texto--corto { width: 70%; margin-top: 5px; }
+.guia-esq-galeria {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    margin-top: 10px;
+}
+.guia-esq-galeria span {
+    height: 26px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.22);
+}
+
 @media (max-width: 767px) {
     .guia-fila { grid-template-columns: 1fr; }
+    .guia-fotos-grid { grid-template-columns: 1fr; }
+    .guia-fotos-esquema { max-width: 220px; }
 }

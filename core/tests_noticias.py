@@ -606,6 +606,86 @@ class NoticiasAdminTests(TestCase):
         self.assertIn('login', r['Location'])
         self.assertEqual(Noticia.objects.count(), 0)
 
+    def _fotos_en_el_formulario(self, *fotos):
+        """Datos de la tabla de fotos para el formulario del panel. Cada
+        foto es (descripción, orden, portada, archivo)."""
+        datos = {'fotos-TOTAL_FORMS': str(len(fotos))}
+        for i, (alt, orden, portada, archivo) in enumerate(fotos):
+            datos.update({f'fotos-{i}-alt': alt, f'fotos-{i}-orden': str(orden), f'fotos-{i}-archivo': archivo})
+            if portada:
+                datos[f'fotos-{i}-es_portada'] = 'on'
+        return datos
+
+    def test_la_foto_marcada_como_portada_es_la_de_arriba_la_tarjeta_y_al_compartir(self):
+        self._entrar_al_panel()
+        # La portada es la tercera de la lista, y tiene el orden más alto:
+        # manda la casilla, no el orden.
+        r = self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
+            **self._fotos_en_el_formulario(
+                ('Foto uno', 1, False, foto_de_celular(1200, 900)),
+                ('Foto dos', 2, False, foto_de_celular(1300, 900)),
+                ('La premiación', 3, True, foto_de_celular(1400, 700)),
+            )))
+        self.assertEqual(r.status_code, 302)
+        noticia = Noticia.objects.get()
+        portada = noticia.fotos.get(alt='La premiación')
+        self.assertEqual(noticia.portada, portada)
+
+        pagina = self.client.get(noticia.get_absolute_url()).content.decode()
+        encabezado = re.search(r'<section class="noticia-hero.*?</section>', pagina, re.S).group(0)
+        self.assertIn(portada.url_grande, encabezado)
+        galeria = re.search(r'<div class="noticia-galeria">.*?</div>', pagina, re.S).group(0)
+        self.assertNotIn(portada.url_miniatura, galeria)
+        self.assertLess(galeria.index('alt="Foto uno"'), galeria.index('alt="Foto dos"'))
+
+        tarjeta = re.search(r'<a class="noticia-card".*?</a>', self.client.get(reverse('home')).content.decode(), re.S).group(0)
+        self.assertIn(portada.url_miniatura, tarjeta)
+
+        # La imagen para compartir sale de la portada (1400×700, apaisada),
+        # no de la primera subida: se compara contra recortar cada una.
+        noticia.refresh_from_db()
+        social = bytes(Noticia.objects.values_list('imagen_social', flat=True).get())
+        grande_portada = FotoNoticia.objects.filter(pk=portada.pk).values_list('grande', flat=True).get()
+        self.assertEqual(social, imagen_social(grande_portada))
+
+    def test_sin_ninguna_marcada_la_portada_es_la_de_orden_mas_bajo(self):
+        self._entrar_al_panel()
+        self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
+            **self._fotos_en_el_formulario(
+                ('Segunda', 2, False, foto_de_celular()),
+                ('Primera', 1, False, foto_de_celular()),
+            )))
+        self.assertEqual(Noticia.objects.get().portada.alt, 'Primera')
+
+    def test_no_se_puede_marcar_mas_de_una_portada(self):
+        self._entrar_al_panel()
+        r = self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
+            **self._fotos_en_el_formulario(
+                ('Una', 1, True, foto_de_celular()),
+                ('Otra', 2, True, foto_de_celular()),
+            )))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, 'Marcaste más de una foto como portada. Deja marcada solo una.')
+        self.assertEqual(Noticia.objects.count(), 0)
+
+    def test_el_panel_explica_la_portada_y_la_senala_en_la_tabla(self):
+        noticia = crear_noticia(fotos=3)
+        elegida = noticia.fotos.get(alt='Foto 2 de la premiación')
+        FotoNoticia.objects.filter(pk=elegida.pk).update(es_portada=True)
+        self._entrar_al_panel()
+        html = self.client.get(reverse('admin:core_noticia_change', args=[noticia.pk])).content.decode()
+        self.assertIn('Fotos de la noticia', html)
+        self.assertIn('La foto marcada como «Portada»', html)
+        self.assertIn('Si no marcas ninguna, se usa la primera', html)
+        # La etiqueta "Portada" está una sola vez en la tabla, junto a la
+        # foto elegida.
+        tabla = html[html.index('<table>', html.index('id="fotos-group"')):]
+        self.assertEqual(tabla.count('<span class="foto-portada-marca">Portada</span>'), 1)
+        fila = re.search(r'<td class="field-vista">.*?</td>', tabla[tabla.index(elegida.url_miniatura) - 200:], re.S).group(0)
+        self.assertIn('foto-portada-marca', fila)
+        # El script que deja marcar una sola casilla, desde un archivo (CSP).
+        self.assertRegex(html, r'<script src="/static/core/js/admin-noticias\.[0-9a-f]+\.js"')
+
     def test_noticias_esta_en_el_admin_con_tope_de_fotos(self):
         modelo_admin = site._registry[Noticia]
         self.assertIsInstance(modelo_admin, NoticiaAdmin)

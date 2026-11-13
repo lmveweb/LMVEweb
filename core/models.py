@@ -118,8 +118,9 @@ class Noticia(models.Model):
 
     @property
     def portada(self):
-        """La primera foto, o None. Usa las fotos ya traídas con
-        prefetch_related('fotos') cuando las hay."""
+        """La foto marcada como portada (o, si no hay, la primera), o
+        None. Usa las fotos ya traídas con prefetch_related('fotos')
+        cuando las hay."""
         fotos = list(self.fotos.all())
         return fotos[0] if fotos else None
 
@@ -140,9 +141,13 @@ class FotoNoticia(models.Model):
     """
 
     noticia = models.ForeignKey(Noticia, on_delete=models.CASCADE, related_name='fotos')
+    es_portada = models.BooleanField(
+        'Portada', default=False,
+        help_text='Márcala en la foto que va arriba de la noticia y en su tarjeta. Solo una.',
+    )
     orden = models.PositiveSmallIntegerField(
         'Orden', default=0,
-        help_text='La de número más bajo es la foto principal.',
+        help_text='Orden de las fotos en la galería del final: 1, 2, 3…',
     )
     alt = models.CharField(
         'Descripción', max_length=160,
@@ -164,7 +169,10 @@ class FotoNoticia(models.Model):
     class Meta:
         verbose_name = 'Foto'
         verbose_name_plural = 'Fotos'
-        ordering = ['orden', 'id']
+        # La portada siempre primero: es la que usan el encabezado de la
+        # noticia, su tarjeta y la imagen para compartir. Si ninguna está
+        # marcada, queda primera la de orden más bajo.
+        ordering = ['-es_portada', 'orden', 'id']
 
     def __str__(self):
         return self.alt or f'Foto {self.pk}'
