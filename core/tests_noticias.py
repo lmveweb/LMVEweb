@@ -384,6 +384,20 @@ class NoticiasPublicasTests(TestCase):
         self.assertEqual(self.client.get(reverse('noticia', args=['no-existe'])).status_code, 404)
 
 
+class NoticiasEnElMenuTests(TestCase):
+    def test_noticias_esta_en_el_menu_principal_el_movil_y_el_pie(self):
+        html = self.client.get(reverse('sobre')).content.decode()
+        url = reverse('noticias')
+        menu = re.search(r'<nav class="site-nav".*?</nav>', html, re.S).group(0)
+        movil = re.search(r'<nav[^>]*aria-label="Menú móvil".*?</nav>', html, re.S).group(0)
+        pie = re.search(r'<footer class="site-footer">.*?</footer>', html, re.S).group(0)
+        for nombre, bloque in (('menú', menu), ('menú móvil', movil), ('pie', pie)):
+            with self.subTest(donde=nombre):
+                self.assertIn(f'<a href="{url}">Noticias</a>', bloque)
+                # Mismo orden en los tres: después de Multimedia.
+                self.assertLess(bloque.index('>Multimedia<'), bloque.index('>Noticias<'))
+
+
 class NoticiasEnLaPortadaTests(TestCase):
     def test_sin_noticias_la_portada_no_tiene_la_seccion_ni_su_css(self):
         crear_noticia(titulo='Borrador', publicada=False)
