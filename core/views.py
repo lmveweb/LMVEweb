@@ -108,6 +108,17 @@ def noticia_foto(request, pk, version, tamano):
     volver a pedirla. Las fotos de un borrador solo las ve quien entró
     al panel, igual que el borrador mismo.
     """
+    if tamano == 'o':
+        # La portada sin recortar, para el editor del panel. Nunca
+        # pública: puede mostrar partes de la foto que se recortaron a
+        # propósito.
+        if not _puede_ver_borradores(request):
+            raise Http404
+        fila = FotoNoticia.objects.filter(pk=pk, version=version).values_list('original', 'grande').first()
+        if fila is None:
+            raise Http404
+        return _imagen(fila[0] or fila[1], 'image/webp', False, None)
+
     campo = {'m': 'miniatura', 'g': 'grande'}.get(tamano)
     if campo is None:
         raise Http404

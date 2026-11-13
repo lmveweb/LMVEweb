@@ -126,7 +126,7 @@ class Noticia(models.Model):
 
 
 class _FotoManager(_SinBinarios):
-    binarios = ('miniatura', 'grande')
+    binarios = ('miniatura', 'grande', 'original')
 
 
 class FotoNoticia(models.Model):
@@ -141,14 +141,17 @@ class FotoNoticia(models.Model):
     """
 
     noticia = models.ForeignKey(Noticia, on_delete=models.CASCADE, related_name='fotos')
-    es_portada = models.BooleanField(
-        'Portada', default=False,
-        help_text='Márcala en la foto que va arriba de la noticia y en su tarjeta. Solo una.',
-    )
+    # Una noticia tiene a lo más una foto de portada; se sube y se edita
+    # aparte de la galería (ver NoticiaAdminForm en core/admin.py).
+    es_portada = models.BooleanField('Portada', default=False, editable=False)
     orden = models.PositiveSmallIntegerField(
         'Orden', default=0,
         help_text='Orden de las fotos en la galería del final: 1, 2, 3…',
     )
+    # Solo la portada: la foto sin recortar y los ajustes elegidos en el
+    # editor, para poder volver a editarla (ver core/imagenes.py).
+    original = models.BinaryField(null=True, editable=False)
+    ajustes = models.JSONField(default=dict, blank=True, editable=False)
     alt = models.CharField(
         'Descripción', max_length=160,
         help_text='Qué se ve en la foto, en una frase. La escuchan las personas ciegas que visitan el sitio.',
@@ -193,3 +196,8 @@ class FotoNoticia(models.Model):
     @property
     def url_grande(self):
         return self._url('g')
+
+    @property
+    def url_original(self):
+        """Solo para el editor del panel: la vista no la sirve al público."""
+        return self._url('o')

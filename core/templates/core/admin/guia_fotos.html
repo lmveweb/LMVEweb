@@ -1,0 +1,35 @@
+{% comment %}
+Explicación de las fotos de una noticia, sobre la casilla de la portada
+(ver NoticiaAdmin.get_fieldsets en core/admin.py). La galería va más
+abajo, en su propia tabla.
+{% endcomment %}
+<div class="guia guia-fotos">
+    <p class="guia-titulo">Fotos de la noticia</p>
+    <div class="guia-fotos-grid">
+        <div class="guia-fotos-esquema" aria-hidden="true">
+            <div class="guia-esq-portada">
+                <span class="foto-portada-marca">Portada</span>
+                <span class="guia-esq-titulo">Título de la noticia</span>
+            </div>
+            <div class="guia-esq-texto"></div>
+            <div class="guia-esq-texto guia-esq-texto--corto"></div>
+            <div class="guia-esq-galeria"><span></span><span></span><span></span></div>
+        </div>
+        <ul>
+            <li>
+                <strong>La foto de portada</strong> va grande arriba de la noticia, detrás del título. También es la
+                que sale en la tarjeta de la portada del sitio y al compartir el link por WhatsApp. Se sube acá abajo.
+            </li>
+            <li>
+                Para recortarla, girarla o ajustar su luz, usa la pestaña
+                <a href="#pestana-editor" data-ir-a-pestana="editor"><strong>«Editar portada»</strong></a>.
+            </li>
+            <li>
+                <strong>Las demás fotos</strong> van en una galería al final del texto. Se suben más abajo, en
+                <strong>«Fotos de la galería»</strong>, en el orden que les pongas en «Orden» (1, 2, 3…).
+            </li>
+            <li>Si no subes portada, se usa la primera foto de la galería.</li>
+            <li>Para la portada, mejor una foto horizontal: en el encabezado y en la tarjeta se recorta para llenar el espacio.</li>
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,106 @@
+{% comment %}
+Editor de la foto de portada (pestaña «Editar portada»). Lo hace
+funcionar core/static/core/js/admin-noticias.js, que escribe los ajustes
+en el campo oculto portada_ajustes; el servidor los aplica al guardar
+(core/imagenes.py, aplicar_ajustes).
+
+data-original: la foto de portada sin recortar, si ya hay una. Si se
+elige un archivo nuevo en la pestaña «Fotos», el editor usa ese.
+{% endcomment %}
+<div class="editor-portada" id="editorPortada" data-original="{{ url_original }}">
+    <p class="editor-vacio" id="editorVacio">
+        Todavía no hay foto de portada. Súbela en la pestaña <strong>«Fotos»</strong> y vuelve acá para editarla.
+    </p>
+    <p class="editor-sin-js" id="editorSinJs">
+        El editor necesita JavaScript. Si no lo ves, la foto se publica tal como se subió.
+    </p>
+
+    <div class="editor-cuerpo" id="editorCuerpo" hidden>
+        <div class="editor-columnas">
+            <div class="editor-principal">
+                <div class="editor-lienzo" id="editorLienzo">
+                    <canvas id="editorCanvas"></canvas>
+                    <div class="editor-recorte" id="editorRecorte" role="presentation">
+                        <span class="editor-asa" data-asa="nw"></span>
+                        <span class="editor-asa" data-asa="ne"></span>
+                        <span class="editor-asa" data-asa="sw"></span>
+                        <span class="editor-asa" data-asa="se"></span>
+                    </div>
+                </div>
+                <p class="editor-ayuda">
+                    Arrastra el recuadro para elegir qué parte de la foto se muestra, y tira de sus esquinas
+                    para agrandarlo o achicarlo. Lo que queda fuera del recuadro no se publica.
+                </p>
+            </div>
+
+            <div class="editor-herramientas">
+                <div class="editor-grupo">
+                    <span class="editor-etiqueta">Girar</span>
+                    <div class="editor-botones">
+                        <button type="button" class="editor-boton" data-accion="girar-izq" title="Girar a la izquierda">&#8634; Izquierda</button>
+                        <button type="button" class="editor-boton" data-accion="girar-der" title="Girar a la derecha">&#8635; Derecha</button>
+                        <button type="button" class="editor-boton" data-accion="voltear" title="Voltear como espejo">&#8644; Voltear</button>
+                    </div>
+                </div>
+
+                <div class="editor-grupo">
+                    <span class="editor-etiqueta">Forma del recorte</span>
+                    <div class="editor-botones">
+                        <button type="button" class="editor-boton" data-proporcion="libre" aria-pressed="true">Libre</button>
+                        <button type="button" class="editor-boton" data-proporcion="1.7778" aria-pressed="false">Panorámica 16:9</button>
+                        <button type="button" class="editor-boton" data-proporcion="1.3333" aria-pressed="false">Clásica 4:3</button>
+                        <button type="button" class="editor-boton" data-proporcion="1" aria-pressed="false">Cuadrada</button>
+                    </div>
+                </div>
+
+                <div class="editor-grupo">
+                    <span class="editor-etiqueta">Ajustes</span>
+                    <label class="editor-control">
+                        <span>Brillo</span>
+                        <input type="range" min="50" max="150" step="1" value="100" data-ajuste="brillo">
+                        <output data-salida="brillo">100%</output>
+                    </label>
+                    <label class="editor-control">
+                        <span>Contraste</span>
+                        <input type="range" min="50" max="150" step="1" value="100" data-ajuste="contraste">
+                        <output data-salida="contraste">100%</output>
+                    </label>
+                    <label class="editor-control">
+                        <span>Color</span>
+                        <input type="range" min="0" max="200" step="1" value="100" data-ajuste="saturacion">
+                        <output data-salida="saturacion">100%</output>
+                    </label>
+                </div>
+
+                <button type="button" class="editor-boton editor-boton--restablecer" data-accion="restablecer">
+                    Deshacer todos los cambios
+                </button>
+            </div>
+        </div>
+
+        <p class="guia-titulo editor-vistas-titulo">Así se va a ver</p>
+        <div class="editor-vistas">
+            <figure class="editor-vista editor-vista--encabezado">
+                <div class="editor-vista-marco">
+                    <canvas data-vista="encabezado" width="640" height="246"></canvas>
+                    <span class="editor-vista-titulo" data-titulo></span>
+                </div>
+                <figcaption>Arriba de la noticia</figcaption>
+            </figure>
+            <figure class="editor-vista editor-vista--tarjeta">
+                <div class="editor-vista-marco">
+                    <canvas data-vista="tarjeta" width="380" height="250"></canvas>
+                    <span class="editor-vista-titulo" data-titulo></span>
+                </div>
+                <figcaption>Tarjeta en la portada del sitio</figcaption>
+            </figure>
+            <figure class="editor-vista editor-vista--compartir">
+                <div class="editor-vista-marco">
+                    <canvas data-vista="compartir" width="400" height="210"></canvas>
+                </div>
+                <figcaption>Al compartir el link (WhatsApp)</figcaption>
+            </figure>
+        </div>
+        <p class="editor-nota">Los cambios se aplican al apretar <strong>«Guardar»</strong>.</p>
+    </div>
+</div>

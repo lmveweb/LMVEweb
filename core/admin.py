@@ -5,13 +5,22 @@ from django.utils.decorators import method_decorator
 from django_otp.admin import OTPAdminSite
 from django_ratelimit.decorators import ratelimit
 
+import json
+
 from django import forms
 from django.db import models
 from django.template.loader import render_to_string
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from .imagenes import FotoInvalida, imagen_social, procesar_foto
+from .imagenes import (
+    FotoInvalida,
+    derivar,
+    imagen_social,
+    normalizar_ajustes,
+    procesar_foto,
+    procesar_original,
+)
 from .ip import clave_ratelimit
 from .models import FotoNoticia, MensajePatrocinio, Noticia
 
@@ -58,24 +67,135 @@ class MensajePatrocinioAdmin(admin.ModelAdmin):
 
 # ---------------------------------------------------------------------
 # Noticias
+#
+# El formulario va en tres pestañas (las arma core/static/core/js/
+# admin-noticias.js; sin JavaScript se ve todo seguido):
+#   Texto          título, fecha, autor, resumen y texto
+#   Fotos          la foto de portada y, aparte, las de la galería
+#   Editar portada recortar, girar y ajustar la portada, con vista previa
 # ---------------------------------------------------------------------
 
 FOTOS_POR_NOTICIA = 8
+TIPOS_DE_FOTO = 'image/jpeg,image/png,image/webp'
+
+
+class NoticiaAdminForm(forms.ModelForm):
+    """Formulario de la noticia, más su foto de portada.
+
+    La portada es una FotoNoticia con es_portada=True, pero no se maneja
+    en la tabla de la galería: tiene su propia casilla para subirla, su
+    descripción y los ajustes del editor (un JSON en un campo oculto que
+    llena el editor). Se guarda en NoticiaAdmin.save_related.
+    """
+
+    portada_archivo = forms.FileField(
+        label='Foto de portada', required=False,
+        widget=forms.FileInput(attrs={'accept': TIPOS_DE_FOTO}),
+        help_text='JPG, PNG o WebP, hasta 10 MB. Si ya hay una, elegir otra la reemplaza.',
+    )
+    portada_alt = forms.CharField(
+        label='Descripción de la portada', max_length=160, required=False,
+        widget=forms.TextInput(attrs={'size': 70}),
+        help_text='Qué se ve en la foto, en una frase. La escuchan las personas ciegas que visitan el sitio.',
+    )
+    portada_quitar = forms.BooleanField(label='Quitar la foto de portada', required=False)
+    portada_ajustes = forms.CharField(required=False, widget=forms.HiddenInput)
+
+    class Meta:
+        model = Noticia
+        fields = ['titulo', 'fecha', 'autor', 'resumen', 'cuerpo', 'publicada']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.portada = None
+        if self.instance.pk:
+            self.portada = self.instance.fotos.filter(es_portada=True).first()
+        if self.portada:
+            self.fields['portada_alt'].initial = self.portada.alt
+            self.fields['portada_ajustes'].initial = json.dumps(normalizar_ajustes(self.portada.ajustes))
+        else:
+            # Sin portada todavía no hay nada que quitar.
+            del self.fields['portada_quitar']
+
+    def clean_portada_archivo(self):
+        archivo = self.cleaned_data.get('portada_archivo')
+        self._original = None
+        if archivo:
+            try:
+                self._original = procesar_original(archivo)
+            except FotoInvalida as error:
+                raise forms.ValidationError(str(error))
+        return archivo
+
+    def clean_portada_ajustes(self):
+        # Lo escribe el editor; si llega roto o adulterado, se corrige
+        # (normalizar_ajustes nunca falla) en vez de molestar a quien
+        # está publicando con un error que no puede entender.
+        try:
+            datos = json.loads(self.cleaned_data.get('portada_ajustes') or '{}')
+        except ValueError:
+            datos = {}
+        return normalizar_ajustes(datos)
+
+    def clean(self):
+        datos = super().clean()
+        quitar = datos.get('portada_quitar')
+        hay_portada = getattr(self, '_original', None) or (self.portada and not quitar)
+        if hay_portada and not (datos.get('portada_alt') or '').strip():
+            self.add_error('portada_alt', 'Falta describir la foto de portada.')
+        return datos
+
+    def guardar_portada(self, noticia):
+        datos = self.cleaned_data
+        if datos.get('portada_quitar') and not self._original:
+            if self.portada:
+                self.portada.delete()
+            return
+
+        ajustes = datos['portada_ajustes']
+        if self._original:
+            original = self._original
+            # Una foto nueva parte sin los recortes de la anterior, salvo
+            # que se hayan editado sobre la nueva (el editor los reinicia
+            # al elegir otro archivo).
+            if self.portada and ajustes == normalizar_ajustes(self.portada.ajustes):
+                ajustes = normalizar_ajustes({})
+        elif self.portada:
+            if ajustes == normalizar_ajustes(self.portada.ajustes):
+                # Sin foto nueva ni cambios en el editor: solo la descripción.
+                if self.portada.alt != datos['portada_alt']:
+                    self.portada.alt = datos['portada_alt']
+                    self.portada.save(update_fields=['alt'])
+                return
+            guardadas = FotoNoticia.objects.filter(pk=self.portada.pk).values_list('original', 'grande').get()
+            # Una portada sin original guardado (anterior al editor) se
+            # edita a partir de su versión grande.
+            original = bytes(guardadas[0] or guardadas[1])
+        else:
+            return
+
+        foto = self.portada or FotoNoticia(noticia=noticia, es_portada=True)
+        foto.alt = datos['portada_alt']
+        foto.original = original
+        foto.ajustes = ajustes
+        foto.cargar(derivar(original, ajustes))
+        foto.save()
 
 
 class FotoNoticiaForm(forms.ModelForm):
-    """Recibe el archivo de la foto y lo pasa por core.imagenes antes de
-    guardar: lo que queda en la base nunca es el archivo original."""
+    """Una foto de la galería. Recibe el archivo y lo pasa por
+    core.imagenes antes de guardar: lo que queda en la base nunca es el
+    archivo original."""
 
     archivo = forms.FileField(
         label='Foto', required=False,
-        widget=forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png,image/webp'}),
+        widget=forms.FileInput(attrs={'accept': TIPOS_DE_FOTO}),
         help_text='JPG, PNG o WebP, hasta 10 MB. Para cambiar una foto ya subida, elige otra acá.',
     )
 
     class Meta:
         model = FotoNoticia
-        fields = ['archivo', 'alt', 'es_portada', 'orden']
+        fields = ['archivo', 'alt', 'orden']
 
     def clean_archivo(self):
         archivo = self.cleaned_data.get('archivo')
@@ -99,74 +219,77 @@ class FotoNoticiaForm(forms.ModelForm):
         return foto
 
 
-class FotosFormSet(forms.BaseInlineFormSet):
-    def clean(self):
-        super().clean()
-        marcadas = [
-            f for f in self.forms
-            if getattr(f, 'cleaned_data', None)
-            and f.cleaned_data.get('es_portada') and not f.cleaned_data.get('DELETE')
-        ]
-        if len(marcadas) > 1:
-            raise forms.ValidationError(
-                'Marcaste más de una foto como portada. Deja marcada solo una.'
-            )
-
-
 class FotoNoticiaInline(admin.TabularInline):
+    """Las fotos de la galería del final. La portada no aparece acá: se
+    sube y se edita aparte (ver NoticiaAdminForm)."""
+
     model = FotoNoticia
     form = FotoNoticiaForm
-    formset = FotosFormSet
-    # Agrega sobre la tabla una explicación de qué foto es la portada
-    # (ver la plantilla).
-    template = 'core/admin/fotos_inline.html'
+    verbose_name = 'Foto de la galería'
+    verbose_name_plural = 'Fotos de la galería'
     extra = 1
     max_num = FOTOS_POR_NOTICIA
-    fields = ['vista', 'archivo', 'alt', 'es_portada', 'orden']
-    readonly_fields = ['vista']
+    fields = ['foto_actual', 'archivo', 'alt', 'orden']
+    readonly_fields = ['foto_actual']
 
-    @admin.display(description='Vista')
-    def vista(self, foto):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(es_portada=False)
+
+    @admin.display(description='Subida')
+    def foto_actual(self, foto):
+        # Un enlace y no una miniatura: con varias fotos, las miniaturas
+        # alargaban demasiado el formulario.
         if not foto.pk:
             return '—'
-        # Con atributos width/height y no con style="": la política de
-        # seguridad del sitio (CSP) bloquea los estilos en línea.
-        imagen = format_html(
-            '<img src="{}" alt="" width="120" height="{}">',
-            foto.url_miniatura, round(120 * foto.mini_alto / foto.mini_ancho),
-        )
-        # La marca va en la que de verdad sale de portada, esté marcada
-        # o no (si no hay ninguna marcada, es la primera).
-        if foto.noticia.portada.pk == foto.pk:
-            return format_html('{}<span class="foto-portada-marca">Portada</span>', imagen)
-        return imagen
+        return format_html('<a href="{}" target="_blank" rel="noopener">Ver foto</a>', foto.url_grande)
 
 
 @admin.register(Noticia, site=site)
 class NoticiaAdmin(admin.ModelAdmin):
+    form = NoticiaAdminForm
     list_display = ('titulo', 'fecha', 'publicada', 'cantidad_fotos')
     list_filter = ('publicada',)
     search_fields = ('titulo', 'resumen', 'cuerpo')
     date_hierarchy = 'fecha'
     inlines = [FotoNoticiaInline]
+    formfield_overrides = {
+        models.TextField: {'widget': forms.Textarea(attrs={'rows': 22, 'cols': 90})},
+    }
 
     class Media:
         css = {'all': ['core/css/admin-noticias.css']}
         js = ['core/js/admin-noticias.js']
 
     def get_fieldsets(self, request, obj=None):
-        # La guía de escritura va justo sobre las casillas que explica.
-        # Sale de una plantilla propia: es HTML escrito por nosotros, sin
-        # nada que venga de un usuario.
-        guia = mark_safe(render_to_string('core/admin/guia_noticia.html'))
+        # Las guías y el editor salen de plantillas propias: es HTML
+        # escrito por nosotros. Lo único de la base que llega al editor
+        # es la dirección de la foto, que arma reverse().
+        portada = obj.fotos.filter(es_portada=True).first() if obj else None
+        editor = render_to_string('core/admin/editor_portada.html', {
+            'url_original': portada.url_original if portada else '',
+        })
         return [
-            (None, {'fields': ('titulo', 'fecha', 'autor')}),
-            ('Contenido', {'fields': ('resumen', 'cuerpo'), 'description': guia}),
-            ('Publicación', {'fields': ('publicada',)}),
+            ('Texto', {
+                'classes': ('pestana', 'pestana-texto'),
+                'fields': ('titulo', 'fecha', 'autor', 'resumen', 'cuerpo'),
+                'description': mark_safe(render_to_string('core/admin/guia_noticia.html')),
+            }),
+            ('Foto de portada', {
+                'classes': ('pestana', 'pestana-fotos'),
+                'fields': ('portada_archivo', 'portada_alt', 'portada_quitar') if portada
+                else ('portada_archivo', 'portada_alt'),
+                'description': mark_safe(render_to_string('core/admin/guia_fotos.html')),
+            }),
+            ('Editar portada', {
+                'classes': ('pestana', 'pestana-editor'),
+                'fields': ('portada_ajustes',),
+                'description': mark_safe(editor),
+            }),
+            ('Publicación', {
+                'classes': ('pestana-publicacion',),
+                'fields': ('publicada',),
+            }),
         ]
-    formfield_overrides = {
-        models.TextField: {'widget': forms.Textarea(attrs={'rows': 22, 'cols': 90})},
-    }
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(_fotos=models.Count('fotos'))
@@ -183,10 +306,13 @@ class NoticiaAdmin(admin.ModelAdmin):
         return inicial
 
     def save_related(self, request, form, formsets, change):
-        """Después de guardar las fotos, rehace la imagen que se ve al
-        compartir el link, a partir de la que quedó primera."""
+        """Después de guardar la galería, guarda la portada y rehace la
+        imagen que se ve al compartir el link, a partir de la que quedó
+        primera (la portada, o si no hay, la primera de la galería)."""
         super().save_related(request, form, formsets, change)
         noticia = form.instance
+        form.guardar_portada(noticia)
         principal = noticia.fotos.values_list('grande', flat=True).first()
         noticia.imagen_social = imagen_social(principal) if principal else None
         noticia.save(update_fields=['imagen_social'])
+

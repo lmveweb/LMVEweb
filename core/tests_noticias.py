@@ -15,7 +15,17 @@ from django_otp.plugins.otp_email.models import EmailDevice
 from PIL import Image
 
 from .admin import FotoNoticiaForm, NoticiaAdmin, site
-from .imagenes import GRANDE, MINIATURA, FotoInvalida, imagen_social, procesar_foto
+from .imagenes import (
+    GRANDE,
+    MINIATURA,
+    FotoInvalida,
+    aplicar_ajustes,
+    derivar,
+    imagen_social,
+    normalizar_ajustes,
+    procesar_foto,
+    procesar_original,
+)
 from .models import FotoNoticia, Noticia
 from .templatetags.noticias import cuerpo_noticia
 
@@ -196,6 +206,81 @@ class AutorTests(TestCase):
         self.assertNotContains(r, '<b>Camila</b>')
 
 
+def foto_dos_colores(ancho=1000, alto=500):
+    """Mitad izquierda roja y mitad derecha azul: permite ver qué parte
+    quedó después de recortar, girar o voltear."""
+    imagen = Image.new('RGB', (ancho, alto), (220, 30, 30))
+    imagen.paste((30, 30, 220), (ancho // 2, 0, ancho, alto))
+    salida = io.BytesIO()
+    imagen.save(salida, 'PNG')
+    return procesar_original(SimpleUploadedFile('dos.png', salida.getvalue()))
+
+
+class EditorDePortadaTests(TestCase):
+    def _color(self, imagen, x, y):
+        r, g, b = imagen.getpixel((x, y))
+        return 'rojo' if r > b else 'azul'
+
+    def test_el_original_se_guarda_sin_metadatos_y_hasta_2400_px(self):
+        original = procesar_original(foto_de_celular(4000, 3000))
+        imagen = Image.open(io.BytesIO(original))
+        self.assertEqual(imagen.size, (2400, 1800))
+        self.assertEqual(len(imagen.getexif()), 0)
+        self.assertNotIn(b'MarcaDePrueba', original)
+
+    def test_recortar(self):
+        imagen = aplicar_ajustes(foto_dos_colores(), {'x': 0.5, 'ancho': 0.5})
+        self.assertEqual(imagen.size, (500, 500))
+        self.assertEqual(self._color(imagen, 10, 10), 'azul')
+
+    def test_girar_y_voltear_en_el_mismo_orden_que_el_editor(self):
+        # Girada 90° a favor del reloj, la mitad roja (izquierda) queda arriba.
+        girada = aplicar_ajustes(foto_dos_colores(), {'rotacion': 90})
+        self.assertEqual(girada.size, (500, 1000))
+        self.assertEqual(self._color(girada, 250, 10), 'rojo')
+        volteada = aplicar_ajustes(foto_dos_colores(), {'voltear': True})
+        self.assertEqual(self._color(volteada, 10, 10), 'azul')
+
+    def test_brillo_contraste_y_color_con_las_formulas_de_css(self):
+        gris = io.BytesIO()
+        Image.new('RGB', (10, 10), (100, 150, 200)).save(gris, 'PNG')
+        original = procesar_original(SimpleUploadedFile('g.png', gris.getvalue()))
+        base = aplicar_ajustes(original, {}).getpixel((5, 5))
+        mas_brillo = aplicar_ajustes(original, {'brillo': 1.2}).getpixel((5, 5))
+        # brightness(1.2): cada canal × 1,2.
+        for canal, antes in zip(mas_brillo, base):
+            self.assertAlmostEqual(canal, min(255, antes * 1.2), delta=2)
+        # saturate(0): gris, con los pesos de luminancia de CSS.
+        sin_color = aplicar_ajustes(original, {'saturacion': 0}).getpixel((5, 5))
+        esperado = 0.2126 * base[0] + 0.7152 * base[1] + 0.0722 * base[2]
+        for canal in sin_color:
+            self.assertAlmostEqual(canal, esperado, delta=2)
+        # contrast(1.5): se alejan de 127,5.
+        contraste = aplicar_ajustes(original, {'contraste': 1.5}).getpixel((5, 5))
+        for canal, antes in zip(contraste, base):
+            self.assertAlmostEqual(canal, max(0, min(255, (antes - 127.5) * 1.5 + 127.5)), delta=2)
+
+    def test_los_ajustes_fuera_de_rango_se_corrigen(self):
+        ajustes = normalizar_ajustes({
+            'rotacion': 45, 'voltear': 'si', 'x': 0.9, 'ancho': 0.5, 'y': -1, 'alto': 0.001,
+            'brillo': 9, 'contraste': float('nan'), 'saturacion': 'mucho',
+        })
+        self.assertEqual(ajustes['rotacion'], 0)
+        self.assertIs(ajustes['voltear'], False)
+        self.assertEqual(ajustes['x'], 0.5)           # el recorte no se sale de la foto
+        self.assertEqual(ajustes['y'], 0.0)
+        self.assertEqual(ajustes['alto'], 0.05)       # recorte mínimo
+        self.assertEqual(ajustes['brillo'], 1.5)
+        self.assertEqual(ajustes['contraste'], 1.0)
+        self.assertEqual(ajustes['saturacion'], 1.0)
+        self.assertEqual(normalizar_ajustes('basura'), normalizar_ajustes({}))
+
+    def test_derivar_da_las_dos_versiones_publicables(self):
+        r = derivar(foto_dos_colores(2000, 1000), {'ancho': 0.5})
+        self.assertEqual((r['ancho'], r['alto']), (1000, 1000))
+        self.assertEqual((r['mini_ancho'], r['mini_alto']), (800, 800))
+
+
 class FotosTests(TestCase):
     def test_se_achica_a_dos_tamanos_en_webp(self):
         r = procesar_foto(foto_de_celular(2400, 1800))
@@ -292,7 +377,7 @@ class NoticiaModeloTests(TestCase):
         # Listar noticias no puede cargar megabytes de imágenes.
         crear_noticia(fotos=1)
         foto = FotoNoticia.objects.get()
-        self.assertEqual(foto.get_deferred_fields(), {'miniatura', 'grande'})
+        self.assertEqual(foto.get_deferred_fields(), {'miniatura', 'grande', 'original'})
         self.assertEqual(Noticia.objects.get().get_deferred_fields(), {'imagen_social'})
 
 
@@ -606,30 +691,31 @@ class NoticiasAdminTests(TestCase):
         self.assertIn('login', r['Location'])
         self.assertEqual(Noticia.objects.count(), 0)
 
-    def _fotos_en_el_formulario(self, *fotos):
-        """Datos de la tabla de fotos para el formulario del panel. Cada
-        foto es (descripción, orden, portada, archivo)."""
+    def _fotos_de_galeria(self, *fotos):
+        """Datos de la tabla de la galería. Cada foto es (descripción,
+        orden, archivo)."""
         datos = {'fotos-TOTAL_FORMS': str(len(fotos))}
-        for i, (alt, orden, portada, archivo) in enumerate(fotos):
+        for i, (alt, orden, archivo) in enumerate(fotos):
             datos.update({f'fotos-{i}-alt': alt, f'fotos-{i}-orden': str(orden), f'fotos-{i}-archivo': archivo})
-            if portada:
-                datos[f'fotos-{i}-es_portada'] = 'on'
         return datos
 
-    def test_la_foto_marcada_como_portada_es_la_de_arriba_la_tarjeta_y_al_compartir(self):
+    def _portada(self, noticia):
+        return noticia.fotos.get(es_portada=True)
+
+    def test_la_portada_se_sube_aparte_de_la_galeria(self):
         self._entrar_al_panel()
-        # La portada es la tercera de la lista, y tiene el orden más alto:
-        # manda la casilla, no el orden.
         r = self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
-            **self._fotos_en_el_formulario(
-                ('Foto uno', 1, False, foto_de_celular(1200, 900)),
-                ('Foto dos', 2, False, foto_de_celular(1300, 900)),
-                ('La premiación', 3, True, foto_de_celular(1400, 700)),
+            portada_archivo=foto_de_celular(1400, 700), portada_alt='La premiación',
+            **self._fotos_de_galeria(
+                ('Foto uno', 1, foto_de_celular(1200, 900)),
+                ('Foto dos', 2, foto_de_celular(1300, 900)),
             )))
         self.assertEqual(r.status_code, 302)
         noticia = Noticia.objects.get()
-        portada = noticia.fotos.get(alt='La premiación')
+        portada = self._portada(noticia)
+        self.assertEqual(portada.alt, 'La premiación')
         self.assertEqual(noticia.portada, portada)
+        self.assertEqual(noticia.fotos.filter(es_portada=False).count(), 2)
 
         pagina = self.client.get(noticia.get_absolute_url()).content.decode()
         encabezado = re.search(r'<section class="noticia-hero.*?</section>', pagina, re.S).group(0)
@@ -641,50 +727,174 @@ class NoticiasAdminTests(TestCase):
         tarjeta = re.search(r'<a class="noticia-card".*?</a>', self.client.get(reverse('home')).content.decode(), re.S).group(0)
         self.assertIn(portada.url_miniatura, tarjeta)
 
-        # La imagen para compartir sale de la portada (1400×700, apaisada),
-        # no de la primera subida: se compara contra recortar cada una.
-        noticia.refresh_from_db()
         social = bytes(Noticia.objects.values_list('imagen_social', flat=True).get())
-        grande_portada = FotoNoticia.objects.filter(pk=portada.pk).values_list('grande', flat=True).get()
-        self.assertEqual(social, imagen_social(grande_portada))
+        grande = FotoNoticia.objects.filter(pk=portada.pk).values_list('grande', flat=True).get()
+        self.assertEqual(social, imagen_social(grande))
 
-    def test_sin_ninguna_marcada_la_portada_es_la_de_orden_mas_bajo(self):
+    def test_la_tabla_de_la_galeria_no_muestra_la_portada_ni_miniaturas(self):
+        noticia = crear_noticia(fotos=2)
         self._entrar_al_panel()
-        self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
-            **self._fotos_en_el_formulario(
-                ('Segunda', 2, False, foto_de_celular()),
-                ('Primera', 1, False, foto_de_celular()),
-            )))
-        self.assertEqual(Noticia.objects.get().portada.alt, 'Primera')
+        self.client.post(reverse('admin:core_noticia_change', args=[noticia.pk]), self._formulario_de_edicion(
+            noticia, portada_archivo=foto_de_celular(), portada_alt='Portada'))
+        html = self.client.get(reverse('admin:core_noticia_change', args=[noticia.pk])).content.decode()
+        tabla = html[html.index('id="fotos-group"'):]
+        self.assertIn('Fotos de la galería', tabla)
+        self.assertEqual(tabla.count('>Ver foto</a>'), 2)
+        self.assertNotIn(self._portada(noticia).url_grande, tabla)
+        self.assertNotIn('<img src="/noticias/foto/', tabla)
 
-    def test_no_se_puede_marcar_mas_de_una_portada(self):
+    def _formulario_de_edicion(self, noticia, **extra):
+        """Lo que manda el formulario al editar una noticia existente sin
+        tocar su galería."""
+        fotos = list(noticia.fotos.filter(es_portada=False))
+        datos = self._datos_del_formulario(**{
+            'fotos-TOTAL_FORMS': str(len(fotos)), 'fotos-INITIAL_FORMS': str(len(fotos)),
+        })
+        for i, foto in enumerate(fotos):
+            datos.update({f'fotos-{i}-id': foto.pk, f'fotos-{i}-noticia': noticia.pk,
+                          f'fotos-{i}-alt': foto.alt, f'fotos-{i}-orden': foto.orden})
+        datos.pop('fotos-0-archivo', None)
+        datos.update(extra)
+        return datos
+
+    def test_la_portada_exige_descripcion(self):
         self._entrar_al_panel()
         r = self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
-            **self._fotos_en_el_formulario(
-                ('Una', 1, True, foto_de_celular()),
-                ('Otra', 2, True, foto_de_celular()),
-            )))
+            portada_archivo=foto_de_celular(), portada_alt='  ', **{'fotos-TOTAL_FORMS': '0'}))
         self.assertEqual(r.status_code, 200)
-        self.assertContains(r, 'Marcaste más de una foto como portada. Deja marcada solo una.')
+        self.assertContains(r, 'Falta describir la foto de portada.')
         self.assertEqual(Noticia.objects.count(), 0)
 
-    def test_el_panel_explica_la_portada_y_la_senala_en_la_tabla(self):
-        noticia = crear_noticia(fotos=3)
-        elegida = noticia.fotos.get(alt='Foto 2 de la premiación')
-        FotoNoticia.objects.filter(pk=elegida.pk).update(es_portada=True)
+    def test_sin_portada_se_usa_la_primera_de_la_galeria(self):
         self._entrar_al_panel()
+        self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
+            **self._fotos_de_galeria(
+                ('Segunda', 2, foto_de_celular()),
+                ('Primera', 1, foto_de_celular()),
+            )))
+        noticia = Noticia.objects.get()
+        self.assertFalse(noticia.fotos.filter(es_portada=True).exists())
+        self.assertEqual(noticia.portada.alt, 'Primera')
+
+    def test_los_ajustes_del_editor_se_aplican_al_guardar(self):
+        self._entrar_al_panel()
+        ajustes = {'rotacion': 90, 'x': 0.25, 'y': 0, 'ancho': 0.5, 'alto': 1, 'brillo': 1.2}
+        self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
+            portada_archivo=foto_de_celular(2000, 1000), portada_alt='Portada',
+            portada_ajustes=json.dumps(ajustes), **{'fotos-TOTAL_FORMS': '0'}))
+        portada = self._portada(Noticia.objects.get())
+        # 2000×1000 en el original (hasta 2400 px), girada queda de
+        # 1000×2000, y el recorte toma la mitad del ancho: 500×2000. La
+        # versión grande la achica a 1600 de alto.
+        self.assertEqual((portada.ancho, portada.alto), (400, 1600))
+        self.assertEqual(portada.ajustes['rotacion'], 90)
+        self.assertEqual(portada.ajustes['brillo'], 1.2)
+
+    def test_editar_la_portada_sin_subirla_de_nuevo_parte_del_original(self):
+        self._entrar_al_panel()
+        self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
+            portada_archivo=foto_de_celular(2000, 1000), portada_alt='Portada', **{'fotos-TOTAL_FORMS': '0'}))
+        noticia = Noticia.objects.get()
+        antes = self._portada(noticia)
+        # Primer recorte: la mitad izquierda.
+        self.client.post(reverse('admin:core_noticia_change', args=[noticia.pk]), self._formulario_de_edicion(
+            noticia, portada_alt='Portada', portada_ajustes=json.dumps({'x': 0, 'ancho': 0.5})))
+        recortada = self._portada(noticia)
+        self.assertEqual((recortada.ancho, recortada.alto), (1000, 1000))
+        self.assertNotEqual(recortada.version, antes.version)
+        # Volver atrás: como se guarda el original, se recupera la foto
+        # completa en vez de recortar lo ya recortado.
+        self.client.post(reverse('admin:core_noticia_change', args=[noticia.pk]), self._formulario_de_edicion(
+            noticia, portada_alt='Portada', portada_ajustes=json.dumps({})))
+        self.assertEqual((self._portada(noticia).ancho, self._portada(noticia).alto), (1600, 800))
+
+    def test_cambiar_solo_la_descripcion_no_rehace_la_foto(self):
+        self._entrar_al_panel()
+        self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
+            portada_archivo=foto_de_celular(), portada_alt='Antes', **{'fotos-TOTAL_FORMS': '0'}))
+        noticia = Noticia.objects.get()
+        version = self._portada(noticia).version
+        ajustes = json.dumps(self._portada(noticia).ajustes)
+        self.client.post(reverse('admin:core_noticia_change', args=[noticia.pk]), self._formulario_de_edicion(
+            noticia, portada_alt='Después', portada_ajustes=ajustes))
+        self.assertEqual(self._portada(noticia).alt, 'Después')
+        self.assertEqual(self._portada(noticia).version, version)
+
+    def test_una_portada_nueva_no_hereda_el_recorte_de_la_anterior(self):
+        self._entrar_al_panel()
+        self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
+            portada_archivo=foto_de_celular(2000, 1000), portada_alt='Portada',
+            portada_ajustes=json.dumps({'ancho': 0.5}), **{'fotos-TOTAL_FORMS': '0'}))
+        noticia = Noticia.objects.get()
+        ajustes_viejos = json.dumps(self._portada(noticia).ajustes)
+        self.client.post(reverse('admin:core_noticia_change', args=[noticia.pk]), self._formulario_de_edicion(
+            noticia, portada_archivo=foto_de_celular(1200, 900), portada_alt='Otra', portada_ajustes=ajustes_viejos))
+        portada = self._portada(noticia)
+        self.assertEqual((portada.ancho, portada.alto), (1200, 900))
+        self.assertEqual(noticia.fotos.filter(es_portada=True).count(), 1)
+
+    def test_quitar_la_portada(self):
+        self._entrar_al_panel()
+        self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
+            portada_archivo=foto_de_celular(), portada_alt='Portada', **{'fotos-TOTAL_FORMS': '0'}))
+        noticia = Noticia.objects.get()
+        self.client.post(reverse('admin:core_noticia_change', args=[noticia.pk]), self._formulario_de_edicion(
+            noticia, portada_quitar='on', portada_alt=''))
+        self.assertFalse(noticia.fotos.exists())
+        self.assertIsNone(Noticia.objects.values_list('imagen_social', flat=True).get())
+
+    def test_ajustes_adulterados_no_rompen_nada(self):
+        self._entrar_al_panel()
+        for basura in ('no es json', '[1, 2]', json.dumps({'rotacion': 45, 'x': -5, 'ancho': 99, 'brillo': 'mucho'})):
+            with self.subTest(ajustes=basura):
+                Noticia.objects.all().delete()
+                r = self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
+                    portada_archivo=foto_de_celular(1000, 500), portada_alt='Portada',
+                    portada_ajustes=basura, **{'fotos-TOTAL_FORMS': '0'}))
+                self.assertEqual(r.status_code, 302)
+                portada = self._portada(Noticia.objects.get())
+                self.assertEqual((portada.ancho, portada.alto), (1000, 500))
+
+    def test_el_original_de_la_portada_solo_lo_ve_el_panel(self):
+        self._entrar_al_panel()
+        self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
+            portada_archivo=foto_de_celular(), portada_alt='Portada', portada_ajustes=json.dumps({'ancho': 0.5}),
+            **{'fotos-TOTAL_FORMS': '0'}))
+        noticia = Noticia.objects.get()
+        url = self._portada(noticia).url_original
+        r = self.client.get(url)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r['Cache-Control'], 'private, no-store')
+        self.assertEqual(Image.open(io.BytesIO(r.content)).size, (2400, 1800))
+        self.assertEqual(len(Image.open(io.BytesIO(r.content)).getexif()), 0)
+        # La noticia está publicada, pero la foto sin recortar no es pública.
+        self.client.logout()
+        self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_el_formulario_va_en_pestanas_con_el_editor_de_la_portada(self):
+        noticia = crear_noticia()
+        self._entrar_al_panel()
+        self.client.post(reverse('admin:core_noticia_change', args=[noticia.pk]), self._formulario_de_edicion(
+            noticia, portada_archivo=foto_de_celular(), portada_alt='Portada'))
         html = self.client.get(reverse('admin:core_noticia_change', args=[noticia.pk])).content.decode()
+        for clase in ('pestana pestana-texto', 'pestana pestana-fotos', 'pestana pestana-editor', 'pestana-publicacion'):
+            self.assertIn(clase, html)
         self.assertIn('Fotos de la noticia', html)
-        self.assertIn('La foto marcada como «Portada»', html)
-        self.assertIn('Si no marcas ninguna, se usa la primera', html)
-        # La etiqueta "Portada" está una sola vez en la tabla, junto a la
-        # foto elegida.
-        tabla = html[html.index('<table>', html.index('id="fotos-group"')):]
-        self.assertEqual(tabla.count('<span class="foto-portada-marca">Portada</span>'), 1)
-        fila = re.search(r'<td class="field-vista">.*?</td>', tabla[tabla.index(elegida.url_miniatura) - 200:], re.S).group(0)
-        self.assertIn('foto-portada-marca', fila)
-        # El script que deja marcar una sola casilla, desde un archivo (CSP).
+        self.assertIn('id="editorPortada"', html)
+        self.assertIn(f'data-original="{self._portada(noticia).url_original}"', html)
+        self.assertIn('name="portada_ajustes"', html)
+        self.assertIn('Quitar la foto de portada', html)
         self.assertRegex(html, r'<script src="/static/core/js/admin-noticias\.[0-9a-f]+\.js"')
+        # Sin estilos ni scripts en línea en lo que agregamos (CSP).
+        editor = html[html.index('id="editorPortada"'):html.index('Los cambios se aplican')]
+        self.assertNotIn('style=', editor)
+        self.assertNotIn('<script', editor)
+
+    def test_una_noticia_nueva_no_ofrece_quitar_una_portada_que_no_existe(self):
+        self._entrar_al_panel()
+        html = self.client.get(reverse('admin:core_noticia_add')).content.decode()
+        self.assertNotIn('Quitar la foto de portada', html)
+        self.assertIn('data-original=""', html)
 
     def test_noticias_esta_en_el_admin_con_tope_de_fotos(self):
         modelo_admin = site._registry[Noticia]
@@ -711,12 +921,15 @@ class NoticiasAdminTests(TestCase):
         # Sus estilos vienen de un archivo: la CSP bloquea los estilos en
         # línea, y la guía no puede depender de ellos.
         self.assertRegex(html, r'<link href="/static/core/css/admin-noticias\.[0-9a-f]+\.css"')
-        guia = html[html.index('<div class="guia">'):html.index('Antes de publicar')]
+        guia = html[html.index('<details class="guia guia-plegable">'):html.index('Antes de publicar')]
         self.assertNotIn('style=', guia)
+        # Plegada por defecto, para no alargar el formulario.
+        self.assertNotIn('<details class="guia guia-plegable" open', html)
         # El slug y las imágenes procesadas no se editan a mano.
         campos = [c for _, opciones in site._registry[Noticia].get_fieldsets(r.wsgi_request)
                   for c in opciones['fields']]
-        self.assertEqual(campos, ['titulo', 'fecha', 'autor', 'resumen', 'cuerpo', 'publicada'])
+        self.assertEqual(campos, ['titulo', 'fecha', 'autor', 'resumen', 'cuerpo',
+                                  'portada_archivo', 'portada_alt', 'portada_ajustes', 'publicada'])
 
     def test_los_ejemplos_de_la_guia_son_los_que_de_verdad_produce_el_sitio(self):
         # Si la guía promete que "# Cuadro de Honor" es un subtítulo o

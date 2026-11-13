@@ -71,9 +71,10 @@ def _webp(imagen, lado):
     return salida.getvalue(), copia.size
 
 
-def procesar_foto(archivo):
-    """Recibe el archivo subido y devuelve las dos versiones listas para
-    guardar. Lanza FotoInvalida si no sirve."""
+def _leer(archivo, lado):
+    """Abre la foto subida, la endereza y la deja en RGB. `lado` es el
+    tamaño al que se va a terminar achicando: permite abrir un JPEG
+    enorme ya reducido."""
     if getattr(archivo, 'size', 0) > PESO_MAXIMO:
         raise FotoInvalida('La foto pesa más de 10 MB. Súbela con menos resolución.')
 
@@ -83,20 +84,147 @@ def procesar_foto(archivo):
             # Le pide al decodificador JPEG que abra la foto ya achicada
             # (a la mitad, un cuarto...): una de 48 megapíxeles ocuparía
             # cientos de MB de memoria solo para terminar en 1600 px.
-            escala = GRANDE / max(imagen.size)
+            escala = lado / max(imagen.size)
             if escala < 1:
                 imagen.draft('RGB', (math.ceil(imagen.width * escala), math.ceil(imagen.height * escala)))
         imagen = ImageOps.exif_transpose(imagen)
-        imagen = _a_rgb(imagen)
+        return _a_rgb(imagen)
     except (OSError, ValueError, SyntaxError):
         raise FotoInvalida('La foto está dañada y no se pudo procesar.')
 
+
+def _versiones(imagen):
     grande, (ancho, alto) = _webp(imagen, GRANDE)
     miniatura, (mini_ancho, mini_alto) = _webp(imagen, MINIATURA)
     return {
         'grande': grande, 'ancho': ancho, 'alto': alto,
         'miniatura': miniatura, 'mini_ancho': mini_ancho, 'mini_alto': mini_alto,
     }
+
+
+def procesar_foto(archivo):
+    """Recibe el archivo subido y devuelve las dos versiones listas para
+    guardar. Lanza FotoInvalida si no sirve."""
+    return _versiones(_leer(archivo, GRANDE))
+
+
+# ---------------------------------------------------------------------
+# Foto de portada: se puede recortar, girar y ajustar desde el panel.
+#
+# Para poder volver a editarla sin perder calidad, de la portada se
+# guarda además una versión "original" (enderezada, sin metadatos, hasta
+# 2400 px) y los ajustes elegidos. Las versiones que se publican salen
+# siempre de aplicar esos ajustes al original.
+#
+# Los ajustes se aplican en el mismo orden y con las mismas fórmulas que
+# los filtros CSS que usa la vista previa del editor
+# (core/static/core/js/admin-noticias.js): girar, voltear, recortar, y
+# después brillo, contraste y saturación. Así lo que se ve al editar es
+# lo que queda publicado.
+# ---------------------------------------------------------------------
+
+ORIGINAL = 2400
+
+AJUSTES_POR_DEFECTO = {
+    'rotacion': 0, 'voltear': False,
+    'x': 0.0, 'y': 0.0, 'ancho': 1.0, 'alto': 1.0,
+    'brillo': 1.0, 'contraste': 1.0, 'saturacion': 1.0,
+}
+RANGOS = {'brillo': (0.5, 1.5), 'contraste': (0.5, 1.5), 'saturacion': (0.0, 2.0)}
+RECORTE_MINIMO = 0.05
+
+
+def procesar_original(archivo):
+    """La versión de la portada que se guarda para editarla: WebP de
+    alta calidad, hasta 2400 px, sin metadatos."""
+    imagen = _leer(archivo, ORIGINAL)
+    imagen.thumbnail((ORIGINAL, ORIGINAL), Image.Resampling.LANCZOS)
+    salida = io.BytesIO()
+    imagen.save(salida, 'WEBP', quality=90, method=4)
+    return salida.getvalue()
+
+
+def _numero(valor, por_defecto, minimo, maximo):
+    try:
+        numero = float(valor)
+    except (TypeError, ValueError):
+        return por_defecto
+    if not math.isfinite(numero):
+        return por_defecto
+    return min(max(numero, minimo), maximo)
+
+
+def normalizar_ajustes(datos):
+    """Ajustes válidos a partir de lo que mandó el navegador: cualquier
+    valor que falte, sobre o esté fuera de rango se corrige acá. Nunca
+    falla: en el peor caso devuelve los ajustes por defecto."""
+    if not isinstance(datos, dict):
+        datos = {}
+    ajustes = dict(AJUSTES_POR_DEFECTO)
+
+    try:
+        rotacion = int(datos.get('rotacion', 0)) % 360
+    except (TypeError, ValueError):
+        rotacion = 0
+    ajustes['rotacion'] = rotacion if rotacion in (0, 90, 180, 270) else 0
+    ajustes['voltear'] = datos.get('voltear') is True
+
+    for clave, (minimo, maximo) in RANGOS.items():
+        ajustes[clave] = round(_numero(datos.get(clave), 1.0, minimo, maximo), 3)
+
+    ancho = _numero(datos.get('ancho'), 1.0, RECORTE_MINIMO, 1.0)
+    alto = _numero(datos.get('alto'), 1.0, RECORTE_MINIMO, 1.0)
+    ajustes['ancho'], ajustes['alto'] = round(ancho, 4), round(alto, 4)
+    ajustes['x'] = round(_numero(datos.get('x'), 0.0, 0.0, 1.0 - ancho), 4)
+    ajustes['y'] = round(_numero(datos.get('y'), 0.0, 0.0, 1.0 - alto), 4)
+    return ajustes
+
+
+def _lut(funcion):
+    return [min(255, max(0, round(funcion(v)))) for v in range(256)] * 3
+
+
+def aplicar_ajustes(original, ajustes):
+    """La imagen editada, a partir del original guardado."""
+    ajustes = normalizar_ajustes(ajustes)
+    imagen = Image.open(io.BytesIO(bytes(original))).convert('RGB')
+
+    if ajustes['rotacion']:
+        # rotate() gira en contra del reloj; la rotación del editor es a
+        # favor del reloj, como la de un canvas.
+        imagen = imagen.rotate(-ajustes['rotacion'], expand=True)
+    if ajustes['voltear']:
+        imagen = ImageOps.mirror(imagen)
+
+    ancho, alto = imagen.size
+    caja = (
+        round(ajustes['x'] * ancho), round(ajustes['y'] * alto),
+        round((ajustes['x'] + ajustes['ancho']) * ancho), round((ajustes['y'] + ajustes['alto']) * alto),
+    )
+    if caja != (0, 0, ancho, alto):
+        imagen = imagen.crop(caja)
+
+    # Mismas fórmulas que los filtros CSS brightness(), contrast() y
+    # saturate(), en ese orden.
+    brillo, contraste, saturacion = ajustes['brillo'], ajustes['contraste'], ajustes['saturacion']
+    if brillo != 1:
+        imagen = imagen.point(_lut(lambda v: v * brillo))
+    if contraste != 1:
+        imagen = imagen.point(_lut(lambda v: (v - 127.5) * contraste + 127.5))
+    if saturacion != 1:
+        s = saturacion
+        imagen = imagen.convert('RGB', (
+            0.2126 + 0.7874 * s, 0.7152 - 0.7152 * s, 0.0722 - 0.0722 * s, 0,
+            0.2126 - 0.2126 * s, 0.7152 + 0.2848 * s, 0.0722 - 0.0722 * s, 0,
+            0.2126 - 0.2126 * s, 0.7152 - 0.7152 * s, 0.0722 + 0.9278 * s, 0,
+        ))
+    return imagen
+
+
+def derivar(original, ajustes):
+    """Las versiones publicables (grande y miniatura) de la portada, con
+    los ajustes aplicados."""
+    return _versiones(aplicar_ajustes(original, ajustes))
 
 
 def imagen_social(grande):

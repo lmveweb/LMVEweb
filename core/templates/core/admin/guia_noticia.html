@@ -7,7 +7,9 @@ sitio. El lado derecho imita los estilos reales de la página de la
 noticia (core/templates/core/noticia.html); si esos cambian, hay que
 ajustar core/static/core/css/admin-noticias.css.
 {% endcomment %}
-<div class="guia">
+{# Cerrada por defecto: es larga, y quien ya sabe escribir una noticia no necesita verla cada vez. #}
+<details class="guia guia-plegable">
+    <summary>Cómo escribir la noticia: subtítulos, listas, videos y enlaces <span>(ver ejemplos)</span></summary>
     <p class="guia-titulo">Cómo se arma una noticia</p>
     <p>Una noticia tiene tres partes, y cada una se escribe en su propia casilla:</p>
 
@@ -155,4 +157,4 @@ https://www.youtube.com/watch?v=abc123XYZ00</pre>
         Arriba a la derecha aparece <strong>«Ver en el sitio»</strong>: ahí ves la noticia tal como va a quedar,
         y solo la ves tú. Cuando esté lista, marca «Publicada» y guarda.
     </p>
-</div>
+</details>
