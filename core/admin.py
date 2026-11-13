@@ -7,7 +7,9 @@ from django_ratelimit.decorators import ratelimit
 
 from django import forms
 from django.db import models
+from django.template.loader import render_to_string
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from .imagenes import FotoInvalida, imagen_social, procesar_foto
 from .ip import clave_ratelimit
@@ -123,8 +125,21 @@ class NoticiaAdmin(admin.ModelAdmin):
     list_filter = ('publicada',)
     search_fields = ('titulo', 'resumen', 'cuerpo')
     date_hierarchy = 'fecha'
-    fields = ('titulo', 'fecha', 'resumen', 'cuerpo', 'publicada')
     inlines = [FotoNoticiaInline]
+
+    class Media:
+        css = {'all': ['core/css/admin-noticias.css']}
+
+    def get_fieldsets(self, request, obj=None):
+        # La guía de escritura va justo sobre las casillas que explica.
+        # Sale de una plantilla propia: es HTML escrito por nosotros, sin
+        # nada que venga de un usuario.
+        guia = mark_safe(render_to_string('core/admin/guia_noticia.html'))
+        return [
+            (None, {'fields': ('titulo', 'fecha', 'autor')}),
+            ('Contenido', {'fields': ('resumen', 'cuerpo'), 'description': guia}),
+            ('Publicación', {'fields': ('publicada',)}),
+        ]
     formfield_overrides = {
         models.TextField: {'widget': forms.Textarea(attrs={'rows': 22, 'cols': 90})},
     }
@@ -135,6 +150,13 @@ class NoticiaAdmin(admin.ModelAdmin):
     @admin.display(description='Fotos', ordering='_fotos')
     def cantidad_fotos(self, noticia):
         return noticia._fotos
+
+    def get_changeform_initial_data(self, request):
+        """Una noticia nueva parte firmada por quien la está escribiendo
+        (si su cuenta tiene nombre y apellido). Se puede cambiar o borrar."""
+        inicial = super().get_changeform_initial_data(request)
+        inicial.setdefault('autor', request.user.get_full_name())
+        return inicial
 
     def save_related(self, request, form, formsets, change):
         """Después de guardar las fotos, rehace la imagen que se ve al

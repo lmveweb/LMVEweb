@@ -64,16 +64,21 @@ class Noticia(models.Model):
     )
     resumen = models.CharField(
         'Resumen', max_length=200,
-        help_text='Una o dos frases. Es lo que se lee en la tarjeta de la noticia.',
+        help_text=(
+            'Una o dos frases. Sale destacado al inicio de la noticia (con una barra naranja) '
+            'y es lo que se lee en su tarjeta de la portada.'
+        ),
     )
     cuerpo = models.TextField(
         'Texto de la noticia', validators=[MaxLengthValidator(20000)],
-        help_text=(
-            'Escribe el texto tal cual, sin formato. '
-            'Deja una línea en blanco entre un párrafo y el siguiente. '
-            'Para una lista, empieza cada línea con un guion (- ) o con un número (1. ). '
-            'Para un subtítulo, empieza la línea con # (por ejemplo: # Cuadro de Honor).'
-        ),
+        # Las reglas de escritura (subtítulos, listas, enlaces) se explican
+        # con ejemplos en la guía del formulario, no acá: ver
+        # core/templates/core/admin/guia_noticia.html.
+        help_text='Todo lo demás. Los ejemplos de la guía de arriba muestran cómo hacer subtítulos, listas y enlaces.',
+    )
+    autor = models.CharField(
+        'Publicado por', max_length=80, blank=True,
+        help_text='Opcional. Nombre de quien firma la noticia; se muestra junto a la fecha.',
     )
     publicada = models.BooleanField(
         'Publicada', default=False,

@@ -20,6 +20,7 @@ from .forms import ContactoForm
 from .ip import clave_ratelimit, ip_cliente
 from .models import FotoNoticia, Noticia
 from .seo import jsonld_home, jsonld_noticia, seo_noticia
+from .templatetags.noticias import cuerpo_noticia
 
 logger = logging.getLogger(__name__)
 
@@ -73,8 +74,13 @@ def noticia(request, slug):
     if not nota.publicada and not _puede_ver_borradores(request):
         raise Http404
     fotos = list(nota.fotos.all())
+    cuerpo_html = cuerpo_noticia(nota.cuerpo)
     respuesta = render(request, 'core/noticia.html', {
         'noticia': nota,
+        'cuerpo_html': cuerpo_html,
+        # El script de Instagram se carga solo si la noticia incrusta
+        # alguna publicación (ver core/templatetags/noticias.py).
+        'tiene_instagram': 'class="instagram-media"' in cuerpo_html,
         'portada': fotos[0] if fotos else None,
         'galeria': fotos[1:],
         'jsonld': jsonld_noticia(nota) if nota.publicada else None,

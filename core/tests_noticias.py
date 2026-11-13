@@ -86,6 +86,116 @@ class TextoDeLaNoticiaTests(TestCase):
         self.assertNotIn('<u>resumen</u>', html)
 
 
+class EnlacesIncrustadosTests(TestCase):
+    """Un enlace pegado solo en una línea: YouTube e Instagram se
+    incrustan; cualquier otro queda como botón."""
+
+    def test_youtube_en_todas_sus_formas_se_incrusta_sin_cookies(self):
+        for url in (
+            'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            'https://youtube.com/watch?feature=share&v=dQw4w9WgXcQ&t=30s',
+            'https://youtu.be/dQw4w9WgXcQ?si=abc123',
+            'https://m.youtube.com/watch?v=dQw4w9WgXcQ',
+            'https://www.youtube.com/live/dQw4w9WgXcQ',
+            'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        ):
+            with self.subTest(url=url):
+                html = cuerpo_noticia(f'Miren el partido:\n\n{url}\n\nGracias.')
+                self.assertIn('<iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"', html)
+                self.assertIn('referrerpolicy="strict-origin-when-cross-origin"', html)
+                self.assertIn('title="Video de YouTube"', html)
+                self.assertIn('<p>Miren el partido:</p>', html)
+                self.assertIn('<p>Gracias.</p>', html)
+
+    def test_un_short_de_youtube_va_en_formato_vertical(self):
+        html = cuerpo_noticia('https://www.youtube.com/shorts/dQw4w9WgXcQ')
+        self.assertIn('class="noticia-video noticia-video--vertical"', html)
+        self.assertIn('/embed/dQw4w9WgXcQ"', html)
+
+    def test_instagram_se_incrusta_con_el_mismo_marcado_de_la_portada(self):
+        for url, permalink in (
+            ('https://www.instagram.com/p/Dap8UmUEZdM/?utm_source=ig_web', 'https://www.instagram.com/p/Dap8UmUEZdM/'),
+            ('https://instagram.com/reel/DblC_A0DImu/', 'https://www.instagram.com/reel/DblC_A0DImu/'),
+            ('https://www.instagram.com/ligametropolitanavoley/p/DZeAWx5DOI3/', 'https://www.instagram.com/p/DZeAWx5DOI3/'),
+        ):
+            with self.subTest(url=url):
+                html = cuerpo_noticia(url)
+                self.assertIn(f'<blockquote class="instagram-media" data-instgrm-permalink="{permalink}"', html)
+
+    def test_otras_redes_quedan_como_boton_que_abre_en_otra_pestana(self):
+        html = cuerpo_noticia('https://www.tiktok.com/@liga/video/7301234567890123456')
+        self.assertIn('<a class="noticia-enlace" href="https://www.tiktok.com/@liga/video/7301234567890123456" '
+                      'target="_blank" rel="noopener noreferrer">Ver en TikTok</a>', html)
+        self.assertNotIn('<iframe', html)
+        self.assertIn('>Ver en ejemplo.cl</a>', cuerpo_noticia('https://www.ejemplo.cl/bases.pdf'))
+
+    def test_un_enlace_dentro_de_una_frase_queda_clicable_sin_comerse_el_punto(self):
+        html = cuerpo_noticia('Las bases están en https://ligamve.cl/bases?a=1&b=2. ¡Inscríbanse!')
+        self.assertIn('<a href="https://ligamve.cl/bases?a=1&amp;b=2" target="_blank" rel="noopener noreferrer">'
+                      'https://ligamve.cl/bases?a=1&amp;b=2</a>. ¡Inscríbanse!', html)
+        self.assertNotIn('<iframe', html)
+        # Un video mencionado dentro de una frase no se incrusta: solo
+        # cuando el enlace va solo en su línea.
+        self.assertNotIn('<iframe', cuerpo_noticia('Vean https://youtu.be/dQw4w9WgXcQ por favor'))
+
+    def test_un_enlace_no_sirve_para_colar_codigo(self):
+        for texto in (
+            'javascript:alert(1)',
+            'https://youtu.be/dQw4w9WgXcQ"><script>alert(1)</script>',
+            'https://www.youtube.com/watch?v=x"onload="alert(1)',
+            'https://www.instagram.com/p/abc"><img src=x onerror=alert(1)>/',
+            'https://ejemplo.cl/"onmouseover="alert(1)',
+            'Texto con https://ejemplo.cl/"onmouseover="alert(1) adentro',
+            'data:text/html,<script>alert(1)</script>',
+        ):
+            with self.subTest(texto=texto):
+                html = cuerpo_noticia(texto)
+                self.assertNotIn('<script', html)
+                self.assertNotIn('<img', html)
+                self.assertNotRegex(html, r'<[^>]*\son\w+=')       # ningún atributo onalgo=
+                self.assertNotIn('href="javascript:', html)
+                self.assertNotIn('href="data:', html)
+                # Lo único que puede ir en un iframe es un id de YouTube válido.
+                for src in re.findall(r'<iframe src="([^"]*)"', html):
+                    self.assertRegex(src, r'^https://www\.youtube-nocookie\.com/embed/[A-Za-z0-9_-]{11}$')
+
+    def test_la_pagina_carga_el_script_de_instagram_solo_si_hace_falta(self):
+        sin = crear_noticia(titulo='Sin embed', cuerpo='Solo texto.\n\nhttps://youtu.be/dQw4w9WgXcQ')
+        con = crear_noticia(titulo='Con embed', cuerpo='https://www.instagram.com/p/Dap8UmUEZdM/')
+        r = self.client.get(sin.get_absolute_url())
+        self.assertNotContains(r, 'instagram.com/embed.js')
+        self.assertContains(r, 'youtube-nocookie.com/embed/dQw4w9WgXcQ')
+        self.assertContains(self.client.get(con.get_absolute_url()),
+                            '<script async src="https://www.instagram.com/embed.js"></script>')
+
+    def test_la_politica_de_seguridad_permite_el_iframe_de_youtube_y_ningun_script_suyo(self):
+        csp = self.client.get(crear_noticia().get_absolute_url())['Content-Security-Policy']
+        directivas = dict(d.strip().split(' ', 1) for d in csp.split(';') if ' ' in d.strip())
+        self.assertIn('www.youtube-nocookie.com', directivas['frame-src'])
+        self.assertNotIn('youtube', directivas['script-src'])
+
+
+class AutorTests(TestCase):
+    def test_con_autor_la_noticia_muestra_quien_la_publico(self):
+        noticia = crear_noticia(autor='Camila Busch')
+        r = self.client.get(noticia.get_absolute_url())
+        self.assertContains(r, '<span class="noticia-autor">Por Camila Busch</span>')
+        datos = json.loads(re.search(r'<script type="application/ld\+json"[^>]*>(.*?)</script>',
+                                     r.content.decode(), re.S).group(1))
+        self.assertEqual(datos['author'], {'@type': 'Person', 'name': 'Camila Busch'})
+
+    def test_sin_autor_no_aparece_la_firma_y_firma_la_liga(self):
+        r = self.client.get(crear_noticia().get_absolute_url())
+        self.assertNotContains(r, 'noticia-autor"')
+        datos = json.loads(re.search(r'<script type="application/ld\+json"[^>]*>(.*?)</script>',
+                                     r.content.decode(), re.S).group(1))
+        self.assertEqual(datos['author']['@type'], 'Organization')
+
+    def test_el_nombre_del_autor_se_escapa(self):
+        r = self.client.get(crear_noticia(autor='<b>Camila</b>').get_absolute_url())
+        self.assertNotContains(r, '<b>Camila</b>')
+
+
 class FotosTests(TestCase):
     def test_se_achica_a_dos_tamanos_en_webp(self):
         r = procesar_foto(foto_de_celular(2400, 1800))
@@ -439,7 +549,7 @@ class NoticiasAdminTests(TestCase):
             reverse('admin:core_noticia_add'),
             self._datos_del_formulario(**{'fotos-0-archivo': foto_de_celular()}),
         )
-        self.assertEqual(r.status_code, 302, r.context and r.context['errors'])
+        self.assertEqual(r.status_code, 302)
         noticia = Noticia.objects.get()
         self.assertEqual(noticia.slug, 'exito-de-la-copa-milled')
         self.assertEqual(noticia.fotos.count(), 1)
@@ -449,6 +559,16 @@ class NoticiasAdminTests(TestCase):
         self.client.logout()
         self.assertEqual(self.client.get(reverse('noticia_social', args=[noticia.slug])).status_code, 200)
         self.assertContains(self.client.get(reverse('home')), 'Éxito de la Copa Milled')
+
+    def test_una_noticia_nueva_parte_firmada_por_quien_la_escribe(self):
+        self._entrar_al_panel()
+        User.objects.filter(username='jefa').update(first_name='Camila', last_name='Busch')
+        r = self.client.get(reverse('admin:core_noticia_add'))
+        self.assertContains(r, 'name="autor" value="Camila Busch"')
+        # Y se guarda lo que diga el campo, que se puede cambiar o vaciar.
+        self.client.post(reverse('admin:core_noticia_add'), self._datos_del_formulario(
+            autor='Comunicaciones LMVE', **{'fotos-TOTAL_FORMS': '0'}))
+        self.assertEqual(Noticia.objects.get().autor, 'Comunicaciones LMVE')
 
     def test_el_panel_rechaza_un_archivo_que_no_es_foto_sin_guardar_nada(self):
         self._entrar_al_panel()
@@ -470,5 +590,47 @@ class NoticiasAdminTests(TestCase):
         modelo_admin = site._registry[Noticia]
         self.assertIsInstance(modelo_admin, NoticiaAdmin)
         self.assertEqual(modelo_admin.inlines[0].max_num, 8)
+
+    def test_el_formulario_trae_la_guia_de_escritura_con_ejemplos(self):
+        self._entrar_al_panel()
+        r = self.client.get(reverse('admin:core_noticia_add'))
+        html = r.content.decode()
+        # Las tres partes de la noticia y cada tipo de línea del texto,
+        # con lo que se escribe y cómo se ve.
+        for texto in (
+            'Cómo se arma una noticia',
+            'Casilla «Título»', 'Casilla «Resumen»', 'Casilla «Texto de la noticia»',
+            'con una barra naranja',
+            '<pre># Cuadro de Honor</pre>', '<div class="guia-v-subtitulo">Cuadro de Honor</div>',
+            '- Trofeos Milled', '1. Colegio Andrée',
+            'pega el enlace solo en una línea', 'Ver en TikTok',
+            'Guardar y continuar editando',
+        ):
+            with self.subTest(texto=texto):
+                self.assertIn(texto, html)
+        # Sus estilos vienen de un archivo: la CSP bloquea los estilos en
+        # línea, y la guía no puede depender de ellos.
+        self.assertRegex(html, r'<link href="/static/core/css/admin-noticias\.[0-9a-f]+\.css"')
+        guia = html[html.index('<div class="guia">'):html.index('Antes de publicar')]
+        self.assertNotIn('style=', guia)
         # El slug y las imágenes procesadas no se editan a mano.
-        self.assertNotIn('slug', modelo_admin.fields)
+        campos = [c for _, opciones in site._registry[Noticia].get_fieldsets(r.wsgi_request)
+                  for c in opciones['fields']]
+        self.assertEqual(campos, ['titulo', 'fecha', 'autor', 'resumen', 'cuerpo', 'publicada'])
+
+    def test_los_ejemplos_de_la_guia_son_los_que_de_verdad_produce_el_sitio(self):
+        # Si la guía promete que "# Cuadro de Honor" es un subtítulo o
+        # que un guion hace una lista, el sitio tiene que cumplirlo.
+        html = cuerpo_noticia(
+            'El torneo fue un éxito.\n\nGracias a todos los colegios.\n\n# Cuadro de Honor\n\n'
+            '- Trofeos Milled\n- Balones Molten\n\n1. Colegio Andrée\n2. Liceo Alianza Francesa\n\n'
+            'https://www.youtube.com/watch?v=abc123XYZ00\n\nhttps://www.tiktok.com/@liga/video/123456\n\n'
+            'Escríbenos en https://ligamve.cl/contacto/ para inscribirte.'
+        )
+        self.assertIn('<p>El torneo fue un éxito.</p>\n<p>Gracias a todos los colegios.</p>', html)
+        self.assertIn('<h2>Cuadro de Honor</h2>', html)
+        self.assertIn('<ul><li>Trofeos Milled</li><li>Balones Molten</li></ul>', html)
+        self.assertIn('<ol><li>Colegio Andrée</li><li>Liceo Alianza Francesa</li></ol>', html)
+        self.assertIn('youtube-nocookie.com/embed/abc123XYZ00', html)
+        self.assertIn('>Ver en TikTok</a>', html)
+        self.assertIn('<a href="https://ligamve.cl/contacto/"', html)

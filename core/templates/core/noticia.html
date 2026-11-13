@@ -4,28 +4,68 @@
 {% block content %}
 <style nonce="{{ request.csp_nonce }}">
     /* =========================================================
-       ENCABEZADO DE LA NOTICIA
+       ENCABEZADO: la foto principal de fondo y el título encima, con
+       el mismo degradado azul de las tarjetas de noticias.
        ========================================================= */
-    .noticia-hero { background: var(--c-blue-soft); }
+    .noticia-hero {
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        min-height: 460px;
+        background: linear-gradient(135deg, var(--c-blue-soft) 0%, var(--c-navy-deep) 70%);
+        overflow: hidden;
+        isolation: isolate;
+    }
+    .noticia-hero--sin-foto { min-height: 0; }
+    .noticia-hero-foto {
+        position: absolute;
+        inset: 0;
+        z-index: -2;
+    }
+    .noticia-hero-foto img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .noticia-hero-foto::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to top,
+            rgba(var(--c-navy-deep-rgb), 0.97) 0%,
+            rgba(var(--c-navy-deep-rgb), 0.8) 32%,
+            rgba(var(--c-navy-deep-rgb), 0.3) 70%,
+            rgba(var(--c-navy-deep-rgb), 0.15) 100%
+        );
+    }
     .noticia-hero-inner {
-        max-width: 900px;
+        width: 100%;
+        max-width: var(--page-max);
         margin: 0 auto;
-        padding: 52px var(--page-pad) 44px var(--page-pad);
+        padding: 56px var(--page-pad) 40px var(--page-pad);
     }
     .noticia-volver {
-        display: inline-block;
-        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        border-radius: 50px;
+        background: rgba(var(--c-navy-deep-rgb), 0.62);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        font-size: 13px;
         font-weight: 700;
-        letter-spacing: 0.4px;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.9);
+        letter-spacing: 0.3px;
+        color: #ffffff;
         text-decoration: none;
-        margin-bottom: 18px;
-        transition: color 0.2s ease;
+        margin-bottom: 20px;
+        backdrop-filter: blur(6px);
+        transition: background 0.2s ease, border-color 0.2s ease;
     }
-    .noticia-volver:hover { color: var(--c-amber); }
+    .noticia-volver:hover { background: var(--c-orange); border-color: var(--c-orange); }
     .noticia-hero h1 {
-        font-size: clamp(36px, 5.2vw, 64px);
+        max-width: 900px;
+        font-size: clamp(36px, 5.4vw, 68px);
         font-weight: 800;
         text-transform: uppercase;
         line-height: 0.98;
@@ -34,10 +74,19 @@
         margin-bottom: 14px;
         text-wrap: balance;
     }
-    .noticia-fecha {
+    .noticia-firma {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 14px;
         font-size: 16px;
         font-weight: 700;
-        color: var(--c-amber);
+    }
+    .noticia-fecha { color: var(--c-amber); }
+    .noticia-autor {
+        color: #ffffff;
+        padding-left: 14px;
+        border-left: 2px solid rgba(255, 255, 255, 0.45);
     }
     .noticia-borrador {
         background: var(--c-amber);
@@ -48,91 +97,157 @@
     }
 
     /* =========================================================
-       HOJA: mismo tono claro de las tarjetas, texto oscuro. Un texto
-       largo se lee mejor oscuro sobre claro que blanco sobre azul.
+       TEXTO: blanco sobre el azul de la página, como el resto del
+       sitio, en una columna angosta para que se lea cómodo.
        ========================================================= */
     .noticia-cuerpo-inner {
-        max-width: 900px;
+        max-width: var(--page-max);
         margin: 0 auto;
-        padding: 40px var(--page-pad) 88px var(--page-pad);
+        padding: 48px var(--page-pad) 88px var(--page-pad);
     }
-    .noticia-hoja {
-        background: #E9EEF3;
-        border-radius: 14px;
-        padding: 22px 22px 40px 22px;
-        color: #1c2b3a;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
-    }
-    .noticia-portada {
-        border-radius: 12px;
-        border: 2px solid var(--c-blue-soft);
-        overflow: hidden;
-        margin-bottom: 30px;
-        background: var(--c-navy-deep);
-    }
-    .noticia-portada img { width: 100%; height: auto; }
-
     .noticia-texto {
-        max-width: 700px;
-        margin: 0 auto;
+        max-width: 760px;
         font-size: 17.5px;
-        line-height: 1.7;
+        line-height: 1.72;
+        color: var(--c-text-soft);
         overflow-wrap: break-word;
     }
     .noticia-resumen {
-        font-size: 20px;
+        font-size: 21px;
         line-height: 1.5;
         font-weight: 700;
-        color: var(--c-navy-deep);
-        margin-bottom: 24px;
+        color: #ffffff;
+        padding-left: 18px;
+        border-left: 4px solid var(--c-orange);
+        margin-bottom: 30px;
     }
     .noticia-texto p { margin-bottom: 18px; }
     .noticia-texto h2 {
-        font-size: clamp(26px, 3.2vw, 34px);
+        font-size: clamp(28px, 3.4vw, 40px);
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.4px;
-        line-height: 1.05;
-        color: var(--c-navy);
-        margin: 34px 0 14px 0;
-        padding-bottom: 8px;
-        border-bottom: 3px solid var(--c-orange);
+        line-height: 1.02;
+        color: var(--c-amber);
+        margin: 40px 0 16px 0;
     }
     .noticia-texto ul,
     .noticia-texto ol {
-        margin: 0 0 20px 0;
-        padding-left: 26px;
+        margin: 0 0 22px 0;
+        padding: 18px 22px 14px 44px;
+        background: var(--c-surface);
+        border: 1px solid var(--c-line-soft);
+        border-radius: 12px;
     }
-    .noticia-texto li { margin-bottom: 6px; }
-    .noticia-texto li::marker { color: var(--c-orange); font-weight: 700; }
+    .noticia-texto li { margin-bottom: 6px; padding-left: 4px; }
+    .noticia-texto li::marker { color: var(--c-amber); font-weight: 700; }
+    .noticia-texto ol li::marker { font-family: var(--font-display); font-size: 1.15em; }
+
+    .noticia-texto a {
+        color: var(--c-amber);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        overflow-wrap: anywhere;
+    }
+    .noticia-texto a:hover { color: #ffffff; }
 
     /* =========================================================
-       GALERÍA: el resto de las fotos, cada una abre su versión grande.
+       INCRUSTADOS: un enlace de YouTube o Instagram pegado solo en una
+       línea (ver core/templatetags/noticias.py).
+       ========================================================= */
+    .noticia-video {
+        aspect-ratio: 16 / 9;
+        margin: 8px 0 26px 0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #000000;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+    /* YouTube Shorts: video vertical. */
+    .noticia-video--vertical {
+        aspect-ratio: 9 / 16;
+        max-width: 340px;
+    }
+    .noticia-video iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+    .noticia-instagram {
+        max-width: 480px;
+        margin: 8px 0 26px 0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #ffffff;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+    .noticia-instagram .instagram-media {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+    /* Mientras el script de Instagram no carga (o si está bloqueado),
+       queda el enlace a la publicación. */
+    .noticia-instagram blockquote { padding: 18px 20px; }
+    .noticia-instagram blockquote a { color: var(--c-navy); font-weight: 700; }
+    .noticia-instagram blockquote a:hover { color: var(--c-orange); }
+    /* Enlace a otras redes o sitios: botón, no incrustado. */
+    .noticia-texto a.noticia-enlace {
+        display: inline-block;
+        background: var(--c-orange);
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        padding: 10px 24px;
+        border-radius: 50px;
+        transition: background 0.25s ease, transform 0.12s ease;
+    }
+    .noticia-texto a.noticia-enlace:hover { background: var(--c-orange-hover); color: #ffffff; }
+    .noticia-texto a.noticia-enlace:active { transform: scale(0.96); }
+
+    /* =========================================================
+       GALERÍA: el resto de las fotos; cada una abre su versión grande.
        ========================================================= */
     .noticia-galeria {
-        max-width: 700px;
-        margin: 34px auto 0 auto;
+        margin-top: 44px;
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
     }
     .noticia-galeria a {
         display: block;
         aspect-ratio: 4 / 3;
-        border-radius: 10px;
-        border: 2px solid var(--c-blue-soft);
+        border-radius: 12px;
         overflow: hidden;
         background: var(--c-navy-deep);
-        transition: transform 0.2s ease;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
     }
-    .noticia-galeria a:hover { transform: scale(1.02); }
-    .noticia-galeria a:focus-visible { outline: 3px solid var(--c-orange); outline-offset: 2px; }
-    .noticia-galeria img { width: 100%; height: 100%; object-fit: cover; }
+    .noticia-galeria a:focus-visible { outline: 3px solid var(--c-amber); outline-offset: 3px; }
+    .noticia-galeria img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .noticia-galeria a:hover img { transform: scale(1.05); }
 
+    @media (max-width: 940px) {
+        .noticia-hero { min-height: 380px; }
+        .noticia-hero-inner { padding: 44px var(--page-pad) 32px var(--page-pad); }
+        .noticia-cuerpo-inner { padding: 36px var(--page-pad) 64px var(--page-pad); }
+    }
     @media (max-width: 600px) {
-        .noticia-hoja { padding: 14px 14px 28px 14px; }
+        .noticia-hero { min-height: 320px; }
         .noticia-texto { font-size: 16.5px; }
-        .noticia-resumen { font-size: 18px; }
+        .noticia-resumen { font-size: 18.5px; }
+        .noticia-texto ul,
+        .noticia-texto ol { padding: 14px 16px 10px 36px; }
     }
 </style>
 
@@ -142,40 +257,46 @@
 </div>
 {% endif %}
 
-<section class="noticia-hero">
+<section class="noticia-hero{% if not portada %} noticia-hero--sin-foto{% endif %}">
+    {% if portada %}
+    <div class="noticia-hero-foto">
+        <img src="{{ portada.url_grande }}" alt="{{ portada.alt }}"
+             width="{{ portada.ancho }}" height="{{ portada.alto }}" fetchpriority="high">
+    </div>
+    {% endif %}
     <div class="noticia-hero-inner">
         <a class="noticia-volver" href="{% url 'noticias' %}">&larr; Noticias</a>
         <h1>{{ noticia.titulo }}</h1>
-        <time class="noticia-fecha" datetime="{{ noticia.fecha|date:'Y-m-d' }}">{{ noticia.fecha|date:"j \d\e F \d\e Y" }}</time>
+        <p class="noticia-firma">
+            <time class="noticia-fecha" datetime="{{ noticia.fecha|date:'Y-m-d' }}">{{ noticia.fecha|date:"j \d\e F \d\e Y" }}</time>
+            {% if noticia.autor %}<span class="noticia-autor">Por {{ noticia.autor }}</span>{% endif %}
+        </p>
     </div>
 </section>
 
 <section class="noticia-cuerpo">
     <div class="noticia-cuerpo-inner">
-        <article class="noticia-hoja">
-            {% if portada %}
-            <div class="noticia-portada">
-                <img src="{{ portada.url_grande }}" alt="{{ portada.alt }}"
-                     width="{{ portada.ancho }}" height="{{ portada.alto }}" fetchpriority="high">
-            </div>
-            {% endif %}
-
-            <div class="noticia-texto">
-                <p class="noticia-resumen">{{ noticia.resumen }}</p>
-                {{ noticia.cuerpo|cuerpo_noticia }}
-            </div>
-
-            {% if galeria %}
-            <div class="noticia-galeria">
-                {% for foto in galeria %}
-                <a href="{{ foto.url_grande }}" target="_blank" rel="noopener" aria-label="Ver la foto en grande: {{ foto.alt }}">
-                    <img src="{{ foto.url_miniatura }}" alt="{{ foto.alt }}"
-                         width="{{ foto.mini_ancho }}" height="{{ foto.mini_alto }}" loading="lazy">
-                </a>
-                {% endfor %}
-            </div>
-            {% endif %}
+        <article class="noticia-texto">
+            <p class="noticia-resumen">{{ noticia.resumen }}</p>
+            {{ cuerpo_html }}
         </article>
+
+        {% if galeria %}
+        <div class="noticia-galeria">
+            {% for foto in galeria %}
+            <a href="{{ foto.url_grande }}" target="_blank" rel="noopener" aria-label="Ver la foto en grande: {{ foto.alt }}">
+                <img src="{{ foto.url_miniatura }}" alt="{{ foto.alt }}"
+                     width="{{ foto.mini_ancho }}" height="{{ foto.mini_alto }}" loading="lazy">
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+{% if tiene_instagram %}
+<script async src="https://www.instagram.com/embed.js"></script>
+{% endif %}
 {% endblock %}

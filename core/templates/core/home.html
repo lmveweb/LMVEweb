@@ -877,7 +877,7 @@ Sin ninguna publicada, la sección no existe (ni su CSS, arriba).
             <h2 class="titulo-seccion" id="noticiasTitulo">Noticias</h2>
             <a class="noticias-home-todas" href="{% url 'noticias' %}">Ver todas las noticias</a>
         </div>
-        <div class="noticias-grid">
+        <div class="noticias-grid noticias-grid--portada">
             {% for noticia in noticias %}
             {% include "core/_noticia_tarjeta.html" %}
             {% endfor %}

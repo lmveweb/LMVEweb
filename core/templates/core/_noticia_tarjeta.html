@@ -1,7 +1,8 @@
 {% load static %}
 {% comment %}
-Tarjeta de una noticia: toda la tarjeta es un solo enlace. La usan la
-portada y /noticias/. Recibe `noticia` (con las fotos ya traídas).
+Tarjeta de una noticia: toda la tarjeta es un solo enlace, con la foto de
+fondo y el texto encima. La usan la portada y /noticias/. Recibe
+`noticia` (con las fotos ya traídas).
 {% endcomment %}
 {% with foto=noticia.portada %}
 <a class="noticia-card" href="{{ noticia.get_absolute_url }}">
@@ -16,7 +17,12 @@ portada y /noticias/. Recibe `noticia` (con las fotos ya traídas).
     </div>
     {% endif %}
     <div class="noticia-card-fecha">{{ noticia.fecha|date:"j \d\e F \d\e Y" }}</div>
-    <h3>{{ noticia.titulo }}</h3>
-    <p>{{ noticia.resumen }}</p>
+    <div class="noticia-card-texto">
+        <h3>{{ noticia.titulo }}</h3>
+        <p>{{ noticia.resumen }}</p>
+    </div>
+    <span class="noticia-card-flecha" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+    </span>
 </a>
 {% endwith %}

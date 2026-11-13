@@ -327,7 +327,9 @@ CONTENT_SECURITY_POLICY = {
         # core/fonts/), no desde un CDN.
         'font-src': [SELF],
         'connect-src': [SELF, 'www.instagram.com', 'challenges.cloudflare.com'],
-        'frame-src': ['www.instagram.com', 'challenges.cloudflare.com'],
+        # www.youtube-nocookie.com: videos de YouTube incrustados en las
+        # noticias (solo el <iframe>; no se permite ningún script suyo).
+        'frame-src': ['www.instagram.com', 'challenges.cloudflare.com', 'www.youtube-nocookie.com'],
         'base-uri': [SELF],
         'frame-ancestors': [NONE],
     },

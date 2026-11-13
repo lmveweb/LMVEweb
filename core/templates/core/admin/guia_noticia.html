@@ -1,0 +1,158 @@
+{% comment %}
+Guía para quien escribe una noticia en el panel. Se muestra sobre los
+campos "Resumen" y "Texto" (ver NoticiaAdmin.fieldsets en core/admin.py).
+
+Cada ejemplo tiene dos lados: lo que se escribe y cómo se ve en el
+sitio. El lado derecho imita los estilos reales de la página de la
+noticia (core/templates/core/noticia.html); si esos cambian, hay que
+ajustar core/static/core/css/admin-noticias.css.
+{% endcomment %}
+<div class="guia">
+    <p class="guia-titulo">Cómo se arma una noticia</p>
+    <p>Una noticia tiene tres partes, y cada una se escribe en su propia casilla:</p>
+
+    <div class="guia-fila">
+        <div class="guia-escribes">
+            <span class="guia-etiqueta">Casilla «Título»</span>
+            <pre>Éxito de la Copa Milled</pre>
+        </div>
+        <div class="guia-vista">
+            <span class="guia-etiqueta">Se ve así</span>
+            <div class="guia-v-titulo">Éxito de la Copa Milled</div>
+            <p class="guia-nota">El título grande, sobre la foto principal.</p>
+        </div>
+    </div>
+
+    <div class="guia-fila">
+        <div class="guia-escribes">
+            <span class="guia-etiqueta">Casilla «Resumen»</span>
+            <pre>La cuarta versión reunió a 17 colegios.</pre>
+        </div>
+        <div class="guia-vista">
+            <span class="guia-etiqueta">Se ve así</span>
+            <div class="guia-v-resumen">La cuarta versión reunió a 17 colegios.</div>
+            <p class="guia-nota">Destacado al inicio de la noticia, con una barra naranja. Es también lo que se lee en la tarjeta de la portada.</p>
+        </div>
+    </div>
+
+    <div class="guia-fila">
+        <div class="guia-escribes">
+            <span class="guia-etiqueta">Casilla «Texto de la noticia»</span>
+            <pre>El torneo se jugó en cinco colegios.</pre>
+        </div>
+        <div class="guia-vista">
+            <span class="guia-etiqueta">Se ve así</span>
+            <div class="guia-v-p">El torneo se jugó en cinco colegios.</div>
+            <p class="guia-nota">El texto normal, todo lo demás.</p>
+        </div>
+    </div>
+
+    <p class="guia-titulo">Qué se puede hacer dentro del «Texto de la noticia»</p>
+    <p>
+        Se escribe texto simple, sin negritas ni colores. Lo que cambia cómo se ve una línea es
+        <strong>con qué empieza</strong>:
+    </p>
+
+    <div class="guia-fila">
+        <div class="guia-escribes">
+            <span class="guia-etiqueta">Párrafos: deja una línea en blanco entre uno y otro</span>
+            <pre>El torneo fue un éxito.
+
+Gracias a todos los colegios.</pre>
+        </div>
+        <div class="guia-vista">
+            <span class="guia-etiqueta">Se ve así</span>
+            <div class="guia-v-p">El torneo fue un éxito.</div>
+            <div class="guia-v-p">Gracias a todos los colegios.</div>
+        </div>
+    </div>
+
+    <div class="guia-fila">
+        <div class="guia-escribes">
+            <span class="guia-etiqueta">Subtítulo: empieza la línea con <kbd>#</kbd> y un espacio</span>
+            <pre># Cuadro de Honor</pre>
+        </div>
+        <div class="guia-vista">
+            <span class="guia-etiqueta">Se ve así</span>
+            <div class="guia-v-subtitulo">Cuadro de Honor</div>
+        </div>
+    </div>
+
+    <div class="guia-fila">
+        <div class="guia-escribes">
+            <span class="guia-etiqueta">Lista: empieza cada línea con <kbd>-</kbd> y un espacio</span>
+            <pre>- Trofeos Milled
+- Balones Molten
+- Cuerpo Arbitral</pre>
+        </div>
+        <div class="guia-vista">
+            <span class="guia-etiqueta">Se ve así</span>
+            <ul class="guia-v-lista">
+                <li>Trofeos Milled</li>
+                <li>Balones Molten</li>
+                <li>Cuerpo Arbitral</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="guia-fila">
+        <div class="guia-escribes">
+            <span class="guia-etiqueta">Lista numerada: empieza cada línea con el número, un punto y un espacio</span>
+            <pre>1. Colegio Andrée
+2. Liceo Alianza Francesa
+3. Liceo Manuel de Salas</pre>
+        </div>
+        <div class="guia-vista">
+            <span class="guia-etiqueta">Se ve así</span>
+            <ol class="guia-v-lista">
+                <li>Colegio Andrée</li>
+                <li>Liceo Alianza Francesa</li>
+                <li>Liceo Manuel de Salas</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="guia-fila">
+        <div class="guia-escribes">
+            <span class="guia-etiqueta">Video de YouTube o publicación de Instagram: pega el enlace solo en una línea</span>
+            <pre>Así se vivió la final:
+
+https://www.youtube.com/watch?v=abc123XYZ00</pre>
+        </div>
+        <div class="guia-vista">
+            <span class="guia-etiqueta">Se ve así</span>
+            <div class="guia-v-p">Así se vivió la final:</div>
+            <div class="guia-v-video"><span>&#9654;</span> El video, para verlo ahí mismo</div>
+        </div>
+    </div>
+
+    <div class="guia-fila">
+        <div class="guia-escribes">
+            <span class="guia-etiqueta">Enlace a otra red o página (TikTok, Facebook, un documento): también solo en una línea</span>
+            <pre>https://www.tiktok.com/@liga/video/123456</pre>
+        </div>
+        <div class="guia-vista">
+            <span class="guia-etiqueta">Se ve así</span>
+            <span class="guia-v-boton">Ver en TikTok</span>
+            <p class="guia-nota">Un botón que abre el enlace en otra pestaña.</p>
+        </div>
+    </div>
+
+    <div class="guia-fila">
+        <div class="guia-escribes">
+            <span class="guia-etiqueta">Enlace dentro de una frase: se escribe completo, con https://</span>
+            <pre>Escríbenos en https://ligamve.cl/contacto/ para inscribirte.</pre>
+        </div>
+        <div class="guia-vista">
+            <span class="guia-etiqueta">Se ve así</span>
+            <div class="guia-v-p">Escríbenos en <span class="guia-v-enlace">https://ligamve.cl/contacto/</span> para inscribirte.</div>
+        </div>
+    </div>
+
+    <p class="guia-titulo">Antes de publicar</p>
+    <p>
+        Deja <strong>«Publicada»</strong> sin marcar y aprieta <strong>«Guardar y continuar editando»</strong>.
+        Arriba a la derecha aparece <strong>«Ver en el sitio»</strong>: ahí ves la noticia tal como va a quedar,
+        y solo la ves tú. Cuando esté lista, marca «Publicada» y guarda.
+    </p>
+</div>

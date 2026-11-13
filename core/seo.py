@@ -134,7 +134,10 @@ def jsonld_noticia(noticia):
         'dateModified': noticia.actualizado.date().isoformat(),
         'inLanguage': 'es-CL',
         'mainEntityOfPage': settings.SITE_URL + noticia.get_absolute_url(),
-        'author': {'@type': 'Organization', 'name': 'Liga Metropolitana de Voleibol Escolar'},
+        'author': (
+            {'@type': 'Person', 'name': noticia.autor} if noticia.autor
+            else {'@type': 'Organization', 'name': 'Liga Metropolitana de Voleibol Escolar'}
+        ),
         'publisher': {'@id': settings.SITE_URL + '/#organizacion'},
     }
     portada = noticia.portada

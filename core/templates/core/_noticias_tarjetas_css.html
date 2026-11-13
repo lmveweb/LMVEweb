@@ -2,84 +2,163 @@
        TARJETAS DE NOTICIAS
 
        Compartidas entre la portada y /noticias/ (se incluyen dentro
-       del <style> de cada una). Tarjeta clara sobre el azul de la
-       página, foto con borde azul y esquinas redondeadas.
+       del <style> de cada una). La foto ocupa toda la tarjeta y el
+       texto va encima, sobre un degradado del azul del sitio que lo
+       mantiene legible con cualquier foto. La primera noticia va
+       destacada, más ancha que el resto.
        ========================================================= */
     .noticias-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 26px;
+        grid-auto-rows: 320px;
+        gap: 22px;
     }
+    .noticias-grid > :first-child { grid-column: span 2; }
+    .noticias-grid > :only-child { grid-column: 1 / -1; }
+    /* Portada con sus tres noticias: la destacada ocupa dos filas y las
+       otras dos van apiladas al lado. */
+    .noticias-grid--portada { grid-auto-rows: 250px; }
+    .noticias-grid--portada > :first-child:nth-last-child(3) { grid-row: span 2; }
+
     .noticia-card {
+        position: relative;
         display: flex;
         flex-direction: column;
-        background: #D6E0EA;
+        justify-content: flex-end;
+        overflow: hidden;
         border-radius: 14px;
-        padding: 16px 16px 20px 16px;
-        color: var(--c-navy-deep);
+        background: var(--c-navy-deep);
+        color: #ffffff;
         text-decoration: none;
-        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
-        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+        isolation: isolate;
     }
-    .noticia-card:hover {
-        transform: translateY(-4px);
-        background: #E4EBF2;
-        box-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
-    }
-    .noticia-card:active { transform: translateY(-1px); }
     .noticia-card:focus-visible {
         outline: 3px solid var(--c-amber);
         outline-offset: 3px;
     }
     .noticia-card-foto {
-        aspect-ratio: 4 / 3;
-        border-radius: 12px;
-        border: 2px solid var(--c-blue-soft);
-        overflow: hidden;
-        background: var(--c-navy-deep);
-        margin-bottom: 14px;
+        position: absolute;
+        inset: 0;
+        z-index: -2;
     }
     .noticia-card-foto img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    /* Noticia sin foto: el logo de la Liga centrado sobre el azul. */
+    .noticia-card:hover .noticia-card-foto img { transform: scale(1.05); }
+    /* Noticia sin foto: el logo de la Liga sobre un degradado de marca. */
     .noticia-card-foto--logo {
         display: flex;
-        align-items: center;
-        justify-content: center;
+        align-items: flex-start;
+        justify-content: flex-end;
+        padding: 22px;
+        background: linear-gradient(135deg, var(--c-blue-soft) 0%, var(--c-navy-deep) 70%);
     }
     .noticia-card-foto--logo img {
-        width: 46%;
-        height: auto;
+        width: auto;
+        height: 84px;
         object-fit: contain;
+        opacity: 0.9;
     }
+    .noticia-card:hover .noticia-card-foto--logo img { transform: none; }
+    /* Degradado: transparente arriba, azul profundo abajo. */
+    .noticia-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: linear-gradient(
+            to top,
+            rgba(var(--c-navy-deep-rgb), 0.96) 0%,
+            rgba(var(--c-navy-deep-rgb), 0.78) 34%,
+            rgba(var(--c-navy-deep-rgb), 0.18) 68%,
+            rgba(var(--c-navy-deep-rgb), 0.05) 100%
+        );
+    }
+
     .noticia-card-fecha {
-        font-size: 13px;
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        padding: 5px 14px;
+        border-radius: 50px;
+        background: rgba(var(--c-navy-deep-rgb), 0.62);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        font-size: 12.5px;
         font-weight: 700;
-        letter-spacing: 0.4px;
-        text-transform: uppercase;
-        color: var(--c-blue-soft);
-        margin-bottom: 4px;
+        letter-spacing: 0.3px;
+        color: #ffffff;
+        backdrop-filter: blur(6px);
+    }
+    .noticia-card-texto {
+        display: block;
+        padding: 20px 76px 20px 22px;
     }
     .noticia-card h3 {
-        font-size: 27px;
+        font-size: 28px;
         font-weight: 700;
-        line-height: 1.08;
-        color: var(--c-navy-deep);
+        line-height: 1.05;
+        letter-spacing: 0.2px;
+        color: #ffffff;
         margin-bottom: 8px;
         text-wrap: balance;
     }
     .noticia-card p {
         font-size: 14.5px;
         line-height: 1.45;
-        color: rgba(var(--c-navy-deep-rgb), 0.86);
+        color: var(--c-text-soft);
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        overflow: hidden;
     }
+    .noticias-grid > :first-child h3 { font-size: clamp(30px, 3.4vw, 44px); }
+    .noticias-grid > :first-child p { font-size: 16px; max-width: 620px; }
+
+    /* Flecha: blanca, y naranja (el color de acción del sitio) al pasar. */
+    .noticia-card-flecha {
+        position: absolute;
+        right: 18px;
+        bottom: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #ffffff;
+        color: var(--c-navy-deep);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+    }
+    .noticia-card-flecha svg { width: 18px; height: 18px; }
+    .noticia-card:hover .noticia-card-flecha {
+        background: var(--c-orange);
+        color: #ffffff;
+        transform: translateX(3px);
+    }
+    .noticia-card:active .noticia-card-flecha { transform: scale(0.94); }
 
     @media (max-width: 940px) {
-        .noticias-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .noticias-grid,
+        .noticias-grid--portada {
+            grid-template-columns: repeat(2, 1fr);
+            grid-auto-rows: 280px;
+            gap: 18px;
+        }
+        .noticias-grid > :first-child { grid-column: 1 / -1; }
+        .noticias-grid--portada > :first-child:nth-last-child(3) { grid-row: auto; }
     }
     @media (max-width: 600px) {
-        .noticias-grid { grid-template-columns: 1fr; }
+        .noticias-grid,
+        .noticias-grid--portada {
+            grid-template-columns: 1fr;
+            grid-auto-rows: 270px;
+        }
+        .noticia-card h3,
+        .noticias-grid > :first-child h3 { font-size: 26px; }
+        .noticias-grid > :first-child p { font-size: 14.5px; }
     }
