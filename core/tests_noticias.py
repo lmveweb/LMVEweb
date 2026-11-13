@@ -397,6 +397,12 @@ class NoticiasEnElMenuTests(TestCase):
                 # Mismo orden en los tres: después de Multimedia.
                 self.assertLess(bloque.index('>Multimedia<'), bloque.index('>Noticias<'))
 
+    def test_ningun_nombre_del_menu_se_parte_en_dos_lineas(self):
+        # "Sobre la LMVE" se partía al sumar Noticias: no había espacio.
+        html = self.client.get(reverse('home')).content.decode()
+        regla = re.search(r'\n        \.site-nav a \{(.*?)\}', html, re.S).group(1)
+        self.assertIn('white-space: nowrap;', regla)
+
 
 class NoticiasEnLaPortadaTests(TestCase):
     def test_sin_noticias_la_portada_no_tiene_la_seccion_ni_su_css(self):

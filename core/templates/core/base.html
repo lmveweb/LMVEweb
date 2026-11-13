@@ -275,7 +275,7 @@
         /* Los dos <span> de adentro van en una sola linea mientras haya
            ancho: al ser inline, el salto del HTML entre ellos colapsa a
            un espacio y se lee "Liga Metropolitana de Voleibol Escolar"
-           de corrido. Abajo de 1140px pasan a apilarse (ver RESPONSIVE). */
+           de corrido. Abajo de 1220px pasan a apilarse (ver RESPONSIVE). */
         .brand-nombre {
             font-size: 19px;
             font-weight: 800;
@@ -304,6 +304,9 @@
             font-size: 15px;
             font-weight: 700;
             padding: 4px 16px;
+            /* Un nombre de sección nunca se parte en dos líneas: si no
+               cabe, los espacios se achican antes (ver RESPONSIVE). */
+            white-space: nowrap;
             transition: color 0.25s ease;
         }
         .site-nav a:hover { color: var(--c-amber); }
@@ -665,7 +668,16 @@
         /* =========================================================
            RESPONSIVE
            ========================================================= */
-        @media (max-width: 1140px) {
+        /* Con seis secciones, el nombre en una sola línea (~280px) ya no
+           deja espacio para el menú si la ventana mide menos de 1220px:
+           ahí el nombre se apila (abajo). Por encima, el ancho del
+           encabezado tope es de 1200px y caben justo con un poco menos de
+           aire entre secciones. */
+        @media (min-width: 1221px) {
+            .header-inner { gap: 16px; }
+            .site-nav a { padding: 4px 11px; }
+        }
+        @media (max-width: 1220px) {
             /* Antes aca el nombre se escondia con display:none, porque en
                una sola linea de 19px ocupa ~300px y ya no cabia junto al
                nav. En vez de perderlo se apila en sus dos mitades: baja a
@@ -701,7 +713,7 @@
            junto al logo y el nombre: se aprietan un poco los espacios. */
         @media (min-width: 941px) and (max-width: 1060px) {
             .header-inner { gap: 14px; }
-            .site-nav a { padding: 4px 8px; font-size: 13.5px; }
+            .site-nav a { padding: 4px 7px; font-size: 13.5px; }
             .btn-cta { padding: 10px 18px; margin-left: 8px; }
         }
         @media (max-width: 940px) {
