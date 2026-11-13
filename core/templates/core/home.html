@@ -669,6 +669,44 @@
         .evento-cta { width: 100%; justify-content: center; }
         {% endif %}
     }
+
+    {% if noticias %}
+    /* =========================================================
+       NOTICIAS (las tres más recientes; ver core/views.py)
+       ========================================================= */
+    .noticias-home {
+        position: relative;
+        z-index: 1;
+        background: var(--c-navy);
+    }
+    .noticias-home-inner {
+        max-width: var(--page-max);
+        margin: 0 auto;
+        padding: 64px var(--page-pad) 72px var(--page-pad);
+    }
+    .noticias-home-cabecera {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+    }
+    .noticias-home-cabecera .titulo-seccion { margin-bottom: 0; }
+    .noticias-home-todas {
+        color: #ffffff;
+        font-weight: 700;
+        text-decoration: none;
+        border-bottom: 2px solid var(--c-amber);
+        padding-bottom: 2px;
+        transition: color 0.2s ease;
+    }
+    .noticias-home-todas:hover { color: var(--c-amber); }
+{% include "core/_noticias_tarjetas_css.html" %}
+    @media (max-width: 940px) {
+        .noticias-home-inner { padding: 48px var(--page-pad) 54px var(--page-pad); }
+    }
+    {% endif %}
 </style>
 
 <div class="marca-agua-fija" aria-hidden="true"></div>
@@ -824,6 +862,26 @@ que nadie tenga que entrar a editar el sitio.
       </div>
 
       </div>
+    </div>
+</section>
+{% endif %}
+
+{% comment %}
+Noticias: las tres más recientes que la Liga publicó desde el admin.
+Sin ninguna publicada, la sección no existe (ni su CSS, arriba).
+{% endcomment %}
+{% if noticias %}
+<section class="noticias-home" aria-labelledby="noticiasTitulo">
+    <div class="noticias-home-inner">
+        <div class="noticias-home-cabecera">
+            <h2 class="titulo-seccion" id="noticiasTitulo">Noticias</h2>
+            <a class="noticias-home-todas" href="{% url 'noticias' %}">Ver todas las noticias</a>
+        </div>
+        <div class="noticias-grid">
+            {% for noticia in noticias %}
+            {% include "core/_noticia_tarjeta.html" %}
+            {% endfor %}
+        </div>
     </div>
 </section>
 {% endif %}

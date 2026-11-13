@@ -3,7 +3,7 @@ from django.urls import path
 from django.views.generic import RedirectView, TemplateView
 
 from . import views
-from .sitemaps import VistasEstaticas
+from .sitemaps import NoticiasPublicadas, VistasEstaticas
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -12,10 +12,14 @@ urlpatterns = [
     path('equipo/', TemplateView.as_view(template_name='core/equipo.html'), name='equipo'),
     path('multimedia/', views.archivo, name='archivo'),
     path('contacto/', views.contacto, name='contacto'),
+    path('noticias/', views.noticias, name='noticias'),
+    path('noticias/foto/<int:pk>/<slug:version>/<slug:tamano>.webp', views.noticia_foto, name='noticia_foto'),
+    path('noticias/<slug:slug>/', views.noticia, name='noticia'),
+    path('noticias/<slug:slug>/social.jpg', views.noticia_social, name='noticia_social'),
     path('privacidad/', TemplateView.as_view(template_name='core/privacidad.html'), name='privacidad'),
 
     path('robots.txt', views.robots_txt, name='robots_txt'),
-    path('sitemap.xml', sitemap, {'sitemaps': {'estaticas': VistasEstaticas}},
+    path('sitemap.xml', sitemap, {'sitemaps': {'estaticas': VistasEstaticas, 'noticias': NoticiasPublicadas}},
          name='django.contrib.sitemaps.views.sitemap'),
 
     # La vista se llamaba "Staff" y vivia en /staff/ hasta el cambio de

@@ -2,8 +2,9 @@ import logging
 
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.core.paginator import Paginator
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, render
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_http_methods, require_safe
 from django_ratelimit.decorators import ratelimit
@@ -17,7 +18,8 @@ from .antispam import (
 from .contenido import COLEGIOS, FOTOS_MULTIMEDIA, evento_vigente
 from .forms import ContactoForm
 from .ip import clave_ratelimit, ip_cliente
-from .seo import jsonld_home
+from .models import FotoNoticia, Noticia
+from .seo import jsonld_home, jsonld_noticia, seo_noticia
 
 logger = logging.getLogger(__name__)
 
@@ -32,12 +34,97 @@ def home(request):
         'colegios': COLEGIOS,
         'evento': evento,
         'jsonld': jsonld_home(evento),
+        'noticias': Noticia.objects.publicadas().prefetch_related('fotos')[:NOTICIAS_EN_PORTADA],
     })
 
 
 @require_safe
 def archivo(request):
     return render(request, 'core/archivo.html', {'fotos': FOTOS_MULTIMEDIA})
+
+
+# ---------------------------------------------------------------------
+# Noticias (las publica la Liga desde el admin, ver core/models.py)
+# ---------------------------------------------------------------------
+
+NOTICIAS_EN_PORTADA = 3
+NOTICIAS_POR_PAGINA = 12
+UN_DIA = 60 * 60 * 24
+UN_ANIO = UN_DIA * 365
+
+
+def _puede_ver_borradores(request):
+    """Quien entró al panel ve también las noticias sin publicar: es la
+    vista previa antes de marcar "Publicada"."""
+    return request.user.is_authenticated and request.user.is_staff
+
+
+@require_safe
+def noticias(request):
+    pagina = Paginator(
+        Noticia.objects.publicadas().prefetch_related('fotos'), NOTICIAS_POR_PAGINA,
+    ).get_page(request.GET.get('pagina'))
+    return render(request, 'core/noticias.html', {'pagina': pagina})
+
+
+@require_safe
+def noticia(request, slug):
+    nota = get_object_or_404(Noticia.objects.prefetch_related('fotos'), slug=slug)
+    if not nota.publicada and not _puede_ver_borradores(request):
+        raise Http404
+    fotos = list(nota.fotos.all())
+    respuesta = render(request, 'core/noticia.html', {
+        'noticia': nota,
+        'portada': fotos[0] if fotos else None,
+        'galeria': fotos[1:],
+        'jsonld': jsonld_noticia(nota) if nota.publicada else None,
+        # Pisa lo que entrega el context processor para el resto de las
+        # vistas (ver core/seo.py): acá los metadatos salen de la noticia.
+        **seo_noticia(nota),
+    })
+    if not nota.publicada:
+        respuesta['Cache-Control'] = 'private, no-store'
+    return respuesta
+
+
+def _imagen(contenido, tipo, publicada, cache):
+    respuesta = HttpResponse(bytes(contenido), content_type=tipo)
+    respuesta['Cache-Control'] = cache if publicada else 'private, no-store'
+    return respuesta
+
+
+@require_safe
+def noticia_foto(request, pk, version, tamano):
+    """Sirve una foto desde la base de datos (ver FotoNoticia).
+
+    La dirección lleva la versión de la imagen: si la foto cambia, cambia
+    la dirección, así que el navegador puede guardarla por un año sin
+    volver a pedirla. Las fotos de un borrador solo las ve quien entró
+    al panel, igual que el borrador mismo.
+    """
+    campo = {'m': 'miniatura', 'g': 'grande'}.get(tamano)
+    if campo is None:
+        raise Http404
+    fila = (FotoNoticia.objects.filter(pk=pk, version=version)
+            .values_list(campo, 'noticia__publicada').first())
+    if fila is None:
+        raise Http404
+    contenido, publicada = fila
+    if not publicada and not _puede_ver_borradores(request):
+        raise Http404
+    return _imagen(contenido, 'image/webp', publicada, f'public, max-age={UN_ANIO}, immutable')
+
+
+@require_safe
+def noticia_social(request, slug):
+    """La imagen de la vista previa al compartir el link (og:image)."""
+    fila = Noticia.objects.filter(slug=slug).values_list('imagen_social', 'publicada').first()
+    if fila is None or fila[0] is None:
+        raise Http404
+    contenido, publicada = fila
+    if not publicada and not _puede_ver_borradores(request):
+        raise Http404
+    return _imagen(contenido, 'image/jpeg', publicada, f'public, max-age={UN_DIA}')
 
 
 # require_safe (GET y HEAD), no require_GET: varios rastreadores y

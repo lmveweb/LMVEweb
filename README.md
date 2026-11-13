@@ -15,7 +15,7 @@
 
 ## 📋 Sobre el proyecto
 
-Sitio institucional de la LMVE, fundada en 1987, en producción en **[ligamve.cl](https://ligamve.cl)**. Siete vistas públicas: Inicio, Historia, Sobre la LMVE, Equipo, Multimedia, Contacto y Política de Privacidad.
+Sitio institucional de la LMVE, fundada en 1987, en producción en **[ligamve.cl](https://ligamve.cl)**. Ocho vistas públicas: Inicio, Historia, Sobre la LMVE, Equipo, Multimedia, Noticias, Contacto y Política de Privacidad.
 
 El formulario de Contacto guarda cada propuesta de patrocinio en base de datos **y** avisa por correo, con rate limiting, honeypot, chequeo de tiempo de envío y (opcional) Cloudflare Turnstile para frenar spam.
 
@@ -26,6 +26,7 @@ El formulario de Contacto guarda cada propuesta de patrocinio en base de datos *
 | Sobre la LMVE | `/sobre/` | Visión y misión |
 | Equipo | `/equipo/` | Directiva, coordinadores y staff |
 | Multimedia | `/multimedia/` | Galería de fotos con lightbox |
+| Noticias | `/noticias/` | Noticias que la Liga publica desde el panel de administración, con fotos |
 | Contacto | `/contacto/` | Formulario de auspicio → guarda en BD + envía correo |
 | Política de Privacidad | `/privacidad/` | Política de privacidad y uso de datos |
 
@@ -34,6 +35,7 @@ El formulario de Contacto guarda cada propuesta de patrocinio en base de datos *
 ## 🛠️ Stack técnico
 
 - **Backend:** Django 6.0.5
+- **Noticias:** texto y fotos en la base de datos (las fotos se achican a WebP y se guardan sin metadatos al subirlas, con Pillow)
 - **Estáticos:** WhiteNoise (con hash de contenido para cache-busting)
 - **Base de datos:** SQLite en desarrollo · PostgreSQL en producción
 - **Seguridad:** Content-Security-Policy con nonces, HSTS, rate limiting (`django-ratelimit`)

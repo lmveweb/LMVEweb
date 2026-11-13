@@ -22,9 +22,9 @@ from .models import MensajePatrocinio
 from .seo import PAGINAS
 from LMVEweb.urls import ADMIN_URL
 
-# Las 7 vistas públicas, tal como deben aparecer en el sitemap y llevar
+# Las 8 vistas públicas, tal como deben aparecer en el sitemap y llevar
 # meta de SEO. Ni /staff/ (redirect) ni el admin.
-VISTAS_PUBLICAS = ['home', 'proyecto', 'sobre', 'equipo', 'archivo', 'contacto', 'privacidad']
+VISTAS_PUBLICAS = ['home', 'proyecto', 'sobre', 'equipo', 'archivo', 'noticias', 'contacto', 'privacidad']
 
 
 def marca_tiempo_hace(segundos):
@@ -251,7 +251,7 @@ class RutasTests(TestCase):
                 self.assertEqual(self.client.head(reverse(nombre)).status_code, 200)
 
     def test_vistas_de_solo_lectura_rechazan_post(self):
-        for nombre in ['home', 'proyecto', 'sobre', 'equipo', 'archivo', 'privacidad']:
+        for nombre in ['home', 'proyecto', 'sobre', 'equipo', 'archivo', 'noticias', 'privacidad']:
             with self.subTest(vista=nombre):
                 self.assertEqual(self.client.post(reverse(nombre)).status_code, 405)
 

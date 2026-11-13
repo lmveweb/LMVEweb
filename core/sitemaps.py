@@ -4,10 +4,11 @@ from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 
+from .models import Noticia
 from .seo import PAGINAS
 
 
-class VistasEstaticas(Sitemap):
+class _SitemapCanonico(Sitemap):
     # Dominio y esquema desde SITE_URL, no desde el Host de la petición
     # ni de que el proxy avise que era https: por defecto Django usa
     # request.scheme como protocolo, y detrás de un proxy mal
@@ -20,6 +21,8 @@ class VistasEstaticas(Sitemap):
     def get_domain(self, site=None):
         return urlsplit(settings.SITE_URL).netloc
 
+
+class VistasEstaticas(_SitemapCanonico):
     def items(self):
         # Las mismas vistas que tienen metadatos de SEO en core/seo.py:
         # así una página nueva no puede quedar en el sitemap sin title ni
@@ -28,3 +31,13 @@ class VistasEstaticas(Sitemap):
 
     def location(self, item):
         return reverse(item)
+
+
+class NoticiasPublicadas(_SitemapCanonico):
+    """Una entrada por noticia publicada; los borradores no aparecen."""
+
+    def items(self):
+        return Noticia.objects.publicadas()
+
+    def lastmod(self, noticia):
+        return noticia.actualizado

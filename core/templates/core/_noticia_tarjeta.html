@@ -1,0 +1,22 @@
+{% load static %}
+{% comment %}
+Tarjeta de una noticia: toda la tarjeta es un solo enlace. La usan la
+portada y /noticias/. Recibe `noticia` (con las fotos ya traídas).
+{% endcomment %}
+{% with foto=noticia.portada %}
+<a class="noticia-card" href="{{ noticia.get_absolute_url }}">
+    {% if foto %}
+    <div class="noticia-card-foto">
+        <img src="{{ foto.url_miniatura }}" alt="{{ foto.alt }}"
+             width="{{ foto.mini_ancho }}" height="{{ foto.mini_alto }}" loading="lazy">
+    </div>
+    {% else %}
+    <div class="noticia-card-foto noticia-card-foto--logo">
+        <img src="{% static 'core/img/logo-sobre-oscuro.png' %}" alt="" width="164" height="148" loading="lazy">
+    </div>
+    {% endif %}
+    <div class="noticia-card-fecha">{{ noticia.fecha|date:"j \d\e F \d\e Y" }}</div>
+    <h3>{{ noticia.titulo }}</h3>
+    <p>{{ noticia.resumen }}</p>
+</a>
+{% endwith %}

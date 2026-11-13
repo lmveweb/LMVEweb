@@ -5,8 +5,13 @@ from django.utils.decorators import method_decorator
 from django_otp.admin import OTPAdminSite
 from django_ratelimit.decorators import ratelimit
 
+from django import forms
+from django.db import models
+from django.utils.html import format_html
+
+from .imagenes import FotoInvalida, imagen_social, procesar_foto
 from .ip import clave_ratelimit
-from .models import MensajePatrocinio
+from .models import FotoNoticia, MensajePatrocinio, Noticia
 
 
 class LmveAdminSite(OTPAdminSite):
@@ -47,3 +52,95 @@ class MensajePatrocinioAdmin(admin.ModelAdmin):
     list_filter = ('creado',)
     search_fields = ('nombre', 'institucion', 'email')
     readonly_fields = ('creado',)
+
+
+# ---------------------------------------------------------------------
+# Noticias
+# ---------------------------------------------------------------------
+
+FOTOS_POR_NOTICIA = 8
+
+
+class FotoNoticiaForm(forms.ModelForm):
+    """Recibe el archivo de la foto y lo pasa por core.imagenes antes de
+    guardar: lo que queda en la base nunca es el archivo original."""
+
+    archivo = forms.FileField(
+        label='Foto', required=False,
+        widget=forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png,image/webp'}),
+        help_text='JPG, PNG o WebP, hasta 10 MB. Para cambiar una foto ya subida, elige otra acá.',
+    )
+
+    class Meta:
+        model = FotoNoticia
+        fields = ['archivo', 'alt', 'orden']
+
+    def clean_archivo(self):
+        archivo = self.cleaned_data.get('archivo')
+        if not archivo:
+            if not self.instance.pk:
+                raise forms.ValidationError('Falta elegir la foto.')
+            return None
+        try:
+            self._procesada = procesar_foto(archivo)
+        except FotoInvalida as error:
+            raise forms.ValidationError(str(error))
+        return archivo
+
+    def save(self, commit=True):
+        foto = super().save(commit=False)
+        procesada = getattr(self, '_procesada', None)
+        if procesada:
+            foto.cargar(procesada)
+        if commit:
+            foto.save()
+        return foto
+
+
+class FotoNoticiaInline(admin.TabularInline):
+    model = FotoNoticia
+    form = FotoNoticiaForm
+    extra = 1
+    max_num = FOTOS_POR_NOTICIA
+    fields = ['vista', 'archivo', 'alt', 'orden']
+    readonly_fields = ['vista']
+
+    @admin.display(description='Vista')
+    def vista(self, foto):
+        if not foto.pk:
+            return '—'
+        # Con atributos width/height y no con style="": la política de
+        # seguridad del sitio (CSP) bloquea los estilos en línea.
+        return format_html(
+            '<img src="{}" alt="" width="120" height="{}">',
+            foto.url_miniatura, round(120 * foto.mini_alto / foto.mini_ancho),
+        )
+
+
+@admin.register(Noticia, site=site)
+class NoticiaAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'fecha', 'publicada', 'cantidad_fotos')
+    list_filter = ('publicada',)
+    search_fields = ('titulo', 'resumen', 'cuerpo')
+    date_hierarchy = 'fecha'
+    fields = ('titulo', 'fecha', 'resumen', 'cuerpo', 'publicada')
+    inlines = [FotoNoticiaInline]
+    formfield_overrides = {
+        models.TextField: {'widget': forms.Textarea(attrs={'rows': 22, 'cols': 90})},
+    }
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(_fotos=models.Count('fotos'))
+
+    @admin.display(description='Fotos', ordering='_fotos')
+    def cantidad_fotos(self, noticia):
+        return noticia._fotos
+
+    def save_related(self, request, form, formsets, change):
+        """Después de guardar las fotos, rehace la imagen que se ve al
+        compartir el link, a partir de la que quedó primera."""
+        super().save_related(request, form, formsets, change)
+        noticia = form.instance
+        principal = noticia.fotos.values_list('grande', flat=True).first()
+        noticia.imagen_social = imagen_social(principal) if principal else None
+        noticia.save(update_fields=['imagen_social'])

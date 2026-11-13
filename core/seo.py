@@ -10,6 +10,10 @@ pasarlo a mano.
 
 from django.conf import settings
 from django.templatetags.static import static
+from django.urls import reverse
+
+from .imagenes import SOCIAL
+from .models import Noticia
 
 POR_DEFECTO = {
     'title': 'LMVE | Liga Metropolitana de Voleibol Escolar',
@@ -61,6 +65,13 @@ PAGINAS = {
         'og_image_width': 1400,
         'og_image_height': 1016,
     },
+    'noticias': {
+        'title': 'Noticias | LMVE',
+        'description': (
+            'Noticias de la Liga Metropolitana de Voleibol Escolar: torneos, resultados '
+            'y novedades del voleibol escolar en Santiago.'
+        ),
+    },
     'contacto': {
         'title': 'Contacto | LMVE',
         'description': (
@@ -91,6 +102,45 @@ def contexto_seo(request):
         'canonical_url': settings.SITE_URL + request.path,
         'og_image_url': settings.SITE_URL + static(seo['og_image']),
     }
+
+
+def seo_noticia(noticia):
+    """Metadatos de una noticia, con las mismas claves que entrega
+    contexto_seo: la vista los pasa en su contexto, que tiene prioridad
+    sobre el del context processor. Un borrador sale con noindex."""
+    seo = {
+        **POR_DEFECTO,
+        'title': f'{noticia.titulo} | LMVE',
+        'description': noticia.resumen,
+        'indexable': noticia.publicada,
+    }
+    og_image_url = settings.SITE_URL + static(seo['og_image'])
+    # Se pregunta a la base en vez de leer el campo: la imagen queda
+    # fuera de las consultas normales a propósito (ver core/models.py).
+    if Noticia.objects.filter(pk=noticia.pk, imagen_social__isnull=False).exists():
+        seo['og_image_width'], seo['og_image_height'] = SOCIAL
+        og_image_url = settings.SITE_URL + reverse('noticia_social', args=[noticia.slug])
+    return {'seo': seo, 'og_image_url': og_image_url}
+
+
+def jsonld_noticia(noticia):
+    """NewsArticle: le permite a Google mostrar la noticia con su fecha."""
+    datos = {
+        '@context': 'https://schema.org',
+        '@type': 'NewsArticle',
+        'headline': noticia.titulo,
+        'description': noticia.resumen,
+        'datePublished': noticia.fecha.isoformat(),
+        'dateModified': noticia.actualizado.date().isoformat(),
+        'inLanguage': 'es-CL',
+        'mainEntityOfPage': settings.SITE_URL + noticia.get_absolute_url(),
+        'author': {'@type': 'Organization', 'name': 'Liga Metropolitana de Voleibol Escolar'},
+        'publisher': {'@id': settings.SITE_URL + '/#organizacion'},
+    }
+    portada = noticia.portada
+    if portada:
+        datos['image'] = [settings.SITE_URL + portada.url_grande]
+    return datos
 
 
 def jsonld_home(evento=None):

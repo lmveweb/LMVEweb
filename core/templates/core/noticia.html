@@ -1,0 +1,181 @@
+{% extends "core/base.html" %}
+{% load noticias %}
+
+{% block content %}
+<style nonce="{{ request.csp_nonce }}">
+    /* =========================================================
+       ENCABEZADO DE LA NOTICIA
+       ========================================================= */
+    .noticia-hero { background: var(--c-blue-soft); }
+    .noticia-hero-inner {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 52px var(--page-pad) 44px var(--page-pad);
+    }
+    .noticia-volver {
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        margin-bottom: 18px;
+        transition: color 0.2s ease;
+    }
+    .noticia-volver:hover { color: var(--c-amber); }
+    .noticia-hero h1 {
+        font-size: clamp(36px, 5.2vw, 64px);
+        font-weight: 800;
+        text-transform: uppercase;
+        line-height: 0.98;
+        letter-spacing: 0.4px;
+        color: #ffffff;
+        margin-bottom: 14px;
+        text-wrap: balance;
+    }
+    .noticia-fecha {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--c-amber);
+    }
+    .noticia-borrador {
+        background: var(--c-amber);
+        color: var(--c-navy-deep);
+        font-weight: 700;
+        text-align: center;
+        padding: 10px var(--page-pad);
+    }
+
+    /* =========================================================
+       HOJA: mismo tono claro de las tarjetas, texto oscuro. Un texto
+       largo se lee mejor oscuro sobre claro que blanco sobre azul.
+       ========================================================= */
+    .noticia-cuerpo-inner {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px var(--page-pad) 88px var(--page-pad);
+    }
+    .noticia-hoja {
+        background: #E9EEF3;
+        border-radius: 14px;
+        padding: 22px 22px 40px 22px;
+        color: #1c2b3a;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+    }
+    .noticia-portada {
+        border-radius: 12px;
+        border: 2px solid var(--c-blue-soft);
+        overflow: hidden;
+        margin-bottom: 30px;
+        background: var(--c-navy-deep);
+    }
+    .noticia-portada img { width: 100%; height: auto; }
+
+    .noticia-texto {
+        max-width: 700px;
+        margin: 0 auto;
+        font-size: 17.5px;
+        line-height: 1.7;
+        overflow-wrap: break-word;
+    }
+    .noticia-resumen {
+        font-size: 20px;
+        line-height: 1.5;
+        font-weight: 700;
+        color: var(--c-navy-deep);
+        margin-bottom: 24px;
+    }
+    .noticia-texto p { margin-bottom: 18px; }
+    .noticia-texto h2 {
+        font-size: clamp(26px, 3.2vw, 34px);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        line-height: 1.05;
+        color: var(--c-navy);
+        margin: 34px 0 14px 0;
+        padding-bottom: 8px;
+        border-bottom: 3px solid var(--c-orange);
+    }
+    .noticia-texto ul,
+    .noticia-texto ol {
+        margin: 0 0 20px 0;
+        padding-left: 26px;
+    }
+    .noticia-texto li { margin-bottom: 6px; }
+    .noticia-texto li::marker { color: var(--c-orange); font-weight: 700; }
+
+    /* =========================================================
+       GALERÍA: el resto de las fotos, cada una abre su versión grande.
+       ========================================================= */
+    .noticia-galeria {
+        max-width: 700px;
+        margin: 34px auto 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+    }
+    .noticia-galeria a {
+        display: block;
+        aspect-ratio: 4 / 3;
+        border-radius: 10px;
+        border: 2px solid var(--c-blue-soft);
+        overflow: hidden;
+        background: var(--c-navy-deep);
+        transition: transform 0.2s ease;
+    }
+    .noticia-galeria a:hover { transform: scale(1.02); }
+    .noticia-galeria a:focus-visible { outline: 3px solid var(--c-orange); outline-offset: 2px; }
+    .noticia-galeria img { width: 100%; height: 100%; object-fit: cover; }
+
+    @media (max-width: 600px) {
+        .noticia-hoja { padding: 14px 14px 28px 14px; }
+        .noticia-texto { font-size: 16.5px; }
+        .noticia-resumen { font-size: 18px; }
+    }
+</style>
+
+{% if not noticia.publicada %}
+<div class="noticia-borrador" role="status">
+    Borrador: esta noticia todavía no está publicada. Solo la ves tú, porque entraste al panel.
+</div>
+{% endif %}
+
+<section class="noticia-hero">
+    <div class="noticia-hero-inner">
+        <a class="noticia-volver" href="{% url 'noticias' %}">&larr; Noticias</a>
+        <h1>{{ noticia.titulo }}</h1>
+        <time class="noticia-fecha" datetime="{{ noticia.fecha|date:'Y-m-d' }}">{{ noticia.fecha|date:"j \d\e F \d\e Y" }}</time>
+    </div>
+</section>
+
+<section class="noticia-cuerpo">
+    <div class="noticia-cuerpo-inner">
+        <article class="noticia-hoja">
+            {% if portada %}
+            <div class="noticia-portada">
+                <img src="{{ portada.url_grande }}" alt="{{ portada.alt }}"
+                     width="{{ portada.ancho }}" height="{{ portada.alto }}" fetchpriority="high">
+            </div>
+            {% endif %}
+
+            <div class="noticia-texto">
+                <p class="noticia-resumen">{{ noticia.resumen }}</p>
+                {{ noticia.cuerpo|cuerpo_noticia }}
+            </div>
+
+            {% if galeria %}
+            <div class="noticia-galeria">
+                {% for foto in galeria %}
+                <a href="{{ foto.url_grande }}" target="_blank" rel="noopener" aria-label="Ver la foto en grande: {{ foto.alt }}">
+                    <img src="{{ foto.url_miniatura }}" alt="{{ foto.alt }}"
+                         width="{{ foto.mini_ancho }}" height="{{ foto.mini_alto }}" loading="lazy">
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </article>
+    </div>
+</section>
+{% endblock %}

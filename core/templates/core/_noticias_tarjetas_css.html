@@ -1,0 +1,85 @@
+    /* =========================================================
+       TARJETAS DE NOTICIAS
+
+       Compartidas entre la portada y /noticias/ (se incluyen dentro
+       del <style> de cada una). Tarjeta clara sobre el azul de la
+       página, foto con borde azul y esquinas redondeadas.
+       ========================================================= */
+    .noticias-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 26px;
+    }
+    .noticia-card {
+        display: flex;
+        flex-direction: column;
+        background: #D6E0EA;
+        border-radius: 14px;
+        padding: 16px 16px 20px 16px;
+        color: var(--c-navy-deep);
+        text-decoration: none;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .noticia-card:hover {
+        transform: translateY(-4px);
+        background: #E4EBF2;
+        box-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
+    }
+    .noticia-card:active { transform: translateY(-1px); }
+    .noticia-card:focus-visible {
+        outline: 3px solid var(--c-amber);
+        outline-offset: 3px;
+    }
+    .noticia-card-foto {
+        aspect-ratio: 4 / 3;
+        border-radius: 12px;
+        border: 2px solid var(--c-blue-soft);
+        overflow: hidden;
+        background: var(--c-navy-deep);
+        margin-bottom: 14px;
+    }
+    .noticia-card-foto img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    /* Noticia sin foto: el logo de la Liga centrado sobre el azul. */
+    .noticia-card-foto--logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .noticia-card-foto--logo img {
+        width: 46%;
+        height: auto;
+        object-fit: contain;
+    }
+    .noticia-card-fecha {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--c-blue-soft);
+        margin-bottom: 4px;
+    }
+    .noticia-card h3 {
+        font-size: 27px;
+        font-weight: 700;
+        line-height: 1.08;
+        color: var(--c-navy-deep);
+        margin-bottom: 8px;
+        text-wrap: balance;
+    }
+    .noticia-card p {
+        font-size: 14.5px;
+        line-height: 1.45;
+        color: rgba(var(--c-navy-deep-rgb), 0.86);
+    }
+
+    @media (max-width: 940px) {
+        .noticias-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    }
+    @media (max-width: 600px) {
+        .noticias-grid { grid-template-columns: 1fr; }
+    }
