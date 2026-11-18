@@ -43,26 +43,31 @@
         width: 100%;
         max-width: var(--page-max);
         margin: 0 auto;
-        padding: 56px var(--page-pad) 40px var(--page-pad);
+        /* Arriba deja lugar para la flecha de volver. */
+        padding: 96px var(--page-pad) 40px var(--page-pad);
     }
+    /* Flecha para volver a la lista, en la esquina superior izquierda del
+       encabezado, alineada con el borde del contenido. Absoluta dentro de
+       la sección (nunca "fixed": ver la animación de base.html). */
     .noticia-volver {
-        display: inline-flex;
+        position: absolute;
+        top: 24px;
+        left: max(var(--page-pad), calc((100% - var(--page-max)) / 2 + var(--page-pad)));
+        display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 6px 16px;
-        border-radius: 50px;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
         background: rgba(var(--c-navy-deep-rgb), 0.62);
-        border: 1px solid rgba(255, 255, 255, 0.28);
-        font-size: 13px;
-        font-weight: 700;
-        letter-spacing: 0.3px;
+        border: 1px solid rgba(255, 255, 255, 0.35);
         color: #ffffff;
-        text-decoration: none;
-        margin-bottom: 20px;
         backdrop-filter: blur(6px);
-        transition: background 0.2s ease, border-color 0.2s ease;
+        transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
     }
-    .noticia-volver:hover { background: var(--c-orange); border-color: var(--c-orange); }
+    .noticia-volver svg { width: 24px; height: 24px; }
+    .noticia-volver:hover { background: var(--c-orange); border-color: var(--c-orange); transform: translateX(-3px); }
+    .noticia-volver:focus-visible { outline: 3px solid var(--c-amber); outline-offset: 3px; }
     .noticia-hero h1 {
         max-width: 900px;
         font-size: clamp(36px, 5.4vw, 68px);
@@ -239,7 +244,8 @@
 
     @media (max-width: 940px) {
         .noticia-hero { min-height: 380px; }
-        .noticia-hero-inner { padding: 44px var(--page-pad) 32px var(--page-pad); }
+        .noticia-hero-inner { padding: 84px var(--page-pad) 32px var(--page-pad); }
+        .noticia-volver { top: 20px; }
         .noticia-cuerpo-inner { padding: 36px var(--page-pad) 64px var(--page-pad); }
     }
     @media (max-width: 600px) {
@@ -264,8 +270,10 @@
              width="{{ portada.ancho }}" height="{{ portada.alto }}" fetchpriority="high">
     </div>
     {% endif %}
+    <a class="noticia-volver" href="{% url 'noticias' %}" aria-label="Volver a todas las noticias" title="Volver a todas las noticias">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </a>
     <div class="noticia-hero-inner">
-        <a class="noticia-volver" href="{% url 'noticias' %}">&larr; Noticias</a>
         <h1>{{ noticia.titulo }}</h1>
         <p class="noticia-firma">
             <time class="noticia-fecha" datetime="{{ noticia.fecha|date:'Y-m-d' }}">{{ noticia.fecha|date:"j \d\e F \d\e Y" }}</time>

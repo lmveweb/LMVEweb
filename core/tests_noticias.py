@@ -430,6 +430,16 @@ class NoticiasPublicasTests(TestCase):
             self.assertIn(f'href="{foto.url_grande}"', html)
         self.assertIn('alt="Foto 1 de la premiación"', html)
 
+    def test_la_noticia_tiene_una_flecha_para_volver_a_la_lista(self):
+        for noticia in (crear_noticia(fotos=2), crear_noticia(titulo='Sin foto')):
+            html = self.client.get(noticia.get_absolute_url()).content.decode()
+            flecha = re.search(r'<a class="noticia-volver" href="([^"]+)" aria-label="([^"]+)"', html)
+            self.assertIsNotNone(flecha, noticia.titulo)
+            self.assertEqual(flecha.group(1), reverse('noticias'))
+            self.assertEqual(flecha.group(2), 'Volver a todas las noticias')
+            # Arriba de todo: antes del título.
+            self.assertLess(flecha.start(), html.index('<h1>'))
+
     def test_un_borrador_no_existe_para_el_publico(self):
         noticia = crear_noticia(publicada=False, fotos=1)
         foto = noticia.fotos.get()
