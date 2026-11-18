@@ -36,6 +36,8 @@ if settings.DEBUG:
         from core import errores
         if tipo == '404':
             return errores.pagina_no_encontrada(request, Http404())
+        if tipo == '404-noticia':
+            return errores.noticia_no_encontrada(request)
         if tipo == '403':
             return errores.acceso_denegado(request, PermissionDenied())
         if tipo == 'formulario':

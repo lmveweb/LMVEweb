@@ -45,14 +45,18 @@ def _pagina(request, status, titulo, mensaje, enlaces):
     }, status=status)
 
 
+def noticia_no_encontrada(request):
+    return _pagina(
+        request, 404, 'Noticia no encontrada',
+        'Esa noticia no existe o ya no está publicada. Puede que la dirección esté mal '
+        'escrita o que la hayan retirado.',
+        [('Ver todas las noticias', reverse('noticias')), ('Ir al inicio', reverse('home'))],
+    )
+
+
 def pagina_no_encontrada(request, exception=None):
     if request.path.startswith(reverse('noticias')):
-        return _pagina(
-            request, 404, 'Noticia no encontrada',
-            'Esa noticia no existe o ya no está publicada. Puede que la dirección esté mal '
-            'escrita o que la hayan retirado.',
-            [('Ver todas las noticias', reverse('noticias')), ('Ir al inicio', reverse('home'))],
-        )
+        return noticia_no_encontrada(request)
     return _pagina(
         request, 404, 'Página no encontrada',
         'No encontramos esta página. Puede que la dirección esté mal escrita o que la '

@@ -94,6 +94,17 @@ class PaginasDeErrorTests(TestCase):
         self.assertContains(r, 'Algo falló de nuestro lado', status_code=500)
         self.assertContains(r, 'core/css/error', status_code=500)
         self.assertContains(r, 'noindex', status_code=500)
+        # Un comentario {# #} de varias líneas no es comentario en Django:
+        # se imprime tal cual en la página.
+        self.assertNotContains(r, '{#', status_code=500)
+        self.assertNotContains(r, 'nonce', status_code=500)
+
+    def test_ninguna_plantilla_tiene_comentarios_de_varias_lineas(self):
+        from pathlib import Path
+        for plantilla in Path(__file__).parent.joinpath('templates').rglob('*.html'):
+            for n, linea in enumerate(plantilla.read_text(encoding='utf-8').splitlines(), 1):
+                if '{#' in linea:
+                    self.assertIn('#}', linea, f'{plantilla.name}:{n}: un {{# #}} de varias líneas se imprime; usar {{% comment %}}')
 
     def test_las_vistas_previas_no_existen_en_produccion(self):
         # Los tests corren con DEBUG=False, igual que producción.

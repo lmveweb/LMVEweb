@@ -1,7 +1,9 @@
 {% extends "admin/base_site.html" %}
 {% load static %}
-{# Ingreso al panel en dos pasos (ver core/acceso.py). Sin <style> ni
-   <script> propios: la CSP del sitio no los deja pasar sin nonce. #}
+{% comment %}
+Ingreso al panel en dos pasos (ver core/acceso.py). Sin <style> ni
+<script> propios: la CSP del sitio no los deja pasar sin nonce.
+{% endcomment %}
 
 {% block title %}{% if form.errors or error_codigo %}Error: {% endif %}{{ block.super }}{% endblock %}
 {% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static "admin/css/login.css" %}">

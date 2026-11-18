@@ -1,8 +1,10 @@
 {% load static %}<!DOCTYPE html>
-{# Error del servidor. Django la muestra sin request ni contexto: no
-   puede extender core/base.html (le faltaría el nonce de la CSP) y el
-   CSS va en un archivo, porque la CSP no deja pasar un <style> sin
-   nonce. Sin JavaScript. #}
+{% comment %}
+Error del servidor. Django la muestra sin request ni contexto: no
+puede extender core/base.html (le faltaría el nonce de la CSP) y el
+CSS va en un archivo, porque la CSP no deja pasar un <style> sin
+nonce. Sin JavaScript.
+{% endcomment %}
 <html lang="es-CL">
 <head>
     <meta charset="UTF-8">
