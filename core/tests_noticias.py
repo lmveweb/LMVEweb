@@ -440,6 +440,19 @@ class NoticiasPublicasTests(TestCase):
             # Arriba de todo: antes del título.
             self.assertLess(flecha.start(), html.index('<h1>'))
 
+    def test_la_noticia_ofrece_otras_secciones_del_sitio(self):
+        html = self.client.get(crear_noticia(fotos=2).get_absolute_url()).content.decode()
+        barra = re.search(r'<aside class="noticia-acciones".*?</aside>', html, re.S)
+        self.assertIsNotNone(barra)
+        barra = barra.group(0)
+        self.assertIn('Explora la <em>LMVE</em>', barra)
+        for nombre in ('contacto', 'proyecto', 'archivo', 'equipo', 'noticias'):
+            self.assertIn(f'href="{reverse(nombre)}"', barra, nombre)
+        self.assertIn('href="https://www.instagram.com/ligametropolitanavoley/" target="_blank" rel="noopener"', barra)
+        # Va después del texto y la galería: en celular queda al final y
+        # un lector de pantalla llega primero a la noticia.
+        self.assertLess(html.index('class="noticia-galeria"'), html.index('class="noticia-acciones"'))
+
     def test_un_borrador_no_existe_para_el_publico(self):
         noticia = crear_noticia(publicada=False, fotos=1)
         foto = noticia.fotos.get()
@@ -528,13 +541,40 @@ class NoticiasEnLaPortadaTests(TestCase):
         self.assertNotIn('noticias-home', html)
         self.assertNotIn('noticia-card', html)
 
-    def test_muestra_las_tres_mas_recientes_y_el_enlace_a_todas(self):
-        for i in range(4):
+    def test_el_carrusel_muestra_las_cinco_mas_recientes_y_el_enlace_a_todas(self):
+        for i in range(6):
             crear_noticia(titulo=f'Noticia número {i}', fecha=date(2026, 6, 1 + i))
         html = self.client.get(reverse('home')).content.decode()
-        self.assertEqual(html.count('class="noticia-card"'), 3)
+        carrusel = html[html.index('id="noticiasCarrusel"'):]
+        self.assertEqual(carrusel.count('class="noticias-carrusel-slide"'), 5)
+        self.assertEqual(html.count('class="noticia-card"'), 5)
         self.assertNotIn('Noticia número 0', html)   # la más vieja queda fuera
+        # La más nueva, primera.
+        self.assertLess(carrusel.index('Noticia número 5'), carrusel.index('Noticia número 1'))
+        self.assertIn('aria-label="5 de 5"', carrusel)
         self.assertIn(f'href="{reverse("noticias")}"', html)
+
+    def test_el_carrusel_trae_flechas_y_puntos_ocultos_hasta_que_carga_el_script(self):
+        for i in range(3):
+            crear_noticia(titulo=f'Noticia {i}', fecha=date(2026, 6, 1 + i))
+        html = self.client.get(reverse('home')).content.decode()
+        controles = re.search(r'<div class="noticias-carrusel-controles"[^>]*>', html).group(0)
+        self.assertIn('hidden', controles)
+        self.assertEqual(html.count('class="carrusel-punto"'), 3)
+        for etiqueta in ('Noticia anterior', 'Noticia siguiente'):
+            self.assertIn(f'aria-label="{etiqueta}"', html)
+        # Flechas y puntos, dentro del carrusel (encima de la tarjeta).
+        carrusel = html[html.index('id="noticiasCarrusel"'):html.index('id="noticiasControles"')]
+        self.assertIn('id="noticiasPista"', carrusel)
+        # El script va con el nonce de la CSP.
+        self.assertRegex(html, r'<script nonce="[^"]+">\s*\(function \(\) \{\s*var carrusel')
+
+    def test_con_una_sola_noticia_no_hay_controles_ni_script(self):
+        crear_noticia()
+        html = self.client.get(reverse('home')).content.decode()
+        self.assertIn('class="noticias-carrusel-slide"', html)
+        self.assertNotIn('noticiasControles', html)
+        self.assertNotIn('var carrusel', html)
 
     def test_la_tarjeta_enlaza_a_la_noticia_y_usa_la_miniatura_con_medidas(self):
         noticia = crear_noticia(fotos=2)
@@ -550,7 +590,7 @@ class NoticiasEnLaPortadaTests(TestCase):
         self.assertContains(self.client.get(reverse('home')), 'noticia-card-foto--logo')
 
     def test_la_portada_no_hace_una_consulta_por_cada_noticia(self):
-        for i in range(3):
+        for i in range(5):
             crear_noticia(titulo=f'Noticia {i}', fotos=2)
         # Una consulta para las noticias y una para todas sus fotos.
         with self.assertNumQueries(2):

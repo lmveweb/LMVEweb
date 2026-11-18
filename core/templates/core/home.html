@@ -672,7 +672,7 @@
 
     {% if noticias %}
     /* =========================================================
-       NOTICIAS (las tres más recientes; ver core/views.py)
+       NOTICIAS: carrusel con las más recientes (ver core/views.py)
        ========================================================= */
     .noticias-home {
         position: relative;
@@ -703,8 +703,121 @@
     }
     .noticias-home-todas:hover { color: var(--c-amber); }
 {% include "core/_noticias_tarjetas_css.html" %}
+
+    /* Una noticia a la vez, a todo el ancho. La pista se desliza con el
+       dedo o el trackpad y se "imanta" a cada noticia (scroll-snap); el
+       script de abajo suma flechas, puntos, pausa y el avance solo. Sin
+       JavaScript sigue funcionando deslizando. */
+    .noticias-carrusel-pista {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+        border-radius: 14px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+    }
+    .noticias-carrusel-pista::-webkit-scrollbar { display: none; }
+    .noticias-carrusel-slide {
+        flex: 0 0 100%;
+        height: 440px;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+    }
+    .noticias-carrusel-slide .noticia-card {
+        height: 100%;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    .noticias-carrusel-slide .noticia-card-texto { padding: 28px 96px 30px 30px; }
+    .noticias-carrusel-slide .noticia-card h3 { font-size: clamp(30px, 3.6vw, 48px); max-width: 860px; }
+    .noticias-carrusel-slide .noticia-card p { font-size: 16.5px; max-width: 640px; }
+    .noticias-carrusel-slide .noticia-card-flecha { right: 26px; bottom: 30px; width: 46px; height: 46px; }
+    .noticias-carrusel-slide .noticia-card-fecha { top: 22px; left: 22px; }
+
+    /* Flechas y puntos van dentro de la noticia, en la franja de abajo.
+       Se encima a las tarjetas: el contenedor deja pasar los clics (para
+       que el resto de la tarjeta siga siendo el enlace) y solo los
+       botones los reciben. */
+    .noticias-carrusel { position: relative; }
+    .noticias-carrusel-controles {
+        position: absolute;
+        left: 50%;
+        bottom: 12px;
+        transform: translateX(-50%);
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        pointer-events: none;
+    }
+    .noticias-carrusel-controles[hidden] { display: none; }
+    .noticias-carrusel-controles button { pointer-events: auto; }
+    .carrusel-puntos { display: flex; }
+    /* El área que se toca es de 28 px; lo que se ve, un punto de 9. */
+    .carrusel-punto {
+        width: 28px;
+        height: 36px;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .carrusel-punto::before {
+        content: '';
+        width: 9px;
+        height: 9px;
+        border-radius: 50px;
+        background: rgba(255, 255, 255, 0.45);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+        transition: width 0.3s ease, background 0.3s ease;
+    }
+    .carrusel-punto:hover::before { background: rgba(255, 255, 255, 0.85); }
+    .carrusel-punto[aria-current="true"]::before { width: 26px; background: var(--c-amber); }
+    /* Flechas sin fondo: tenues, y blancas del todo al pasar el mouse. */
+    .carrusel-flecha {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: #ffffff;
+        opacity: 0.5;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .carrusel-flecha svg { width: 26px; height: 26px; }
+    .carrusel-flecha:hover,
+    .carrusel-flecha:focus-visible { opacity: 1; }
+    .carrusel-flecha[data-paso="-1"]:hover { transform: translateX(-2px); }
+    .carrusel-flecha[data-paso="1"]:hover { transform: translateX(2px); }
+    .carrusel-punto:focus-visible,
+    .carrusel-flecha:focus-visible { outline: 2px solid var(--c-amber); outline-offset: -2px; border-radius: 8px; }
+    /* Con los controles activos, el texto sube para dejarles la franja. */
+    .noticias-carrusel--activo .noticia-card-texto { padding-bottom: 64px; }
+    .noticias-carrusel--activo .noticia-card-flecha { bottom: 64px; }
+
     @media (max-width: 940px) {
         .noticias-home-inner { padding: 48px var(--page-pad) 54px var(--page-pad); }
+        .noticias-carrusel-slide { height: 380px; }
+    }
+    @media (max-width: 600px) {
+        .noticias-carrusel-slide { height: 360px; }
+        .noticias-carrusel-slide .noticia-card-texto { padding: 20px 72px 22px 20px; }
+        .noticias-carrusel-slide .noticia-card h3 { font-size: 27px; }
+        .noticias-carrusel-slide .noticia-card p { font-size: 14.5px; }
+        .noticias-carrusel-slide .noticia-card-flecha { right: 18px; bottom: 22px; width: 40px; height: 40px; }
+        .noticias-carrusel-slide .noticia-card-fecha { top: 16px; left: 16px; }
+        .noticias-carrusel--activo .noticia-card-texto { padding-bottom: 56px; }
+        .noticias-carrusel--activo .noticia-card-flecha { bottom: 56px; }
+        .noticias-carrusel-controles { bottom: 8px; }
     }
     {% endif %}
 </style>
@@ -867,7 +980,7 @@ que nadie tenga que entrar a editar el sitio.
 {% endif %}
 
 {% comment %}
-Noticias: las tres más recientes que la Liga publicó desde el admin.
+Noticias: carrusel con las más recientes que la Liga publicó desde el admin.
 Sin ninguna publicada, la sección no existe (ni su CSS, arriba).
 {% endcomment %}
 {% if noticias %}
@@ -877,10 +990,30 @@ Sin ninguna publicada, la sección no existe (ni su CSS, arriba).
             <h2 class="titulo-seccion" id="noticiasTitulo">Noticias</h2>
             <a class="noticias-home-todas" href="{% url 'noticias' %}">Ver todas las noticias</a>
         </div>
-        <div class="noticias-grid noticias-grid--portada">
-            {% for noticia in noticias %}
-            {% include "core/_noticia_tarjeta.html" %}
-            {% endfor %}
+        <div class="noticias-carrusel" id="noticiasCarrusel" role="region" aria-roledescription="carrusel" aria-label="Noticias recientes">
+            <div class="noticias-carrusel-pista" id="noticiasPista">
+                {% for noticia in noticias %}
+                <div class="noticias-carrusel-slide" role="group" aria-roledescription="noticia" aria-label="{{ forloop.counter }} de {{ noticias|length }}">
+                    {% include "core/_noticia_tarjeta.html" %}
+                </div>
+                {% endfor %}
+            </div>
+            {% if noticias|length > 1 %}
+            {# Ocultos hasta que el script los active: sin JavaScript no harían nada. #}
+            <div class="noticias-carrusel-controles" id="noticiasControles" hidden>
+                <button type="button" class="carrusel-flecha" data-paso="-1" aria-label="Noticia anterior">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+                </button>
+                <div class="carrusel-puntos">
+                    {% for noticia in noticias %}
+                    <button type="button" class="carrusel-punto" data-indice="{{ forloop.counter0 }}" aria-label="Ir a la noticia {{ forloop.counter }}"{% if forloop.first %} aria-current="true"{% endif %}></button>
+                    {% endfor %}
+                </div>
+                <button type="button" class="carrusel-flecha" data-paso="1" aria-label="Noticia siguiente">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+            {% endif %}
         </div>
     </div>
 </section>
@@ -979,6 +1112,90 @@ su contenido.
 
 {% block scripts %}
 <script async src="https://www.instagram.com/embed.js"></script>
+
+{% if noticias|length > 1 %}
+<!-- CARRUSEL DE NOTICIAS -->
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+    var carrusel = document.getElementById('noticiasCarrusel');
+    var pista = document.getElementById('noticiasPista');
+    var controles = document.getElementById('noticiasControles');
+    if (!carrusel || !pista || !controles) return;
+
+    var puntos = Array.prototype.slice.call(controles.querySelectorAll('.carrusel-punto'));
+    var total = puntos.length;
+    var actual = 0;
+    var SEGUNDOS = 7;
+    var reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Avanza solo hasta que la persona lo mueve por su cuenta (flechas,
+    // puntos o deslizando): desde ahí lo controla ella y no vuelve a
+    // moverse solo. Tampoco avanza mientras el mouse o el foco están
+    // encima, ni con "reducir movimiento".
+    var detenido = reducir;
+    var encima = false;
+
+    controles.hidden = false;
+    carrusel.classList.add('noticias-carrusel--activo');
+
+    function ir(indice) {
+        indice = (indice + total) % total;
+        pista.scrollTo({ left: indice * pista.clientWidth, behavior: reducir ? 'auto' : 'smooth' });
+    }
+
+    function marcar() {
+        var indice = Math.round(pista.scrollLeft / pista.clientWidth);
+        if (indice === actual || indice < 0 || indice >= total) return;
+        actual = indice;
+        puntos.forEach(function (punto, i) {
+            if (i === actual) punto.setAttribute('aria-current', 'true');
+            else punto.removeAttribute('aria-current');
+        });
+    }
+
+    function detener() { detenido = true; }
+
+    var esperando = false;
+    pista.addEventListener('scroll', function () {
+        if (esperando) return;
+        esperando = true;
+        requestAnimationFrame(function () { esperando = false; marcar(); });
+    }, { passive: true });
+
+    controles.addEventListener('click', function (e) {
+        var boton = e.target.closest('button');
+        if (!boton) return;
+        detener();
+        if (boton.hasAttribute('data-indice')) {
+            ir(parseInt(boton.getAttribute('data-indice'), 10));
+        } else if (boton.hasAttribute('data-paso')) {
+            ir(actual + parseInt(boton.getAttribute('data-paso'), 10));
+        }
+    });
+
+    pista.addEventListener('touchstart', detener, { passive: true });
+    pista.addEventListener('wheel', function (e) {
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) detener();
+    }, { passive: true });
+
+    carrusel.addEventListener('mouseenter', function () { encima = true; });
+    carrusel.addEventListener('mouseleave', function () { encima = false; });
+    carrusel.addEventListener('focusin', function () { encima = true; });
+    carrusel.addEventListener('focusout', function (e) {
+        if (!carrusel.contains(e.relatedTarget)) encima = false;
+    });
+
+    // Al cambiar el ancho de la ventana, sigue mostrando la misma noticia.
+    window.addEventListener('resize', function () {
+        pista.scrollTo({ left: actual * pista.clientWidth, behavior: 'auto' });
+    });
+
+    setInterval(function () {
+        if (detenido || encima || document.hidden) return;
+        ir(actual + 1);
+    }, SEGUNDOS * 1000);
+})();
+</script>
+{% endif %}
 
 {% if evento %}
 <!-- VISOR DEL AFICHE DEL EVENTO -->

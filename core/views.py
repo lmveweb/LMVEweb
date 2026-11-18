@@ -35,7 +35,7 @@ def home(request):
         'colegios': COLEGIOS,
         'evento': evento,
         'jsonld': jsonld_home(evento),
-        'noticias': Noticia.objects.publicadas().prefetch_related('fotos')[:NOTICIAS_EN_PORTADA],
+        'noticias': list(Noticia.objects.publicadas().prefetch_related('fotos')[:NOTICIAS_EN_PORTADA]),
     })
 
 
@@ -48,7 +48,8 @@ def archivo(request):
 # Noticias (las publica la Liga desde el admin, ver core/models.py)
 # ---------------------------------------------------------------------
 
-NOTICIAS_EN_PORTADA = 3
+# Las que recorre el carrusel de la portada.
+NOTICIAS_EN_PORTADA = 5
 NOTICIAS_POR_PAGINA = 12
 UN_DIA = 60 * 60 * 24
 

@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load noticias %}
+{% load noticias static %}
 
 {% block content %}
 <style nonce="{{ request.csp_nonce }}">
@@ -105,11 +105,199 @@
        TEXTO: blanco sobre el azul de la página, como el resto del
        sitio, en una columna angosta para que se lea cómodo.
        ========================================================= */
+    /* Dos columnas: la noticia a la izquierda y "Explora la LMVE" a la
+       derecha. En el HTML la barra va después de la noticia: un lector de
+       pantalla llega primero al texto, y en celular queda al final. */
     .noticia-cuerpo-inner {
         max-width: var(--page-max);
         margin: 0 auto;
         padding: 48px var(--page-pad) 88px var(--page-pad);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 290px;
+        column-gap: 56px;
+        align-items: start;
     }
+    .noticia-principal { grid-column: 1; grid-row: 1; min-width: 0; }
+
+    /* =========================================================
+       EXPLORA LA LMVE: otras cosas que se pueden hacer en el sitio,
+       con el lenguaje de la sección de noticias de un sitio deportivo:
+       franja de colores sobre el título, un destacado y una lista
+       numerada. Los colores son los de las franjas del logo.
+       ========================================================= */
+    .noticia-acciones {
+        grid-column: 2;
+        grid-row: 1;
+        overflow: hidden;
+        border-radius: 14px;
+        background: var(--c-navy-deep);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+    }
+    /* Queda fija bajo el encabezado mientras se lee, si cabe entera en
+       la pantalla (en una pantalla baja, fija se cortaría abajo). */
+    @media (min-width: 941px) and (min-height: 760px) {
+        .noticia-acciones {
+            position: sticky;
+            top: calc(var(--header-h) + 24px);
+        }
+    }
+    .acciones-cabecera {
+        padding: 18px 20px 14px 20px;
+        border-top: 6px solid transparent;
+        border-image: linear-gradient(90deg,
+            var(--c-green) 0 25%, var(--c-amber) 25% 50%,
+            var(--c-orange) 50% 75%, var(--c-red) 75% 100%) 1;
+    }
+    .acciones-cabecera h2 {
+        font-size: 28px;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: #ffffff;
+    }
+    .acciones-cabecera h2 em { font-style: italic; color: var(--c-amber); }
+
+    /* Destacado: auspicios. */
+    .acciones-destacada {
+        position: relative;
+        display: block;
+        margin: 0 14px;
+        padding: 18px 18px 16px 18px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--c-orange) 0%, #F28A13 100%);
+        color: #ffffff;
+        text-decoration: none;
+        overflow: hidden;
+        isolation: isolate;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .acciones-destacada::after {
+        content: '';
+        position: absolute;
+        right: -26px;
+        bottom: -30px;
+        width: 140px;
+        height: 140px;
+        z-index: -1;
+        background: url('{% static "core/img/logo-watermark.png" %}') center / contain no-repeat;
+        opacity: 0.18;
+        transform: rotate(-12deg);
+    }
+    .acciones-destacada:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(242, 98, 15, 0.35); }
+    .acciones-destacada:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
+    .acciones-etiqueta {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 50px;
+        background: var(--c-navy-deep);
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+    .acciones-destacada strong {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 25px;
+        font-weight: 800;
+        line-height: 1.02;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+    }
+    .acciones-boton {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        border-bottom: 2px solid #ffffff;
+        padding-bottom: 1px;
+    }
+    .acciones-boton svg { width: 16px; height: 16px; transition: transform 0.25s ease; }
+    .acciones-destacada:hover .acciones-boton svg { transform: translateX(4px); }
+
+    /* Lista numerada, cada fila con el color de una franja del logo. */
+    .acciones-lista { list-style: none; margin: 10px 0 0 0; padding: 0 8px; }
+    .accion--historia { --acento: #F2A413; --acento-rgb: 242, 164, 19; }
+    .accion--fotos    { --acento: #6CC25A; --acento-rgb: 108, 194, 90; }
+    .accion--equipo   { --acento: #FF5A64; --acento-rgb: 255, 90, 100; }
+    .accion--noticias { --acento: #5BB8FF; --acento-rgb: 91, 184, 255; }
+    .acciones-lista li + li { border-top: 1px solid var(--c-line-soft); }
+    .acciones-lista a {
+        display: grid;
+        grid-template-columns: 44px minmax(0, 1fr) 18px;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: background 0.2s ease;
+    }
+    .acciones-lista a:hover { background: rgba(var(--acento-rgb), 0.14); }
+    .acciones-lista a:focus-visible { outline: 3px solid var(--acento); outline-offset: -3px; }
+    .accion-numero {
+        font-family: var(--font-display);
+        font-size: 38px;
+        font-weight: 800;
+        font-style: italic;
+        line-height: 1;
+        color: var(--acento);
+        transition: transform 0.25s ease;
+    }
+    .acciones-lista a:hover .accion-numero { transform: scale(1.08); }
+    .accion-texto { display: flex; flex-direction: column; min-width: 0; }
+    .accion-texto strong {
+        font-family: var(--font-display);
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1.05;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: #ffffff;
+    }
+    .accion-texto span {
+        font-size: 13px;
+        line-height: 1.35;
+        color: var(--c-text-muted);
+    }
+    .accion-flecha {
+        width: 18px;
+        height: 18px;
+        color: rgba(255, 255, 255, 0.4);
+        transition: color 0.2s ease, transform 0.2s ease;
+    }
+    .acciones-lista a:hover .accion-flecha { color: var(--acento); transform: translateX(3px); }
+
+    /* Instagram, con su degradado. */
+    .acciones-instagram {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 8px 14px 14px 14px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: linear-gradient(45deg, #F58529 0%, #DD2A7B 45%, #8134AF 80%, #515BD4 100%);
+        color: #ffffff;
+        text-decoration: none;
+        transition: filter 0.2s ease, transform 0.2s ease;
+    }
+    .acciones-instagram:hover { filter: brightness(1.1); transform: translateY(-2px); }
+    .acciones-instagram:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
+    .acciones-instagram svg { flex: 0 0 auto; width: 28px; height: 28px; }
+    .acciones-instagram strong {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 19px;
+        font-weight: 700;
+        line-height: 1.05;
+        text-transform: uppercase;
+    }
+    .acciones-instagram span span { font-size: 13px; opacity: 0.9; }
+
     .noticia-texto {
         max-width: 760px;
         font-size: 17.5px;
@@ -246,7 +434,26 @@
         .noticia-hero { min-height: 380px; }
         .noticia-hero-inner { padding: 84px var(--page-pad) 32px var(--page-pad); }
         .noticia-volver { top: 20px; }
-        .noticia-cuerpo-inner { padding: 36px var(--page-pad) 64px var(--page-pad); }
+        .noticia-cuerpo-inner {
+            padding: 36px var(--page-pad) 64px var(--page-pad);
+            grid-template-columns: minmax(0, 1fr);
+        }
+        /* En tablet y celular, la barra va al final, después de la noticia. */
+        .noticia-principal,
+        .noticia-acciones { grid-column: 1; grid-row: auto; }
+        /* Al final de la noticia: el destacado a la izquierda y la lista a
+           la derecha. */
+        .noticia-acciones {
+            margin-top: 48px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            align-items: start;
+            padding-bottom: 14px;
+        }
+        .acciones-cabecera { grid-column: 1 / -1; }
+        .acciones-destacada { margin-right: 0; }
+        .acciones-lista { margin-top: 0; }
+        .acciones-instagram { grid-column: 1 / -1; margin-bottom: 0; }
     }
     @media (max-width: 600px) {
         .noticia-hero { min-height: 320px; }
@@ -254,6 +461,9 @@
         .noticia-resumen { font-size: 18.5px; }
         .noticia-texto ul,
         .noticia-texto ol { padding: 14px 16px 10px 36px; }
+        .noticia-acciones { grid-template-columns: minmax(0, 1fr); }
+        .acciones-destacada { margin-right: 14px; }
+        .acciones-lista { margin-top: 10px; }
     }
 </style>
 
@@ -284,21 +494,73 @@
 
 <section class="noticia-cuerpo">
     <div class="noticia-cuerpo-inner">
-        <article class="noticia-texto">
-            <p class="noticia-resumen">{{ noticia.resumen }}</p>
-            {{ cuerpo_html }}
-        </article>
+        <div class="noticia-principal">
+            <article class="noticia-texto">
+                <p class="noticia-resumen">{{ noticia.resumen }}</p>
+                {{ cuerpo_html }}
+            </article>
 
-        {% if galeria %}
-        <div class="noticia-galeria">
-            {% for foto in galeria %}
-            <a href="{{ foto.url_grande }}" target="_blank" rel="noopener" aria-label="Ver la foto en grande: {{ foto.alt }}">
-                <img src="{{ foto.url_miniatura }}" alt="{{ foto.alt }}"
-                     width="{{ foto.mini_ancho }}" height="{{ foto.mini_alto }}" loading="lazy">
-            </a>
-            {% endfor %}
+            {% if galeria %}
+            <div class="noticia-galeria">
+                {% for foto in galeria %}
+                <a href="{{ foto.url_grande }}" target="_blank" rel="noopener" aria-label="Ver la foto en grande: {{ foto.alt }}">
+                    <img src="{{ foto.url_miniatura }}" alt="{{ foto.alt }}"
+                         width="{{ foto.mini_ancho }}" height="{{ foto.mini_alto }}" loading="lazy">
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
+
+        <aside class="noticia-acciones" aria-labelledby="accionesTitulo">
+            <div class="acciones-cabecera">
+                <h2 id="accionesTitulo">Explora la <em>LMVE</em></h2>
+            </div>
+
+            <a class="acciones-destacada" href="{% url 'contacto' %}">
+                <span class="acciones-etiqueta">Auspicios</span>
+                <strong>¿Tu empresa quiere apoyar el deporte escolar?</strong>
+                <span class="acciones-boton">Escríbenos
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </span>
+            </a>
+
+            <ol class="acciones-lista">
+                <li class="accion--historia">
+                    <a href="{% url 'proyecto' %}">
+                        <span class="accion-numero" aria-hidden="true">01</span>
+                        <span class="accion-texto"><strong>Nuestra historia</strong><span>El voleibol escolar desde 1987</span></span>
+                        <svg class="accion-flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </li>
+                <li class="accion--fotos">
+                    <a href="{% url 'archivo' %}">
+                        <span class="accion-numero" aria-hidden="true">02</span>
+                        <span class="accion-texto"><strong>Fotos de la Liga</strong><span>Partidos, jornadas y premiaciones</span></span>
+                        <svg class="accion-flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </li>
+                <li class="accion--equipo">
+                    <a href="{% url 'equipo' %}">
+                        <span class="accion-numero" aria-hidden="true">03</span>
+                        <span class="accion-texto"><strong>Quiénes somos</strong><span>La directiva y el equipo de la Liga</span></span>
+                        <svg class="accion-flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </li>
+                <li class="accion--noticias">
+                    <a href="{% url 'noticias' %}">
+                        <span class="accion-numero" aria-hidden="true">04</span>
+                        <span class="accion-texto"><strong>Más noticias</strong><span>Torneos, resultados y novedades</span></span>
+                        <svg class="accion-flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </li>
+            </ol>
+
+            <a class="acciones-instagram" href="https://www.instagram.com/ligametropolitanavoley/" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.3 6.7h.01"/></svg>
+                <span><strong>Síguenos en Instagram</strong><span>@ligametropolitanavoley</span></span>
+            </a>
+        </aside>
     </div>
 </section>
 {% endblock %}
