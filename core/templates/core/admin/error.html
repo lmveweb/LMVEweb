@@ -1,0 +1,13 @@
+{% extends "admin/base_site.html" %}
+{# Mensaje de error dentro del panel (ver core/errores.py). #}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <p>{{ mensaje }}</p>
+  {% for texto, url in enlaces %}
+  <p><a href="{{ url }}">{{ texto }}</a></p>
+  {% endfor %}
+</div>
+{% endblock %}

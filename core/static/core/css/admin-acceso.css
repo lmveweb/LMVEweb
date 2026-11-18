@@ -1,0 +1,71 @@
+/* Ingreso al panel en dos pasos (core/templates/core/admin/login.html). */
+
+.acceso-paso {
+    margin: 0 0 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--body-quiet-color);
+}
+
+.acceso-ayuda {
+    margin: 0 0 18px;
+    line-height: 1.5;
+}
+
+.login .form-row input.acceso-codigo {
+    font-size: 1.5rem;
+    letter-spacing: 0.3em;
+    text-align: center;
+}
+
+.login .form-row.acceso-recordar label {
+    display: inline;
+    vertical-align: middle;
+}
+
+.login .form-row.acceso-recordar input[type="checkbox"] {
+    width: auto;
+    margin: 0 6px 0 0;
+    vertical-align: middle;
+}
+
+.acceso-nota {
+    margin: 8px 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--body-quiet-color);
+}
+
+.acceso-otros {
+    margin-top: 22px;
+    padding-top: 14px;
+    border-top: 1px solid var(--hairline-color);
+    font-size: 0.8125rem;
+}
+
+.acceso-otros p {
+    margin: 0 0 8px;
+    color: var(--body-quiet-color);
+}
+
+.acceso-otros form {
+    display: inline-block;
+    margin-right: 16px;
+}
+
+.acceso-enlace {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--link-fg);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.acceso-enlace:hover,
+.acceso-enlace:focus {
+    color: var(--link-hover-color);
+}

@@ -1,0 +1,76 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<style nonce="{{ request.csp_nonce }}">
+    .error-hero {
+        background: var(--c-blue-soft);
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+    }
+    .error-inner {
+        width: 100%;
+        max-width: var(--page-max);
+        margin: 0 auto;
+        padding: 72px var(--page-pad);
+    }
+    .error-codigo {
+        font-size: clamp(64px, 12vw, 128px);
+        font-weight: 800;
+        line-height: 0.9;
+        color: var(--c-amber);
+        margin-bottom: 12px;
+    }
+    .error-inner h1 {
+        font-size: clamp(32px, 4.6vw, 52px);
+        font-weight: 800;
+        text-transform: uppercase;
+        line-height: 1;
+        letter-spacing: 0.5px;
+        color: #ffffff;
+        margin-bottom: 18px;
+    }
+    .error-inner p {
+        max-width: 620px;
+        font-size: 17px;
+        line-height: 1.7;
+        color: var(--c-text-soft);
+        margin-bottom: 32px;
+    }
+    .error-enlaces {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .error-enlaces a {
+        display: inline-block;
+        padding: 12px 22px;
+        border: 2px solid rgba(255, 255, 255, 0.6);
+        border-radius: 999px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: #ffffff;
+        text-decoration: none;
+    }
+    .error-enlaces a:first-child {
+        background: var(--c-orange);
+        border-color: var(--c-orange);
+    }
+    .error-enlaces a:hover { border-color: #ffffff; }
+    .error-enlaces a:first-child:hover { background: var(--c-orange-hover); border-color: var(--c-orange-hover); }
+</style>
+
+<section class="error-hero">
+    <div class="error-inner">
+        <div class="error-codigo" aria-hidden="true">{{ codigo }}</div>
+        <h1>{{ titulo }}</h1>
+        <p>{{ mensaje }}</p>
+        {% if enlaces %}
+        <nav class="error-enlaces" aria-label="Para seguir">
+            {% for texto, url in enlaces %}<a href="{{ url }}">{{ texto }}</a>{% endfor %}
+        </nav>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

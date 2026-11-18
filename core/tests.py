@@ -400,11 +400,8 @@ CLAVE_DE_PRUEBA = 'clave-de-prueba-para-tests-9f2c'
 class AdminSeguridadTests(TestCase):
     """El admin exige 2FA por correo ademas de usuario/clave (ver
     core/admin.py), y el login tiene rate limiting por IP (ver el mismo
-    archivo). Estos tests ejercitan el formulario de login real, paso a
-    paso, tal como lo maneja OTPAuthenticationFormMixin: 1) usuario+clave,
-    2) elegir dispositivo y pedir el desafio (dispara el correo), 3)
-    mandar el codigo. Sin los tres pasos no hay sesion admin, con
-    cualquier usuario/clave que sea."""
+    archivo). El ingreso en dos pasos (clave y despues el codigo) tiene
+    sus tests en core/tests_acceso.py."""
 
     def setUp(self):
         cache.clear()
@@ -419,51 +416,6 @@ class AdminSeguridadTests(TestCase):
         r = self.client.post(LOGIN_URL, {'username': 'admin_test', 'password': CLAVE_DE_PRUEBA})
         self.assertEqual(r.status_code, 200)  # se re-muestra el form, no redirige al panel
         self.assertEqual(self.client.get(f'/{ADMIN_URL}').status_code, 302)  # sigue afuera
-
-    def test_flujo_completo_con_codigo_correcto_entra(self):
-        device = EmailDevice.objects.create(user=self.user, name='default', confirmed=True)
-
-        # Paso 1: usuario + clave. Sin otp_token todavia, el form pide uno
-        # (no es un error real, es como el form comunica "sigue, elige
-        # dispositivo") y no hay sesion admin aun.
-        r = self.client.post(LOGIN_URL, {'username': 'admin_test', 'password': CLAVE_DE_PRUEBA})
-        self.assertEqual(r.status_code, 200)
-
-        # Paso 2: pide el desafio (envia el codigo por correo).
-        r = self.client.post(LOGIN_URL, {
-            'username': 'admin_test', 'password': CLAVE_DE_PRUEBA,
-            'otp_device': device.persistent_id, 'otp_challenge': '1',
-        })
-        self.assertEqual(r.status_code, 200)
-        self.assertEqual(len(mail.outbox), 1)
-        correo = mail.outbox[0]
-        self.assertEqual(correo.to, ['destino-2fa@example.com'])
-        self.assertIn('Admin LMVE', correo.subject)
-        device.refresh_from_db()
-        codigo = device.token
-        self.assertTrue(codigo)
-        self.assertIn(codigo, correo.body)
-
-        # Paso 3: el codigo real. Recien aca hay sesion admin.
-        r = self.client.post(LOGIN_URL, {
-            'username': 'admin_test', 'password': CLAVE_DE_PRUEBA,
-            'otp_device': device.persistent_id, 'otp_token': codigo,
-        })
-        self.assertEqual(r.status_code, 302)
-        self.assertEqual(self.client.get(f'/{ADMIN_URL}').status_code, 200)
-
-    def test_codigo_incorrecto_no_entra(self):
-        device = EmailDevice.objects.create(user=self.user, name='default', confirmed=True)
-        self.client.post(LOGIN_URL, {
-            'username': 'admin_test', 'password': CLAVE_DE_PRUEBA,
-            'otp_device': device.persistent_id, 'otp_challenge': '1',
-        })
-        r = self.client.post(LOGIN_URL, {
-            'username': 'admin_test', 'password': CLAVE_DE_PRUEBA,
-            'otp_device': device.persistent_id, 'otp_token': '000000',
-        })
-        self.assertEqual(r.status_code, 200)
-        self.assertEqual(self.client.get(f'/{ADMIN_URL}').status_code, 302)
 
     def test_rate_limit_en_login(self):
         # 10/m por IP (ver core/admin.py). Con clave mala a proposito: lo

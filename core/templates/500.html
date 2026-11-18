@@ -1,0 +1,27 @@
+{% load static %}<!DOCTYPE html>
+{# Error del servidor. Django la muestra sin request ni contexto: no
+   puede extender core/base.html (le faltaría el nonce de la CSP) y el
+   CSS va en un archivo, porque la CSP no deja pasar un <style> sin
+   nonce. Sin JavaScript. #}
+<html lang="es-CL">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Error del sitio | LMVE</title>
+    <link rel="icon" href="{% static 'core/favicon.ico' %}" sizes="any">
+    <link rel="stylesheet" href="{% static 'core/css/error.css' %}">
+</head>
+<body>
+    <main class="error-500">
+        <img src="{% static 'core/img/logo-sobre-oscuro.png' %}" alt="LMVE" class="error-500-logo" height="74">
+        <div class="error-500-codigo" aria-hidden="true">500</div>
+        <h1>Algo falló de nuestro lado</h1>
+        <p>
+            El sitio tuvo un problema y no pudo mostrar esta página. Ya quedó
+            registrado. Prueba de nuevo en unos minutos.
+        </p>
+        <a href="/" class="error-500-boton">Ir al inicio</a>
+    </main>
+</body>
+</html>

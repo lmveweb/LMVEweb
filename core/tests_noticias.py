@@ -351,6 +351,17 @@ class FotosTests(TestCase):
         with self.assertRaisesMessage(FotoInvalida, 'demasiado grande'):
             procesar_foto(SimpleUploadedFile('enorme.png', salida.getvalue()))
 
+    def test_png_y_webp_tienen_un_tope_menor_que_jpeg(self):
+        # Un PNG o WebP se abre entero en memoria (un JPEG, ya achicado):
+        # 5000 × 4000 = 20 megapíxeles pasa en JPEG pero no en PNG ni WebP.
+        for formato in ('PNG', 'WEBP'):
+            with self.subTest(formato):
+                salida = io.BytesIO()
+                Image.new('L' if formato == 'PNG' else 'RGB', (5000, 4000)).save(salida, formato)
+                with self.assertRaisesMessage(FotoInvalida, 'demasiado grande'):
+                    procesar_foto(SimpleUploadedFile(f'grande.{formato.lower()}', salida.getvalue()))
+        self.assertEqual(procesar_foto(foto_de_celular(5000, 4000, con_gps=False))['ancho'], GRANDE)
+
     def test_imagen_social_es_jpeg_de_1200_por_630(self):
         social = Image.open(io.BytesIO(imagen_social(procesar_foto(foto_de_celular())['grande'])))
         self.assertEqual(social.format, 'JPEG')
@@ -428,7 +439,12 @@ class NoticiasPublicasTests(TestCase):
 
     def test_quien_entro_al_panel_ve_el_borrador_como_vista_previa(self):
         noticia = crear_noticia(publicada=False, fotos=1)
-        self.client.force_login(User.objects.create_user('editora', password='x', is_staff=True))
+        editora = User.objects.create_user('editora', password='x', is_staff=True)
+        dispositivo = EmailDevice.objects.create(user=editora, name='default', confirmed=True)
+        self.client.force_login(editora)
+        sesion = self.client.session
+        sesion[DEVICE_ID_SESSION_KEY] = dispositivo.persistent_id
+        sesion.save()
         r = self.client.get(noticia.get_absolute_url())
         self.assertEqual(r.status_code, 200)
         self.assertContains(r, 'Borrador: esta noticia todavía no está publicada')
@@ -439,6 +455,12 @@ class NoticiasPublicasTests(TestCase):
         foto = self.client.get(noticia.fotos.get().url_miniatura)
         self.assertEqual(foto.status_code, 200)
         self.assertEqual(foto['Cache-Control'], 'private, no-store')
+
+    def test_una_sesion_sin_el_codigo_verificado_no_ve_borradores(self):
+        noticia = crear_noticia(publicada=False, fotos=1)
+        self.client.force_login(User.objects.create_user('editora', password='x', is_staff=True))
+        self.assertEqual(self.client.get(noticia.get_absolute_url()).status_code, 404)
+        self.assertEqual(self.client.get(noticia.fotos.get().url_miniatura).status_code, 404)
 
     def test_un_usuario_que_no_es_del_panel_no_ve_borradores(self):
         noticia = crear_noticia(publicada=False)
@@ -451,7 +473,7 @@ class NoticiasPublicasTests(TestCase):
             r = self.client.get(url)
             self.assertEqual(r.status_code, 200)
             self.assertEqual(r['Content-Type'], 'image/webp')
-            self.assertEqual(r['Cache-Control'], 'public, max-age=31536000, immutable')
+            self.assertEqual(r['Cache-Control'], 'public, max-age=86400')
             self.assertEqual(Image.open(io.BytesIO(r.content)).width, lado)
 
     def test_una_direccion_de_foto_con_version_vieja_o_tamano_inventado_da_404(self):

@@ -51,13 +51,15 @@ def archivo(request):
 NOTICIAS_EN_PORTADA = 3
 NOTICIAS_POR_PAGINA = 12
 UN_DIA = 60 * 60 * 24
-UN_ANIO = UN_DIA * 365
 
 
 def _puede_ver_borradores(request):
     """Quien entró al panel ve también las noticias sin publicar: es la
-    vista previa antes de marcar "Publicada"."""
-    return request.user.is_authenticated and request.user.is_staff
+    vista previa antes de marcar "Publicada". "Entró al panel" incluye
+    el código de acceso: una sesión con la contraseña sola no basta, igual
+    que para el panel mismo (LmveAdminSite.has_permission)."""
+    user = request.user
+    return user.is_authenticated and user.is_staff and user.is_active and user.is_verified()
 
 
 @require_safe
@@ -129,7 +131,11 @@ def noticia_foto(request, pk, version, tamano):
     contenido, publicada = fila
     if not publicada and not _puede_ver_borradores(request):
         raise Http404
-    return _imagen(contenido, 'image/webp', publicada, f'public, max-age={UN_ANIO}, immutable')
+    # Un día y no un año, aunque la dirección cambie con cada versión: son
+    # fotos de menores. Si alguien pide sacar una, despublicar o borrar la
+    # noticia la saca de los navegadores y de Cloudflare a más tardar al
+    # día siguiente (al tiro, si además se purga la caché en Cloudflare).
+    return _imagen(contenido, 'image/webp', publicada, f'public, max-age={UN_DIA}')
 
 
 @require_safe

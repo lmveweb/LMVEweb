@@ -29,6 +29,11 @@ PESO_MAXIMO = 10 * 1024 * 1024
 # Tope de píxeles: una imagen comprimida de pocos KB puede declarar un
 # tamaño gigantesco y agotar la memoria del servidor al abrirla.
 PIXELES_MAXIMOS = 50_000_000
+# PNG y WebP no se pueden abrir ya achicados como los JPEG (ver _leer):
+# se cargan enteros en memoria, a 4 bytes por píxel. Con 50 megapíxeles
+# serían 200 MB solo para abrir la foto, en un servidor de 512 MB. Una
+# captura o una foto de celular en PNG anda por los 12 megapíxeles.
+PIXELES_MAXIMOS_SIN_ACHICAR = 16_000_000
 FORMATOS = {'JPEG', 'MPO', 'PNG', 'WEBP'}
 
 
@@ -46,7 +51,8 @@ def _abrir(archivo):
     if imagen.format not in FORMATOS:
         raise FotoInvalida('Formato de foto no admitido. Usa JPG, PNG o WebP.')
     ancho, alto = imagen.size
-    if ancho * alto > PIXELES_MAXIMOS:
+    tope = PIXELES_MAXIMOS if imagen.format in ('JPEG', 'MPO') else PIXELES_MAXIMOS_SIN_ACHICAR
+    if ancho * alto > tope:
         raise FotoInvalida('La foto es demasiado grande. Súbela con menos resolución.')
     return imagen
 

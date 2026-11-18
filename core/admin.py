@@ -1,7 +1,10 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.contrib.auth.models import Group, User
+from django.core.exceptions import PermissionDenied
 from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
+from django.views.decorators.debug import sensitive_post_parameters
 from django_otp.admin import OTPAdminSite
 from django_ratelimit.decorators import ratelimit
 
@@ -13,6 +16,7 @@ from django.template.loader import render_to_string
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
+from .acceso import activar_codigo_por_correo, dispositivo_de, ingresar
 from .imagenes import (
     FotoInvalida,
     derivar,
@@ -46,14 +50,52 @@ class LmveAdminSite(OTPAdminSite):
     administra el sitio.
     """
 
+    # El ingreso es en dos pasos (ver core/acceso.py): contraseña y
+    # después el código, que sale solo al correo. El límite cuenta los
+    # dos pasos juntos, así que también frena a quien pruebe códigos.
+    @method_decorator(sensitive_post_parameters('password', 'codigo'))
+    @method_decorator(never_cache)
     @method_decorator(ratelimit(key=clave_ratelimit, rate='10/m', method='POST'))
     def login(self, request, extra_context=None):
-        return super().login(request, extra_context)
+        return ingresar(self, request, extra_context)
 
 
 site = LmveAdminSite(LmveAdminSite.name)
 
-site.register(User, UserAdmin)
+
+class UsuarioAdmin(UserAdmin):
+    """Los usuarios de siempre, más lo que le falta a una cuenta para
+    poder entrar: el código de acceso por correo. Se activa desde la
+    lista (Acción → "Activar el código de acceso por correo"), sin pasar
+    por la consola del hosting."""
+
+    list_display = ('username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'codigo_por_correo')
+    actions = ['activar_codigo']
+
+    @admin.display(description='Código por correo', boolean=True)
+    def codigo_por_correo(self, usuario):
+        return dispositivo_de(usuario) is not None
+
+    @admin.action(description='Activar el código de acceso por correo')
+    def activar_codigo(self, request, queryset):
+        # Decide quién puede entrar al panel: solo quien ya lo administra.
+        if not request.user.is_superuser:
+            raise PermissionDenied
+        for usuario in queryset:
+            if not usuario.email:
+                self.message_user(
+                    request,
+                    f'{usuario.get_username()} no tiene correo en su ficha: el código no tendría a dónde llegar.',
+                    messages.ERROR,
+                )
+                continue
+            activar_codigo_por_correo(usuario)
+            self.message_user(
+                request, f'{usuario.get_username()}: los códigos llegarán a {usuario.email}.', messages.SUCCESS,
+            )
+
+
+site.register(User, UsuarioAdmin)
 site.register(Group, GroupAdmin)
 
 

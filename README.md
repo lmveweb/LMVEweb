@@ -34,7 +34,7 @@ El formulario de Contacto guarda cada propuesta de patrocinio en base de datos *
 
 ## 🛠️ Stack técnico
 
-- **Backend:** Django 6.0.5
+- **Backend:** Django 6.0.10
 - **Noticias:** texto y fotos en la base de datos (las fotos se achican a WebP y se guardan sin metadatos al subirlas, con Pillow)
 - **Estáticos:** WhiteNoise (con hash de contenido para cache-busting)
 - **Base de datos:** SQLite en desarrollo · PostgreSQL en producción
@@ -94,6 +94,30 @@ python manage.py test
 | `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | Verificación anti-spam (Cloudflare Turnstile) en Contacto | No — sin esto, esa capa no corre (quedan igual el honeypot y el chequeo de tiempo) |
 
 </details>
+
+---
+
+## 👥 Cuentas del panel
+
+El panel pide usuario y contraseña y, después, un código que llega al correo de la persona. En el segundo paso se puede marcar "Recordar este computador por 30 días" para no recibir el código en ese navegador (la contraseña se pide siempre; cambiarla olvida los computadores recordados).
+
+Quien publica noticias usa una cuenta propia del grupo **Editores**: puede crear, editar y borrar noticias, y nada más (no ve los mensajes de Contacto ni las cuentas).
+
+Crear una cuenta de editor, lista para entrar:
+
+```bash
+python manage.py crear_editor cgonzalez --nombre Carla --apellido González --email carla@example.com
+```
+
+El comando muestra una clave temporal, que la persona cambia al entrar. También se puede hacer desde el panel: crear el usuario, completar su correo, marcar "Es staff", sumarlo al grupo Editores y, en la lista de usuarios, usar la acción "Activar el código de acceso por correo".
+
+Para dar de baja a alguien, desmarcar "Activo" en su ficha (no hace falta borrar la cuenta).
+
+Las noticias con que se estrena la sección se cargan una vez después de desplegar, con `python manage.py cargar_noticias_iniciales` (no duplica nada si se corre de nuevo).
+
+### Páginas de error
+
+404, 403, formulario vencido y 500 tienen páginas propias, sin indexar en Google. En local (`DJANGO_DEBUG=True`) Django muestra su página de depuración en su lugar; para verlas: `/vista-previa-error/404/`, `/403/`, `/formulario/` y `/500/` (esas direcciones no existen en producción).
 
 ---
 

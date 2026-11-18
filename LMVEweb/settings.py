@@ -162,6 +162,11 @@ OTP_EMAIL_BODY_TEMPLATE = (
     'Vence en 5 minutos. Si no intentaste iniciar sesión, ignora este correo.\n'
 )
 
+# Un formulario enviado después de estar abierto mucho rato falla la
+# protección CSRF. En vez de la pantalla técnica de Django, un mensaje
+# que explica qué hacer (ver core/errores.py).
+CSRF_FAILURE_VIEW = 'core.errores.formulario_vencido'
+
 # Origen canónico del sitio, sin barra final. Todas las URLs absolutas de
 # SEO (canonical, og:url, og:image, sitemap.xml, robots.txt) salen de
 # acá, no del header Host de la petición — así no dependen de que el

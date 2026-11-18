@@ -1,0 +1,99 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{# Ingreso al panel en dos pasos (ver core/acceso.py). Sin <style> ni
+   <script> propios: la CSP del sitio no los deja pasar sin nonce. #}
+
+{% block title %}{% if form.errors or error_codigo %}Error: {% endif %}{{ block.super }}{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static "admin/css/login.css" %}">
+<link rel="stylesheet" href="{% static "core/css/admin-acceso.css" %}">
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} login{% endblock %}
+{% block usertools %}{% endblock %}
+{% block nav-global %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block content_title %}{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+{% if paso_codigo %}
+
+  {% if error_codigo %}<p class="errornote">{{ error_codigo }}</p>{% endif %}
+
+  <p class="acceso-paso">Paso 2 de 2</p>
+  <p class="acceso-ayuda">
+    Te enviamos un código de 6 números a <strong>{{ correo }}</strong>.
+    Escríbelo acá. Vence en 5 minutos.
+  </p>
+
+  <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
+    <input type="hidden" name="paso" value="codigo">
+    <div class="form-row">
+      <label for="id_codigo" class="required">Código de acceso:</label>
+      <input type="text" name="codigo" id="id_codigo" class="acceso-codigo" required autofocus
+             inputmode="numeric" autocomplete="one-time-code" maxlength="12">
+    </div>
+    <div class="form-row acceso-recordar">
+      <input type="checkbox" name="recordar" id="id_recordar">
+      <label for="id_recordar">Recordar este computador por 30 días</label>
+      <p class="acceso-nota">
+        No te pediremos el código acá durante 30 días (la contraseña sí).
+        No lo marques en un computador compartido.
+      </p>
+    </div>
+    <div class="submit-row">
+      <input type="submit" value="Entrar">
+    </div>
+  </form>
+
+  <div class="acceso-otros">
+    <p>¿No te llegó? Revisa la carpeta de spam.</p>
+    <form action="{{ app_path }}" method="post">{% csrf_token %}
+      <input type="hidden" name="paso" value="reenviar">
+      <button type="submit" class="acceso-enlace">Enviar otro código</button>
+    </form>
+    <form action="{{ app_path }}" method="post">{% csrf_token %}
+      <input type="hidden" name="paso" value="cancelar">
+      <button type="submit" class="acceso-enlace">Entrar con otra cuenta</button>
+    </form>
+  </div>
+
+{% else %}
+
+  {% if form.errors and not form.non_field_errors %}
+  <p class="errornote">Corrige lo que está marcado abajo.</p>
+  {% endif %}
+  {% for error in form.non_field_errors %}
+  <p class="errornote">{{ error }}</p>
+  {% endfor %}
+
+  {% if user.is_authenticated %}
+  <p class="errornote">
+    Entraste como {{ user.get_username }}, pero esa cuenta no tiene permiso
+    para ver esta página. ¿Quieres entrar con otra?
+  </p>
+  {% endif %}
+
+  <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
+    <input type="hidden" name="paso" value="clave">
+    <div class="form-row">
+      {{ form.username.errors }}
+      {{ form.username.label_tag }} {{ form.username }}
+    </div>
+    <div class="form-row">
+      {{ form.password.errors }}
+      {{ form.password.label_tag }} {{ form.password }}
+      <input type="hidden" name="next" value="{{ next }}">
+    </div>
+    <div class="submit-row">
+      <input type="submit" value="Continuar">
+    </div>
+  </form>
+  <p class="acceso-nota">Después te pediremos un código que llega a tu correo.</p>
+
+{% endif %}
+
+</div>
+{% endblock %}
