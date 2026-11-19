@@ -71,14 +71,12 @@ def noticias(request):
     return render(request, 'core/noticias.html', {'pagina': pagina})
 
 
-@require_safe
-def noticia(request, slug):
-    nota = get_object_or_404(Noticia.objects.prefetch_related('fotos'), slug=slug)
-    if not nota.publicada and not _puede_ver_borradores(request):
-        raise Http404
-    fotos = list(nota.fotos.all())
+def contexto_noticia(nota, fotos):
+    """Lo que necesita core/noticia.html para mostrar una noticia. Lo
+    usan la página pública y la vista previa del panel (que arma la
+    noticia con lo escrito, sin guardarla)."""
     cuerpo_html = cuerpo_noticia(nota.cuerpo)
-    respuesta = render(request, 'core/noticia.html', {
+    return {
         'noticia': nota,
         'cuerpo_html': cuerpo_html,
         # El script de Instagram se carga solo si la noticia incrusta
@@ -86,6 +84,16 @@ def noticia(request, slug):
         'tiene_instagram': 'class="instagram-media"' in cuerpo_html,
         'portada': fotos[0] if fotos else None,
         'galeria': fotos[1:],
+    }
+
+
+@require_safe
+def noticia(request, slug):
+    nota = get_object_or_404(Noticia.objects.prefetch_related('fotos'), slug=slug)
+    if not nota.publicada and not _puede_ver_borradores(request):
+        raise Http404
+    respuesta = render(request, 'core/noticia.html', {
+        **contexto_noticia(nota, list(nota.fotos.all())),
         'jsonld': jsonld_noticia(nota) if nota.publicada else None,
         # Pisa lo que entrega el context processor para el resto de las
         # vistas (ver core/seo.py): acá los metadatos salen de la noticia.

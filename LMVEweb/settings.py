@@ -334,6 +334,8 @@ CONTENT_SECURITY_POLICY = {
         'connect-src': [SELF, 'www.instagram.com', 'challenges.cloudflare.com'],
         # www.youtube-nocookie.com: videos de YouTube incrustados en las
         # noticias (solo el <iframe>; no se permite ningún script suyo).
+        # El formulario de noticias del panel suma 'self' para su vista
+        # previa (ver NoticiaAdmin.changeform_view); el resto del sitio no.
         'frame-src': ['www.instagram.com', 'challenges.cloudflare.com', 'www.youtube-nocookie.com'],
         'base-uri': [SELF],
         'frame-ancestors': [NONE],

@@ -430,6 +430,89 @@
     }
     .noticia-galeria a:hover img { transform: scale(1.05); }
 
+    {% if galeria %}
+    /* =========================================================
+       VISOR DE FOTOS: el mismo de Multimedia (archivo.html). Va en el
+       bloque "modals", fuera de <main>: ver la nota sobre
+       "position: fixed" en base.html.
+       ========================================================= */
+    .lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 300;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(6, 16, 31, 0.94);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease, visibility 0.25s;
+    }
+    .lightbox.is-open { opacity: 1; visibility: visible; }
+    .lightbox-img {
+        max-width: min(88vw, 1100px);
+        max-height: 84vh;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 4px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    .lightbox-cerrar {
+        position: absolute;
+        top: 18px;
+        right: 22px;
+        background: transparent;
+        border: 0;
+        color: #ffffff;
+        font-size: 34px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 8px;
+        opacity: 0.85;
+        transition: opacity 0.2s ease, transform 0.15s ease;
+    }
+    .lightbox-cerrar:hover { opacity: 1; }
+    .lightbox-cerrar:active { transform: scale(0.9); }
+    .lightbox-flecha {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #ffffff;
+        font-size: 30px;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease, transform 0.15s ease;
+    }
+    .lightbox-flecha:hover { background: rgba(255, 255, 255, 0.25); }
+    .lightbox-flecha:active { transform: translateY(-50%) scale(0.92); }
+    .lightbox-flecha[hidden] { display: none; }
+    .lightbox-prev { left: 18px; }
+    .lightbox-next { right: 18px; }
+    .lightbox-contador {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    @media (max-width: 940px) {
+        .lightbox-flecha { width: 42px; height: 42px; font-size: 24px; }
+        .lightbox-prev { left: 8px; }
+        .lightbox-next { right: 8px; }
+    }
+    {% endif %}
+
     @media (max-width: 940px) {
         .noticia-hero { min-height: 380px; }
         .noticia-hero-inner { padding: 84px var(--page-pad) 32px var(--page-pad); }
@@ -467,7 +550,12 @@
     }
 </style>
 
-{% if not noticia.publicada %}
+{% if vista_previa %}
+<div class="noticia-borrador" role="status">
+    Vista previa con lo que llevas escrito: todavía no está guardada.
+    {% if fotos_sin_guardar %}Las fotos que elegiste aparecerán después de guardar.{% endif %}
+</div>
+{% elif not noticia.publicada %}
 <div class="noticia-borrador" role="status">
     Borrador: esta noticia todavía no está publicada. Solo la ves tú, porque entraste al panel.
 </div>
@@ -501,7 +589,7 @@
             </article>
 
             {% if galeria %}
-            <div class="noticia-galeria">
+            <div class="noticia-galeria" id="noticiaGaleria">
                 {% for foto in galeria %}
                 <a href="{{ foto.url_grande }}" target="_blank" rel="noopener" aria-label="Ver la foto en grande: {{ foto.alt }}">
                     <img src="{{ foto.url_miniatura }}" alt="{{ foto.alt }}"
@@ -565,7 +653,103 @@
 </section>
 {% endblock %}
 
+{% block modals %}
+{% if galeria %}
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Foto ampliada" hidden>
+    <button class="lightbox-cerrar" id="lightboxCerrar" type="button" aria-label="Cerrar">&times;</button>
+    <button class="lightbox-flecha lightbox-prev" id="lightboxPrev" type="button" aria-label="Foto anterior">&#8249;</button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="">
+    <button class="lightbox-flecha lightbox-next" id="lightboxNext" type="button" aria-label="Foto siguiente">&#8250;</button>
+    <div class="lightbox-contador" id="lightboxContador"></div>
+</div>
+{% endif %}
+{% endblock %}
+
 {% block scripts %}
+{% if galeria %}
+<!-- VISOR DE FOTOS (el mismo de Multimedia) -->
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+    var galeria = document.getElementById('noticiaGaleria');
+    var lightbox = document.getElementById('lightbox');
+    if (!galeria || !lightbox) return;
+
+    var enlaces = Array.prototype.slice.call(galeria.querySelectorAll('a'));
+    var fotos = enlaces.map(function (a) {
+        return { src: a.getAttribute('href'), alt: a.querySelector('img').getAttribute('alt') };
+    });
+
+    var lightboxImg = document.getElementById('lightboxImg');
+    var contador = document.getElementById('lightboxContador');
+    var btnCerrar = document.getElementById('lightboxCerrar');
+    var btnPrev = document.getElementById('lightboxPrev');
+    var btnNext = document.getElementById('lightboxNext');
+    var indiceActual = 0;
+    var elementoAntesDeAbrir = null;
+    var temporizadorCierre = null;
+
+    // Con una sola foto no hay a dónde avanzar.
+    if (fotos.length < 2) {
+        btnPrev.hidden = true;
+        btnNext.hidden = true;
+        contador.hidden = true;
+    }
+
+    function mostrarFoto(indice) {
+        indiceActual = (indice + fotos.length) % fotos.length;
+        var foto = fotos[indiceActual];
+        lightboxImg.src = foto.src;
+        lightboxImg.alt = foto.alt;
+        contador.textContent = (indiceActual + 1) + ' / ' + fotos.length;
+    }
+
+    function abrirLightbox(indice) {
+        // Si se reabre durante el fundido de cierre, ese cierre pendiente
+        // no debe ocultar el visor recién abierto (quedaría sin teclado).
+        clearTimeout(temporizadorCierre);
+        elementoAntesDeAbrir = document.activeElement;
+        mostrarFoto(indice);
+        lightbox.hidden = false;
+        requestAnimationFrame(function () { lightbox.classList.add('is-open'); });
+        document.body.style.overflow = 'hidden';
+        btnCerrar.focus();
+    }
+
+    function cerrarLightbox() {
+        lightbox.classList.remove('is-open');
+        document.body.style.overflow = '';
+        temporizadorCierre = setTimeout(function () { lightbox.hidden = true; }, 250);
+        if (elementoAntesDeAbrir) elementoAntesDeAbrir.focus();
+    }
+
+    enlaces.forEach(function (a, i) {
+        a.addEventListener('click', function (e) {
+            // Ctrl/Cmd + clic o clic del medio: abrir en otra pestaña,
+            // como cualquier enlace.
+            if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+            e.preventDefault();
+            abrirLightbox(i);
+        });
+    });
+
+    btnCerrar.addEventListener('click', cerrarLightbox);
+    btnPrev.addEventListener('click', function () { mostrarFoto(indiceActual - 1); });
+    btnNext.addEventListener('click', function () { mostrarFoto(indiceActual + 1); });
+
+    // Tapear el fondo oscuro (no la foto ni los controles) cierra.
+    lightbox.addEventListener('click', function (e) {
+        if (e.target === lightbox) cerrarLightbox();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (lightbox.hidden) return;
+        if (e.key === 'Escape') cerrarLightbox();
+        else if (fotos.length > 1 && e.key === 'ArrowLeft') mostrarFoto(indiceActual - 1);
+        else if (fotos.length > 1 && e.key === 'ArrowRight') mostrarFoto(indiceActual + 1);
+    });
+})();
+</script>
+{% endif %}
 {% if tiene_instagram %}
 <script async src="https://www.instagram.com/embed.js"></script>
 {% endif %}

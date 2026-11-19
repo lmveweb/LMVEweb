@@ -1,7 +1,8 @@
 /* Formulario de Noticias en el panel de administración.
 
-   1. Pestañas: Texto, Fotos y Editar portada, para no tener que bajar
-      por un formulario larguísimo. Sin JavaScript se ve todo seguido.
+   1. Pestañas: Texto, Vista previa, Fotos y Editar portada, para no
+      tener que bajar por un formulario larguísimo. Sin JavaScript se ve
+      todo seguido (y la vista previa no aparece: la arma este script).
    2. Editor de la foto de portada: recortar, girar, voltear y ajustar
       brillo, contraste y color, con vista previa de cómo queda arriba de
       la noticia, en su tarjeta y al compartir el link. El editor solo
@@ -21,6 +22,7 @@
        ================================================================= */
     var PESTANAS = [
         { id: 'texto', nombre: 'Texto', piezas: ['fieldset.pestana-texto'] },
+        { id: 'vista', nombre: 'Vista previa', piezas: ['fieldset.pestana-vista'] },
         { id: 'fotos', nombre: 'Fotos', piezas: ['fieldset.pestana-fotos', '#fotos-group'] },
         { id: 'editor', nombre: 'Editar portada', piezas: ['fieldset.pestana-editor'] }
     ];
@@ -94,6 +96,7 @@
             });
             if (recordar) guardarPestana(id);
             if (id === 'editor') editor.mostrar();
+            if (id === 'vista') vistaPrevia.actualizar();
         }
 
         // Al volver con errores se abre la pestaña que hay que corregir;
@@ -121,6 +124,79 @@
             evento.preventDefault();
             mostrar(enlace.getAttribute('data-ir-a-pestana'), true);
             window.scrollTo(0, barra.getBoundingClientRect().top + window.scrollY - 10);
+        });
+    }
+
+    /* =================================================================
+       VISTA PREVIA
+
+       Manda lo escrito en el formulario (sin guardarlo) a la vista previa
+       del servidor, que responde con la página de la noticia; la
+       respuesta se abre en el recuadro de la pestaña. Se manda con un
+       formulario aparte, creado acá, porque el del panel no puede tener
+       otro adentro.
+       ================================================================= */
+    var vistaPrevia = {
+        actualizar: function () {
+            var raiz = document.querySelector('[data-vista-previa]');
+            var principal = document.getElementById('noticia_form');
+            if (!raiz || !principal) return;
+
+            var envio = document.getElementById('envio-vista-previa');
+            if (!envio) {
+                envio = document.createElement('form');
+                envio.id = 'envio-vista-previa';
+                envio.method = 'post';
+                envio.action = raiz.getAttribute('data-url');
+                envio.target = 'marco-vista-previa';
+                envio.hidden = true;
+                document.body.appendChild(envio);
+            }
+            envio.textContent = '';
+
+            function campo(nombre, valor) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = nombre;
+                input.value = valor;
+                envio.appendChild(input);
+            }
+            function valor(nombre) {
+                var el = principal.querySelector('[name="' + nombre + '"]');
+                return el ? el.value : '';
+            }
+            campo('csrfmiddlewaretoken', valor('csrfmiddlewaretoken'));
+            ['titulo', 'fecha', 'autor', 'resumen', 'cuerpo'].forEach(function (nombre) {
+                campo(nombre, valor(nombre));
+            });
+            campo('noticia', raiz.getAttribute('data-noticia') || '');
+            var hayFotosNuevas = Array.prototype.some.call(
+                principal.querySelectorAll('input[type="file"]'),
+                function (input) { return input.files && input.files.length > 0; }
+            );
+            campo('fotos_sin_guardar', hayFotosNuevas ? '1' : '0');
+
+            raiz.classList.add('vista-previa--cargando');
+            envio.submit();
+        }
+    };
+
+    function iniciarVistaPrevia() {
+        var raiz = document.querySelector('[data-vista-previa]');
+        if (!raiz) return;
+        var marco = raiz.querySelector('iframe');
+        marco.addEventListener('load', function () { raiz.classList.remove('vista-previa--cargando'); });
+        raiz.addEventListener('click', function (evento) {
+            var boton = evento.target.closest('button');
+            if (!boton) return;
+            if (boton.hasAttribute('data-actualizar')) {
+                vistaPrevia.actualizar();
+            } else if (boton.hasAttribute('data-ancho')) {
+                raiz.setAttribute('data-dispositivo', boton.getAttribute('data-ancho'));
+                Array.prototype.forEach.call(raiz.querySelectorAll('[data-ancho]'), function (b) {
+                    b.setAttribute('aria-pressed', b === boton ? 'true' : 'false');
+                });
+            }
         });
     }
 
@@ -463,6 +539,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         if (!document.getElementById('noticia_form')) return;
         iniciarEditor();
+        iniciarVistaPrevia();
         armarPestanas();
     });
 })();

@@ -1,14 +1,22 @@
 from django.contrib import admin, messages
 from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.contrib.auth.models import Group, User
+from csp.constants import SELF
+from csp.decorators import csp_replace
 from django.core.exceptions import PermissionDenied
+from django.shortcuts import render
+from django.urls import path, reverse
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.debug import sensitive_post_parameters
+from django.views.decorators.http import require_POST
 from django_otp.admin import OTPAdminSite
 from django_ratelimit.decorators import ratelimit
 
 import json
+import re
 
 from django import forms
 from django.db import models
@@ -27,6 +35,7 @@ from .imagenes import (
 )
 from .ip import clave_ratelimit
 from .models import FotoNoticia, MensajePatrocinio, Noticia
+from .seo import POR_DEFECTO
 
 
 class LmveAdminSite(OTPAdminSite):
@@ -310,11 +319,20 @@ class NoticiaAdmin(admin.ModelAdmin):
         editor = render_to_string('core/admin/editor_portada.html', {
             'url_original': portada.url_original if portada else '',
         })
+        vista_previa = render_to_string('core/admin/vista_previa.html', {
+            'url': reverse('admin:core_noticia_vista_previa', current_app=self.admin_site.name),
+            'noticia_id': obj.pk if obj else '',
+        })
         return [
             ('Texto', {
                 'classes': ('pestana', 'pestana-texto'),
                 'fields': ('titulo', 'fecha', 'autor', 'resumen', 'cuerpo'),
                 'description': mark_safe(render_to_string('core/admin/guia_noticia.html')),
+            }),
+            ('Vista previa', {
+                'classes': ('pestana', 'pestana-vista'),
+                'fields': (),
+                'description': mark_safe(vista_previa),
             }),
             ('Foto de portada', {
                 'classes': ('pestana', 'pestana-fotos'),
@@ -332,6 +350,67 @@ class NoticiaAdmin(admin.ModelAdmin):
                 'fields': ('publicada',),
             }),
         ]
+
+    def changeform_view(self, request, *args, **kwargs):
+        # Solo este formulario puede mostrar una página del propio sitio
+        # en un recuadro: la de su vista previa. El resto del sitio no
+        # (frame-src en settings.py).
+        respuesta = super().changeform_view(request, *args, **kwargs)
+        respuesta._csp_update = {'frame-src': [SELF]}
+        return respuesta
+
+    def get_urls(self):
+        # Se puede mostrar en un recuadro del propio sitio (el resto de las
+        # páginas no se deja mostrar dentro de ninguna otra).
+        vista = csp_replace({'frame-ancestors': [SELF]})(xframe_options_sameorigin(self.vista_previa))
+        return [
+            path('vista-previa/', self.admin_site.admin_view(vista), name='core_noticia_vista_previa'),
+        ] + super().get_urls()
+
+    @method_decorator(require_POST)
+    def vista_previa(self, request):
+        """La noticia tal como se vería con lo escrito en el formulario,
+        sin guardarla. La pide la pestaña "Vista previa" (ver
+        core/static/core/js/admin-noticias.js) y se muestra en un recuadro
+        del mismo formulario.
+
+        El texto pasa por el mismo filtro que en la página pública, que
+        escapa todo lo escrito: la vista previa no abre ninguna puerta que
+        la noticia publicada no tenga. Las fotos son las ya guardadas: las
+        recién elegidas recién se procesan al guardar."""
+        from .views import contexto_noticia
+
+        if not (self.has_add_permission(request) or self.has_change_permission(request)):
+            raise PermissionDenied
+        datos = request.POST
+        try:
+            fecha = forms.DateField().clean(datos.get('fecha'))
+        except forms.ValidationError:
+            fecha = None
+        nota = Noticia(
+            titulo=datos.get('titulo', '').strip()[:120] or 'Sin título todavía',
+            fecha=fecha or timezone.localdate(),
+            autor=datos.get('autor', '').strip()[:80],
+            resumen=datos.get('resumen', '').strip()[:200],
+            cuerpo=datos.get('cuerpo', '')[:20000],
+        )
+        fotos = []
+        # Solo dígitos ASCII y de largo razonable: "²" pasa isdigit() y
+        # rompe int(), y un número gigante desborda la columna en Postgres.
+        noticia_id = datos.get('noticia', '')
+        guardada = None
+        if re.fullmatch(r'[0-9]{1,9}', noticia_id):
+            guardada = Noticia.objects.filter(pk=int(noticia_id)).first()
+        if guardada and self.has_view_permission(request, guardada):
+            fotos = list(guardada.fotos.all())
+        respuesta = render(request, 'core/noticia.html', {
+            **contexto_noticia(nota, fotos),
+            'vista_previa': True,
+            'fotos_sin_guardar': datos.get('fotos_sin_guardar') == '1',
+            'seo': {**POR_DEFECTO, 'title': f'Vista previa: {nota.titulo} | LMVE', 'indexable': False},
+        })
+        respuesta['Cache-Control'] = 'private, no-store'
+        return respuesta
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(_fotos=models.Count('fotos'))

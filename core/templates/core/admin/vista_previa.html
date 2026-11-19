@@ -1,0 +1,22 @@
+{% comment %}
+Pestaña "Vista previa" del formulario de Noticias. El script del panel
+(core/static/core/js/admin-noticias.js) manda lo escrito a `url` y la
+respuesta se abre en el recuadro. Sin JavaScript no hay pestañas y este
+bloque queda oculto (ver admin-noticias.css).
+{% endcomment %}
+<div class="vista-previa" data-vista-previa data-url="{{ url }}" data-noticia="{{ noticia_id }}" data-dispositivo="escritorio">
+    <div class="vista-previa-barra">
+        <p class="vista-previa-ayuda">
+            Así se verá la noticia con lo que llevas escrito. Todavía no está guardada:
+            para eso, aprieta <strong>Guardar</strong> abajo.
+        </p>
+        <div class="vista-previa-botones">
+            <button type="button" class="vista-previa-boton" data-ancho="escritorio" aria-pressed="true">Computador</button>
+            <button type="button" class="vista-previa-boton" data-ancho="celular" aria-pressed="false">Celular</button>
+            <button type="button" class="vista-previa-boton vista-previa-boton--actualizar" data-actualizar>Actualizar</button>
+        </div>
+    </div>
+    <div class="vista-previa-marco">
+        <iframe name="marco-vista-previa" title="Vista previa de la noticia"></iframe>
+    </div>
+</div>

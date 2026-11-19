@@ -792,7 +792,7 @@ class NoticiasAdminTests(TestCase):
         pagina = self.client.get(noticia.get_absolute_url()).content.decode()
         encabezado = re.search(r'<section class="noticia-hero.*?</section>', pagina, re.S).group(0)
         self.assertIn(portada.url_grande, encabezado)
-        galeria = re.search(r'<div class="noticia-galeria">.*?</div>', pagina, re.S).group(0)
+        galeria = re.search(r'<div class="noticia-galeria"[^>]*>.*?</div>', pagina, re.S).group(0)
         self.assertNotIn(portada.url_miniatura, galeria)
         self.assertLess(galeria.index('alt="Foto uno"'), galeria.index('alt="Foto dos"'))
 
@@ -1019,3 +1019,149 @@ class NoticiasAdminTests(TestCase):
         self.assertIn('youtube-nocookie.com/embed/abc123XYZ00', html)
         self.assertIn('>Ver en TikTok</a>', html)
         self.assertIn('<a href="https://ligamve.cl/contacto/"', html)
+
+
+class VistaPreviaTests(TestCase):
+    """La pestaña "Vista previa" del panel: muestra la noticia con lo
+    escrito, sin guardarla, dentro de un recuadro del mismo panel."""
+
+    def setUp(self):
+        from django.contrib.auth.models import Group
+        self.url = reverse('admin:core_noticia_vista_previa')
+        self.editora = User.objects.create_user('editora', password='x', is_staff=True)
+        self.editora.groups.add(Group.objects.get(name='Editores'))
+        self._entrar(self.client, self.editora)
+
+    def _entrar(self, cliente, usuario):
+        dispositivo = EmailDevice.objects.create(user=usuario, name='default', confirmed=True)
+        cliente.force_login(usuario)
+        sesion = cliente.session
+        sesion[DEVICE_ID_SESSION_KEY] = dispositivo.persistent_id
+        sesion.save()
+
+    def _datos(self, **extra):
+        return {
+            'titulo': 'Final de la Copa', 'fecha': '21/11/2026', 'autor': 'Carla González',
+            'resumen': 'Así fue la final.', 'cuerpo': '# Resultados\n\n- Primer lugar: Andrée',
+            **extra,
+        }
+
+    def test_muestra_lo_escrito_sin_guardar_nada(self):
+        r = self.client.post(self.url, self._datos())
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, 'Final de la Copa')
+        self.assertContains(r, '<h2>Resultados</h2>')
+        self.assertContains(r, '<li>Primer lugar: Andrée</li>')
+        self.assertContains(r, '21 de noviembre de 2026')
+        self.assertContains(r, 'Por Carla González')
+        self.assertContains(r, 'Vista previa con lo que llevas escrito')
+        self.assertContains(r, '<meta name="robots" content="noindex, follow">')
+        self.assertIn('no-store', r['Cache-Control'])
+        self.assertIn('private', r['Cache-Control'])
+        self.assertFalse(Noticia.objects.exists())
+
+    def test_solo_ella_se_deja_mostrar_dentro_de_un_recuadro_del_sitio(self):
+        r = self.client.post(self.url, self._datos())
+        self.assertEqual(r['X-Frame-Options'], 'SAMEORIGIN')
+        self.assertIn("frame-ancestors 'self'", r['Content-Security-Policy'])
+        # Las demás páginas siguen sin dejarse mostrar dentro de otra.
+        publica = self.client.get(crear_noticia().get_absolute_url())
+        self.assertEqual(publica['X-Frame-Options'], 'DENY')
+        self.assertIn("frame-ancestors 'none'", publica['Content-Security-Policy'])
+
+    def test_solo_el_formulario_de_noticias_puede_mostrar_paginas_del_sitio(self):
+        def frame_src(respuesta):
+            return re.search(r'frame-src ([^;]+)', respuesta['Content-Security-Policy']).group(1)
+        noticia = crear_noticia()
+        for url in (reverse('admin:core_noticia_add'), reverse('admin:core_noticia_change', args=[noticia.pk])):
+            self.assertIn("'self'", frame_src(self.client.get(url)), url)
+        # El resto del sitio, no: ni las páginas públicas ni otras del panel.
+        for url in (reverse('home'), noticia.get_absolute_url(), reverse('admin:index'),
+                    reverse('admin:core_noticia_changelist')):
+            self.assertNotIn("'self'", frame_src(self.client.get(url)), url)
+
+    def test_lo_escrito_se_escapa(self):
+        r = self.client.post(self.url, self._datos(
+            titulo='<script>alert(1)</script>', cuerpo='<img src=x onerror=alert(1)>',
+        ))
+        html = r.content.decode()
+        self.assertNotIn('<script>alert(1)</script>', html)
+        self.assertNotIn('<img src=x onerror', html)
+        self.assertIn('&lt;script&gt;', html)
+
+    def test_un_identificador_de_noticia_raro_no_rompe_la_vista_previa(self):
+        for valor in ('²', '١٢', '9' * 40, '-1', '1.5', '1 OR 1=1', '99999'):
+            with self.subTest(valor=valor):
+                self.assertEqual(self.client.post(self.url, self._datos(noticia=valor)).status_code, 200)
+
+    def test_una_fecha_mal_escrita_no_rompe_la_vista_previa(self):
+        self.assertEqual(self.client.post(self.url, self._datos(fecha='31/02/20xx')).status_code, 200)
+        self.assertEqual(self.client.post(self.url, {}).status_code, 200)
+
+    def test_muestra_las_fotos_ya_guardadas_de_la_noticia(self):
+        noticia = crear_noticia(fotos=2)
+        portada, otra = list(noticia.fotos.all())
+        r = self.client.post(self.url, self._datos(noticia=str(noticia.pk)))
+        self.assertContains(r, portada.url_grande)
+        self.assertContains(r, otra.url_miniatura)
+
+    def test_avisa_que_las_fotos_nuevas_aparecen_al_guardar(self):
+        r = self.client.post(self.url, self._datos(fotos_sin_guardar='1'))
+        self.assertContains(r, 'Las fotos que elegiste aparecerán después de guardar')
+        r = self.client.post(self.url, self._datos(fotos_sin_guardar='0'))
+        self.assertNotContains(r, 'Las fotos que elegiste')
+
+    def test_solo_responde_a_post(self):
+        self.assertEqual(self.client.get(self.url).status_code, 405)
+
+    def test_exige_la_proteccion_de_formularios(self):
+        from django.test import Client
+        cliente = Client(enforce_csrf_checks=True)
+        otra = User.objects.create_user('otra', password='x', is_staff=True, is_superuser=True)
+        self._entrar(cliente, otra)
+        self.assertEqual(cliente.post(self.url, self._datos()).status_code, 403)
+
+    def test_sin_sesion_lleva_al_ingreso(self):
+        from django.test import Client
+        r = Client().post(self.url, self._datos())
+        self.assertEqual(r.status_code, 302)
+        self.assertIn('login', r['Location'])
+
+    def test_una_cuenta_sin_permisos_de_noticias_no_la_ve(self):
+        from django.test import Client
+        cliente = Client()
+        self._entrar(cliente, User.objects.create_user('sinpermiso', password='x', is_staff=True))
+        self.assertEqual(cliente.post(self.url, self._datos()).status_code, 403)
+
+    def test_el_formulario_trae_la_pestana_junto_a_texto(self):
+        html = self.client.get(reverse('admin:core_noticia_add')).content.decode()
+        self.assertIn(f'data-url="{self.url}"', html)
+        self.assertIn('name="marco-vista-previa"', html)
+        self.assertLess(html.index('pestana-texto'), html.index('pestana-vista'))
+        self.assertLess(html.index('pestana-vista'), html.index('pestana-fotos'))
+        noticia = crear_noticia()
+        html = self.client.get(reverse('admin:core_noticia_change', args=[noticia.pk])).content.decode()
+        self.assertIn(f'data-noticia="{noticia.pk}"', html)
+
+
+class VisorDeFotosTests(TestCase):
+    """Las fotos de la galería se abren en el mismo visor de Multimedia."""
+
+    def test_la_galeria_abre_el_visor(self):
+        noticia = crear_noticia(fotos=3)
+        html = self.client.get(noticia.get_absolute_url()).content.decode()
+        self.assertIn('id="noticiaGaleria"', html)
+        self.assertIn('id="lightbox" role="dialog" aria-modal="true"', html)
+        for etiqueta in ('Cerrar', 'Foto anterior', 'Foto siguiente'):
+            self.assertIn(f'aria-label="{etiqueta}"', html)
+        self.assertRegex(html, r'<script nonce="[^"]+">\s*\(function \(\) \{\s*var galeria')
+        # Sin JavaScript, cada foto sigue abriendo su versión grande.
+        for foto in list(noticia.fotos.all())[1:]:
+            self.assertIn(f'<a href="{foto.url_grande}" target="_blank"', html)
+        # El visor va fuera de <main>, como en Multimedia.
+        self.assertGreater(html.index('id="lightbox"'), html.index('</main>'))
+
+    def test_sin_galeria_no_hay_visor(self):
+        html = self.client.get(crear_noticia(fotos=1).get_absolute_url()).content.decode()
+        self.assertNotIn('id="lightbox"', html)
+        self.assertNotIn('var galeria', html)
