@@ -136,11 +136,38 @@ class CargarNoticiasInicialesTests(TestCase):
             for datos in NOTICIAS:
                 self.assertIn(datos['titulo'], html)
 
+    def test_cada_noticia_trae_su_portada_y_su_galeria_sin_metadatos(self):
+        import io
+        from PIL import Image
+        self._cargar()
+        for datos in NOTICIAS:
+            noticia = Noticia.objects.get(titulo=datos['titulo'])
+            self.assertEqual(noticia.fotos.filter(es_portada=True).count(), 1 if datos.get('portada') else 0)
+            self.assertEqual(noticia.fotos.filter(es_portada=False).count(), len(datos.get('galeria', [])))
+            for foto in FotoNoticia.objects.filter(noticia=noticia).values('alt', 'grande'):
+                self.assertTrue(foto['alt'])
+                self.assertFalse(dict(Image.open(io.BytesIO(bytes(foto['grande']))).getexif()))
+            html = self.client.get(noticia.get_absolute_url()).content.decode()
+            if datos.get('galeria'):
+                self.assertIn('class="noticia-galeria"', html)
+
+    def test_las_fotos_de_origen_no_traen_metadatos(self):
+        from pathlib import Path
+        from PIL import Image
+        from django.conf import settings
+        for datos in NOTICIAS:
+            for foto in [datos.get('portada')] + datos.get('galeria', []):
+                if foto and 'fotos_iniciales' in foto['archivo']:
+                    with Image.open(Path(settings.BASE_DIR) / foto['archivo']) as imagen:
+                        self.assertFalse(dict(imagen.getexif()), foto['archivo'])
+                        self.assertNotIn('xmp', imagen.info, foto['archivo'])
+
     def test_correrlo_de_nuevo_no_duplica_ni_pisa_lo_editado(self):
         self._cargar()
         Noticia.objects.filter(titulo=NOTICIAS[0]['titulo']).update(resumen='Editado desde el panel')
         salida = self._cargar()
         self.assertIn('Ya existe', salida)
         self.assertEqual(Noticia.objects.count(), len(NOTICIAS))
-        self.assertEqual(FotoNoticia.objects.count(), 1)
+        fotos = sum((1 if d.get('portada') else 0) + len(d.get('galeria', [])) for d in NOTICIAS)
+        self.assertEqual(FotoNoticia.objects.count(), fotos)
         self.assertEqual(Noticia.objects.get(titulo=NOTICIAS[0]['titulo']).resumen, 'Editado desde el panel')

@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from core.imagenes import derivar, imagen_social, normalizar_ajustes, procesar_original
+from core.imagenes import derivar, imagen_social, normalizar_ajustes, procesar_foto, procesar_original
 from core.models import FotoNoticia, Noticia
 from core.noticias_iniciales import NOTICIAS
 
@@ -10,7 +10,7 @@ from core.noticias_iniciales import NOTICIAS
 class Command(BaseCommand):
     help = (
         'Carga las noticias con que se estrena la sección (core/noticias_iniciales.py), '
-        'publicadas y con su foto de portada. Se corre una vez después de desplegar. '
+        'publicadas y con sus fotos. Se corre una vez después de desplegar. '
         'Si una ya existe (mismo título), no la toca: correrlo de nuevo no duplica nada '
         'ni pisa lo que se haya editado desde el panel.'
     )
@@ -22,13 +22,23 @@ class Command(BaseCommand):
                 continue
             with transaction.atomic():
                 self._crear(datos)
-            self.stdout.write(self.style.SUCCESS(f'Publicada: {datos["titulo"]}'))
+            fotos = (1 if datos.get('portada') else 0) + len(datos.get('galeria', []))
+            self.stdout.write(self.style.SUCCESS(f'Publicada, con {fotos} fotos: {datos["titulo"]}'))
 
     def _crear(self, datos):
         noticia = Noticia.objects.create(
             titulo=datos['titulo'], fecha=datos['fecha'], autor=datos['autor'],
             resumen=datos['resumen'], cuerpo=datos['cuerpo'], publicada=True,
         )
+        # La galería primero: si no hay portada, la primera foto hace de
+        # portada (igual que en el panel).
+        for orden, foto in enumerate(datos.get('galeria', []), start=1):
+            with open(settings.BASE_DIR / foto['archivo'], 'rb') as archivo:
+                procesada = procesar_foto(archivo)
+            nueva = FotoNoticia(noticia=noticia, alt=foto['alt'], orden=orden)
+            nueva.cargar(procesada)
+            nueva.save()
+
         portada = datos.get('portada')
         if not portada:
             return

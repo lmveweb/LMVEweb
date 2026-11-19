@@ -4,6 +4,11 @@ Las carga el comando cargar_noticias_iniciales (una vez, en producción
 y en local). Después se editan desde el panel como cualquier otra: este
 archivo no se vuelve a leer.
 
+Las fotos de core/fotos_iniciales/ están achicadas y sin metadatos (sin
+ubicación ni datos de la cámara): son de menores de edad. Esa carpeta
+no se publica como archivos del sitio; las fotos llegan a la página
+solo a través de la noticia.
+
 El cuerpo usa las reglas del formulario: "#" subtítulo, "-" lista,
 "1." lista numerada, línea en blanco entre párrafos.
 """
@@ -21,12 +26,18 @@ NOTICIAS = [
             'el primer lugar.'
         ),
         'portada': {
-            'archivo': 'core/static/core/img/eventos/copa-milled-2026-completo.webp',
-            'alt': 'Afiche de la Copa Milled 2026, que se jugó el 25, 26 y 27 de septiembre',
-            # Solo la mitad de arriba del afiche (logo, nombre, fechas y
-            # sede): entero es vertical y no cabe en el encabezado.
-            'ajustes': {'x': 0.0, 'y': 0.0, 'ancho': 1.0, 'alto': 0.5},
+            'archivo': 'core/fotos_iniciales/copa-milled-portada.webp',
+            'alt': 'Un jugador salta a rematar en la red mientras un rival intenta bloquear, en un partido de la Copa Milled',
+            # La foto es vertical: se usa la franja de la jugada (balón,
+            # remate y bloqueo), que es la que cabe en el encabezado.
+            'ajustes': {'x': 0.0, 'y': 0.17, 'ancho': 1.0, 'alto': 0.52},
         },
+        'galeria': [
+            {
+                'archivo': 'core/static/core/img/eventos/copa-milled-2026-completo.webp',
+                'alt': 'Afiche de la Copa Milled 2026, que se jugó el 25, 26 y 27 de septiembre',
+            },
+        ],
         'cuerpo': '''\
 Entre el 25 y el 27 de septiembre se jugó la cuarta versión de la Copa Milled, organizada por la LMVE. Los partidos se repartieron entre British Royal School, Liceo Manuel de Salas, Thomas Morus, Instituto Alonso de Ercilla y Andrée.
 
@@ -100,7 +111,20 @@ Destacamos el gran nivel de juego y la deportividad que mostraron todos los jóv
             'Las divisiones Ascenso y Honor definen a sus campeones del segundo semestre. '
             'Revisa los partidos, horarios y sedes de la jornada.'
         ),
-        'portada': None,
+        'portada': {
+            'archivo': 'core/fotos_iniciales/finales-portada.webp',
+            'alt': 'Un jugador de camiseta blanca salta a rematar el balón sobre la red ante el bloqueo de un rival de rojo',
+        },
+        'galeria': [
+            {
+                'archivo': 'core/fotos_iniciales/finales-2.webp',
+                'alt': 'Un jugador con el número 12 levanta el balón con las dos manos junto a la red',
+            },
+            {
+                'archivo': 'core/fotos_iniciales/finales-3.webp',
+                'alt': 'Un equipo de camisetas negras y amarillas posa en la cancha junto a su entrenador',
+            },
+        ],
         'cuerpo': '''\
 Este sábado 21 de noviembre se juegan las finales Sub 14 del Torneo Oficial LMVE del segundo semestre 2026. En una sola mañana, las divisiones Ascenso y Honor definen a sus campeones.
 
