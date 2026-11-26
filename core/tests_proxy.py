@@ -55,6 +55,23 @@ class ClaveDelProxyTests(TestCase):
         self.assertNotIn(META_ORIGEN, request.META)
         self.assertNotIn(CLAVE, str(request.META))
 
+    def test_espacios_alrededor_de_la_clave_no_la_invalidan(self):
+        request = _request_procesado(HTTP_CF_CONNECTING_IP='198.51.100.9', **{META_ORIGEN: f' {CLAVE} '})
+        self.assertEqual(ip_cliente(request), '198.51.100.9')
+
+    def test_el_estado_dice_que_paso_con_la_clave_sin_mostrarla(self):
+        casos = {
+            CLAVE: 'clave verificada',
+            None: 'no llegó la clave',
+            'otra': f'clave distinta (4 caracteres; se esperaban {len(CLAVE)})',
+        }
+        for recibida, esperado in casos.items():
+            with self.subTest(recibida=recibida):
+                meta = {} if recibida is None else {META_ORIGEN: recibida}
+                estado = _request_procesado(**meta).origen_estado
+                self.assertEqual(estado, esperado)
+                self.assertNotIn(CLAVE, estado)
+
     def test_sin_pasar_por_el_middleware_no_se_confia(self):
         request = RequestFactory().get('/', REMOTE_ADDR=PROXY, HTTP_CF_CONNECTING_IP='198.51.100.9',
                                        **{META_ORIGEN: CLAVE})

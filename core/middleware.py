@@ -36,14 +36,28 @@ TOPE_SIN_SESION = 1 * MB
 TOPE_PANEL = 100 * MB
 
 
+def estado_origen(clave, recibida, verificado):
+    """Qué pasó con la clave, para el registro de ingresos al panel: así
+    se ve si la regla de Cloudflare está funcionando. Nunca incluye la
+    clave; a lo más su largo, para notar un carácter de más o de menos."""
+    if not clave:
+        return 'sin clave configurada'
+    if verificado:
+        return 'clave verificada'
+    if not recibida:
+        return 'no llegó la clave'
+    return f'clave distinta ({len(recibida)} caracteres; se esperaban {len(clave)})'
+
+
 class OrigenDelProxyMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        recibida = request.META.pop(_META_ORIGEN, '')
+        recibida = request.META.pop(_META_ORIGEN, '').strip()
         clave = settings.PROXY_CLAVE
         request.origen_verificado = bool(clave) and constant_time_compare(recibida, clave)
+        request.origen_estado = estado_origen(clave, recibida, request.origen_verificado)
 
         host = request.META.get('HTTP_HOST', '').split(':')[0].lower()
         if host.endswith('.onrender.com'):
