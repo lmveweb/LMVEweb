@@ -164,8 +164,7 @@ def _entrar(request, user, device, destino, recordar=False):
     user.otp_device = device
     auth_login(request, user)
     request.session.pop(PENDIENTE, None)
-    logger.info('Ingreso al panel: %s (IP %s, %s)', user.get_username(), ip_cliente(request),
-                getattr(request, 'origen_estado', 'origen sin revisar'))
+    logger.info('Ingreso al panel: %s (IP %s)', user.get_username(), ip_cliente(request))
     respuesta = HttpResponseRedirect(destino)
     if recordar:
         respuesta.set_cookie(
