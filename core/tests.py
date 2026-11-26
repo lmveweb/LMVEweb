@@ -20,6 +20,7 @@ from .contenido import COLEGIOS, evento_vigente
 from .management.commands.medir_peso import clasificar_estaticos
 from .models import MensajePatrocinio
 from .seo import PAGINAS
+from .tests_noticias import crear_noticia
 from LMVEweb.urls import ADMIN_URL
 
 # Las 8 vistas públicas, tal como deben aparecer en el sitemap y llevar
@@ -228,6 +229,36 @@ class AntiSpamTests(TestCase):
         self.assertEqual(respuesta.json()['errores'], ['El correo electrónico no es válido.'])
 
 
+class VoleibolConTildeTests(TestCase):
+    """El sitio escribe "vóleibol", con tilde (la RAE acepta las dos
+    formas; la Liga eligió esta). Sin tilde queda solo donde no lo lee
+    una persona: el nombre alternativo de la Liga en los datos para
+    Google, porque la mayoría lo busca sin tilde."""
+
+    def _sin_jsonld(self, html):
+        return re.sub(r'<script type="application/ld\+json"[^>]*>.*?</script>', '', html, flags=re.S)
+
+    def test_el_texto_del_sitio_dice_voleibol_con_tilde(self):
+        noticia = crear_noticia()
+        paginas = [reverse(nombre) for nombre in VISTAS_PUBLICAS]
+        paginas += [noticia.get_absolute_url(), '/no-existe/']
+        for url in paginas:
+            with self.subTest(url=url):
+                html = self.client.get(url).content.decode()
+                self.assertIn('óleibol', html)
+                self.assertNotRegex(self._sin_jsonld(html), r'(?i)voleibol')
+
+    def test_google_conoce_el_nombre_con_y_sin_tilde(self):
+        html = self.client.get(reverse('home')).content.decode()
+        bloque = re.search(r'<script type="application/ld\+json"[^>]*>(.*?)</script>', html, re.S)
+        nodos = {n['@type']: n for n in json.loads(bloque.group(1))['@graph']}
+        for tipo in ('WebSite', 'SportsOrganization'):
+            with self.subTest(tipo=tipo):
+                self.assertEqual(nodos[tipo]['name'], 'Liga Metropolitana de Vóleibol Escolar')
+                self.assertIn('Liga Metropolitana de Voleibol Escolar', nodos[tipo]['alternateName'])
+                self.assertIn('LMVE', nodos[tipo]['alternateName'])
+
+
 class EquipoTests(TestCase):
     def test_coordinacion_con_los_nombres_de_cargo_actuales(self):
         r = self.client.get(reverse('equipo'))
@@ -398,7 +429,7 @@ class SeoTests(TestCase):
         self.assertIn('WebSite', nodos)
         self.assertIn('LMVE', nodos['WebSite']['alternateName'])
         self.assertIn('SportsOrganization', nodos)
-        self.assertEqual(nodos['SportsOrganization']['alternateName'], 'LMVE')
+        self.assertIn('LMVE', nodos['SportsOrganization']['alternateName'])
 
     def test_otras_vistas_no_llevan_jsonld(self):
         r = self.client.get(reverse('proyecto'))

@@ -129,13 +129,13 @@ class CargarNoticiasInicialesTests(TestCase):
         self.assertContains(r, '<li>Colegio Andrée</li>')
         self.assertEqual(self.client.get(portada.url_grande).status_code, 200)
 
-    def test_la_copa_milled_presenta_a_molten_como_patrocinador_oficial(self):
+    def test_la_copa_milled_presenta_a_molten_como_auspiciador_oficial(self):
         self._cargar()
         copa = Noticia.objects.get(titulo__contains='Copa Milled')
         self.assertContains(
             self.client.get(copa.get_absolute_url()),
-            '<li>A Barlosport y su marca de balones Molten, patrocinador oficial de la '
-            'Liga Metropolitana de Voleibol Escolar.</li>',
+            '<li>A Barlosport y su marca de balones Molten, auspiciador oficial de la '
+            'Liga Metropolitana de Vóleibol Escolar.</li>',
         )
 
     def test_las_noticias_salen_en_la_lista_y_en_la_portada(self):

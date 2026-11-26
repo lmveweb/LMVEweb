@@ -16,10 +16,10 @@ from .imagenes import SOCIAL
 from .models import Noticia
 
 POR_DEFECTO = {
-    'title': 'LMVE | Liga Metropolitana de Voleibol Escolar',
+    'title': 'LMVE | Liga Metropolitana de Vóleibol Escolar',
     'description': (
-        'Liga Metropolitana de Voleibol Escolar (LMVE), fundada en 1987: historia, colegios '
-        'participantes y multimedia de la competencia escolar de voleibol en Santiago.'
+        'Liga Metropolitana de Vóleibol Escolar (LMVE), fundada en 1987: historia, colegios '
+        'participantes y multimedia de la competencia escolar de vóleibol en Santiago.'
     ),
     # El ancho y alto van junto a la imagen porque son del archivo, no
     # de la plantilla: si se cambia la foto, se actualizan acá mismo.
@@ -31,35 +31,35 @@ POR_DEFECTO = {
 
 PAGINAS = {
     'home': {
-        'title': 'LMVE | Liga Metropolitana de Voleibol Escolar',
+        'title': 'LMVE | Liga Metropolitana de Vóleibol Escolar',
         'description': POR_DEFECTO['description'],
     },
     'proyecto': {
         'title': 'Historia | LMVE',
         'description': (
-            'La historia de la Liga Metropolitana de Voleibol Escolar desde su fundación '
-            'en 1987: épocas, hitos y protagonistas del voleibol escolar en Santiago.'
+            'La historia de la Liga Metropolitana de Vóleibol Escolar desde su fundación '
+            'en 1987: épocas, hitos y protagonistas del vóleibol escolar en Santiago.'
         ),
     },
     'sobre': {
         'title': 'Sobre la LMVE | LMVE',
         'description': (
-            'Visión y misión de la Liga Metropolitana de Voleibol Escolar, la organización '
-            'que reúne a colegios de la Región Metropolitana en torno al voleibol escolar.'
+            'Visión y misión de la Liga Metropolitana de Vóleibol Escolar, la organización '
+            'que reúne a colegios de la Región Metropolitana en torno al vóleibol escolar.'
         ),
     },
     'equipo': {
         'title': 'Equipo y Directiva | LMVE',
         'description': (
             'Directiva, coordinadores y equipo detrás de la Liga Metropolitana de '
-            'Voleibol Escolar.'
+            'Vóleibol Escolar.'
         ),
     },
     'archivo': {
         'title': 'Multimedia | LMVE',
         'description': (
-            'Galería de fotos de la Liga Metropolitana de Voleibol Escolar: partidos, '
-            'jornadas y momentos de la competencia escolar de voleibol.'
+            'Galería de fotos de la Liga Metropolitana de Vóleibol Escolar: partidos, '
+            'jornadas y momentos de la competencia escolar de vóleibol.'
         ),
         'og_image': 'core/img/fotos/galeria-4.jpg',
         'og_image_width': 1400,
@@ -68,14 +68,14 @@ PAGINAS = {
     'noticias': {
         'title': 'Noticias | LMVE',
         'description': (
-            'Noticias de la Liga Metropolitana de Voleibol Escolar: torneos, resultados '
-            'y novedades del voleibol escolar en Santiago.'
+            'Noticias de la Liga Metropolitana de Vóleibol Escolar: torneos, resultados '
+            'y novedades del vóleibol escolar en Santiago.'
         ),
     },
     'contacto': {
         'title': 'Contacto | LMVE',
         'description': (
-            'Contáctate con la Liga Metropolitana de Voleibol Escolar para propuestas '
+            'Contáctate con la Liga Metropolitana de Vóleibol Escolar para propuestas '
             'de auspicio y patrocinio.'
         ),
     },
@@ -83,7 +83,7 @@ PAGINAS = {
         'title': 'Política de Privacidad | LMVE',
         'description': (
             'Política de privacidad y uso de datos de la Liga Metropolitana de '
-            'Voleibol Escolar.'
+            'Vóleibol Escolar.'
         ),
     },
 }
@@ -136,7 +136,7 @@ def jsonld_noticia(noticia):
         'mainEntityOfPage': settings.SITE_URL + noticia.get_absolute_url(),
         'author': (
             {'@type': 'Person', 'name': noticia.autor} if noticia.autor
-            else {'@type': 'Organization', 'name': 'Liga Metropolitana de Voleibol Escolar'}
+            else {'@type': 'Organization', 'name': 'Liga Metropolitana de Vóleibol Escolar'}
         ),
         'publisher': {'@id': settings.SITE_URL + '/#organizacion'},
     }
@@ -151,6 +151,9 @@ def jsonld_home(evento=None):
     que Google usa para el nombre del sitio en los resultados, y ataca
     directo el problema de que "LMVE" compita con la liga de béisbol
     mexicana (LMBE) en la búsqueda.
+
+    El sitio escribe "Vóleibol", con tilde; el nombre sin tilde va como
+    alternativo porque es como lo busca la mayoría.
 
     Si hay un evento vigente se suma como SportsEvent: es lo que le
     permite a Google mostrarlo con fecha y lugar en los resultados. Al
@@ -167,21 +170,21 @@ def jsonld_home(evento=None):
                 '@type': 'WebSite',
                 '@id': url + '#sitio',
                 'url': url,
-                'name': 'Liga Metropolitana de Voleibol Escolar',
-                'alternateName': ['LMVE', 'Liga Metropolitana de Vóleibol Escolar'],
+                'name': 'Liga Metropolitana de Vóleibol Escolar',
+                'alternateName': ['LMVE', 'Liga Metropolitana de Voleibol Escolar'],
                 'inLanguage': 'es-CL',
                 'publisher': {'@id': org_id},
             },
             {
                 '@type': 'SportsOrganization',
                 '@id': org_id,
-                'name': 'Liga Metropolitana de Voleibol Escolar',
-                'alternateName': 'LMVE',
+                'name': 'Liga Metropolitana de Vóleibol Escolar',
+                'alternateName': ['LMVE', 'Liga Metropolitana de Voleibol Escolar'],
                 'url': url,
                 'logo': settings.SITE_URL + static('core/img/logo-full.png'),
                 'description': POR_DEFECTO['description'],
                 'foundingDate': '1987',
-                'sport': 'Voleibol',
+                'sport': 'Vóleibol',
                 'slogan': 'Educar a Través del Deporte',
                 'areaServed': {
                     '@type': 'AdministrativeArea',
@@ -210,7 +213,7 @@ def jsonld_home(evento=None):
             'endDate': evento['fin'].isoformat(),
             'eventStatus': 'https://schema.org/EventScheduled',
             'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
-            'sport': 'Voleibol',
+            'sport': 'Vóleibol',
             'url': url,
             'image': settings.SITE_URL + static(POR_DEFECTO['og_image']),
             'organizer': {'@id': org_id},

@@ -3,7 +3,7 @@
 
   # LMVEweb
 
-  Sitio web oficial de la **Liga Metropolitana de Voleibol Escolar** — historia, multimedia y captación de auspicios.
+  Sitio web oficial de la **Liga Metropolitana de Vóleibol Escolar** — historia, multimedia y captación de auspicios.
 
   [![CI](https://github.com/lmveweb/LMVEweb/actions/workflows/ci.yml/badge.svg?branch=development)](https://github.com/lmveweb/LMVEweb/actions/workflows/ci.yml)
   ![Django](https://img.shields.io/badge/Django-6.0-092E20?logo=django&logoColor=white)
@@ -139,5 +139,5 @@ En producción en **Render** (`ligamve.cl`), con PostgreSQL administrado y DNS/p
 El repositorio vive en una **cuenta de organización de la LMVE** (`github.com/lmveweb`), no en una cuenta personal — así el proyecto no depende de una sola persona una vez terminado el período de soporte.
 
 <div align="center">
-  <sub>Liga Metropolitana de Voleibol Escolar · Fundada en 1987 · "Educar a Través del Deporte"</sub>
+  <sub>Liga Metropolitana de Vóleibol Escolar · Fundada en 1987 · "Educar a Través del Deporte"</sub>
 </div>
