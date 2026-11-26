@@ -228,6 +228,18 @@ class AntiSpamTests(TestCase):
         self.assertEqual(respuesta.json()['errores'], ['El correo electrónico no es válido.'])
 
 
+class EquipoTests(TestCase):
+    def test_coordinacion_con_los_nombres_de_cargo_actuales(self):
+        r = self.client.get(reverse('equipo'))
+        for rol in ('Coordinador Torneo: División Varones', 'Coordinador Torneo: División Damas',
+                    'Coordinador Cuerpo Arbitral'):
+            with self.subTest(rol=rol):
+                self.assertContains(r, f'<span class="equipo-card-rol">{rol}</span>')
+        for viejo in ('Coordinador de Varones', 'Coordinador Damas', 'Coordinador Arbitral'):
+            with self.subTest(viejo=viejo):
+                self.assertNotContains(r, viejo)
+
+
 class RutasTests(TestCase):
     def test_equipo_disponible(self):
         self.assertEqual(self.client.get(reverse('equipo')).status_code, 200)

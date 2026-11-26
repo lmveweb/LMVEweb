@@ -73,7 +73,7 @@ El torneo fue un éxito gracias al trabajo de todo nuestro equipo y al apoyo de 
 Queremos agradecer especialmente:
 
 - A nuestro patrocinador oficial, Trofeos y Medallas Milled.
-- A Barlosport y su marca de balones Molten.
+- A Barlosport y su marca de balones Molten, patrocinador oficial de la Liga Metropolitana de Voleibol Escolar.
 - Al Cuerpo Arbitral de la LMVE, por su profesionalismo.
 - A los estudiantes de Kinesiología de la UBO, por su apoyo en la prevención y el cuidado de los deportistas.
 - Al profesor Rodrigo Andreu, de British Royal School, por su constante colaboración.
