@@ -86,6 +86,7 @@ python manage.py test
 | `DJANGO_ALLOWED_HOSTS` | Dominios permitidos, separados por coma | Sí, en producción |
 | `DJANGO_ADMIN_URL` | Ruta del panel de admin (default `admin/`) | No |
 | `DJANGO_CLIENT_IP_HEADER` | Encabezado en que el proxy del hosting entrega la IP real del visitante, para el límite de intentos (en Render: `CF-Connecting-IP`) | No — sin esto se usa la IP de la conexión, correcto en local |
+| `DJANGO_PROXY_SECRET` | Clave que Cloudflare agrega a cada visita en el encabezado `X-Lmve-Origen` (regla de Transform Rules). Con ella definida, el encabezado de la IP solo se usa en visitas que traen la clave | No — sin esto se confía en el encabezado de la IP como antes |
 | `SITE_URL` | Origen canónico para sitemap, robots.txt y meta de SEO | No — default `http://127.0.0.1:8000` |
 | `DATABASE_URL` | Postgres en producción; sin definir usa SQLite local | No |
 | `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | Gmail + contraseña de aplicación | No — sin esto, el correo solo se imprime en consola |

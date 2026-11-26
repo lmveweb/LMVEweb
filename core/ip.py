@@ -13,6 +13,12 @@ defecto. Un encabezado lo puede escribir cualquiera; solo es confiable
 si el proxy lo pisa siempre con el valor verdadero, así que confiar en
 uno sin saber que el hosting lo pone regalaría una forma de saltarse el
 límite cambiándolo en cada intento.
+
+Cloudflare lo pisa siempre, pero a Render también se puede llegar
+directo, sin pasar por Cloudflare. Por eso, si hay una clave configurada
+(settings.PROXY_CLAVE, desde DJANGO_PROXY_SECRET), el encabezado solo se
+usa cuando la visita trae esa clave, que agrega Cloudflare (lo revisa
+core/middleware.py).
 """
 
 import ipaddress
@@ -26,6 +32,8 @@ def ip_cliente(request):
     conexion = request.META.get('REMOTE_ADDR', '')
     encabezado = settings.IP_CLIENTE_ENCABEZADO
     if not encabezado:
+        return conexion
+    if settings.PROXY_CLAVE and not getattr(request, 'origen_verificado', False):
         return conexion
 
     valor = request.META.get('HTTP_' + encabezado.upper().replace('-', '_'), '').strip()

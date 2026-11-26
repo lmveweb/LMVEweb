@@ -88,6 +88,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # Primero: revisa (y borra) la clave que agrega Cloudflare y manda
+    # lmveweb.onrender.com al dominio propio. Ver core/middleware.py.
+    'core.middleware.OrigenDelProxyMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'csp.middleware.CSPMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -99,6 +102,9 @@ MIDDLEWARE = [
     # mismo con la verificacion 2FA que AuthenticationMiddleware hace con
     # el login (popula request.user.otp_device / is_verified()).
     'django_otp.middleware.OTPMiddleware',
+    # Necesita saber quién es (request.user) y tiene que correr antes de
+    # que la protección CSRF lea el cuerpo del envío.
+    'core.middleware.TopeDeSubidaMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -191,6 +197,13 @@ TURNSTILE_SECRET_KEY = os.environ.get('TURNSTILE_SECRET_KEY', '')
 # que el visitante pueda escribir a su gusto serviría para saltarse el
 # límite de intentos.
 IP_CLIENTE_ENCABEZADO = os.environ.get('DJANGO_CLIENT_IP_HEADER', '').strip()
+
+# Clave secreta que Cloudflare agrega a cada visita en el encabezado
+# X-Lmve-Origen (regla de "Transform Rules" en el panel de Cloudflare).
+# Con la clave definida, el encabezado de arriba solo se usa en las
+# visitas que la traen: las que llegan directo a Render, sin pasar por
+# Cloudflare, cuentan con la IP de la conexión. Vacía: como antes.
+PROXY_CLAVE = os.environ.get('DJANGO_PROXY_SECRET', '').strip()
 
 
 # Sesiones (solo las usa el admin)
